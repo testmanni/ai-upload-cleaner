@@ -134,6 +134,12 @@
     </div>
     <div id="qualHint" class="hint" style="display:none;margin-top:6px"></div>
 
+    <div id="scanRow" style="margin-top:16px">
+      <button id="scanBtn" class="small" style="font-size:13.5px;padding:8px 14px">🔍 <span id="t-scanBtn">Dokument lokal prüfen</span></button>
+      <span id="t-scanHint" style="font-size:12px;color:var(--text-muted);margin-left:8px">Sucht typische sensible Muster – lokal, ohne Upload.</span>
+    </div>
+    <div id="scanReport" style="display:none;margin-top:12px;border:1px solid var(--border);border-radius:8px;padding:14px 16px;background:var(--surface-1);font-size:13px;line-height:1.6"></div>
+
     <details id="checkReminder" style="margin-top:16px;border:1px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--surface-1)">
       <summary style="cursor:pointer;font-size:13.5px;font-weight:600;color:var(--text-primary)" id="t-checkTitle">Vor dem Export kurz prüfen – ist alles Sensible markiert?</summary>
       <div style="font-size:12.5px;color:var(--text-secondary);margin-top:8px;line-height:1.7">
@@ -232,6 +238,8 @@ const I18N={
     fmtLabel:'Format:', fmtPng:'PNG', fmtPdf:'PDF',
     qualLabel:'PDF-Qualität:', qSmall:'Klein (kompakt)', qMid:'Mittel (empfohlen)', qHi:'Scharf (große Datei)',
     checkTitle:'Vor dem Export kurz prüfen – ist alles Sensible markiert?',
+    scanBtn:'Dokument lokal prüfen',
+    scanHint:'Sucht typische sensible Muster – lokal, ohne Upload.',
     checkIntro:'Das Tool findet nichts von selbst – es schwärzt nur, was du markierst. Typische Stellen:',
     checkList:'☐ Name<br>☐ Adresse<br>☐ Geburtsdatum<br>☐ IBAN / Kontonummer<br>☐ Kunden- / Aktennummer<br>☐ QR- / Barcodes<br>☐ Unterschrift<br>☐ Foto<br>☐ Dateiname / Metadaten',
     qualHint:'Höhere Schärfe = größere Datei. Bei kleiner Schrift höher stellen.',
@@ -264,6 +272,8 @@ const I18N={
     fmtLabel:'Format:', fmtPng:'PNG', fmtPdf:'PDF',
     qualLabel:'PDF quality:', qSmall:'Small (compact)', qMid:'Medium (recommended)', qHi:'Sharp (large file)',
     checkTitle:'Quick check before export – is everything sensitive marked?',
+    scanBtn:'Check document locally',
+    scanHint:'Looks for typical sensitive patterns – locally, no upload.',
     checkIntro:'The tool finds nothing on its own – it only redacts what you mark. Common spots:',
     checkList:'☐ Name<br>☐ Address<br>☐ Date of birth<br>☐ IBAN / account number<br>☐ Customer / case number<br>☐ QR / barcodes<br>☐ Signature<br>☐ Photo<br>☐ Filename / metadata',
     qualHint:'Higher sharpness = bigger file. Increase it for small print.',
@@ -300,6 +310,8 @@ function setLang(l){
   set('t-fmtlabel',t.fmtLabel);set('t-fmt-png',t.fmtPng);set('t-fmt-pdf',t.fmtPdf);
   set('t-quallabel',t.qualLabel);set('t-q-small',t.qSmall);set('t-q-mid',t.qMid);set('t-q-hi',t.qHi);
   set('t-checkTitle',t.checkTitle);
+  set('t-scanBtn',t.scanBtn);
+  set('t-scanHint',t.scanHint);
   { const el=document.getElementById('t-checkIntro'); if(el)el.textContent=t.checkIntro; }
   { const el=document.getElementById('t-checkList'); if(el)el.innerHTML=t.checkList; }
   document.documentElement.lang=l;
@@ -313,6 +325,7 @@ function setLang(l){
 let kind=null, pages=[], cur=0, sel=-1, dispScale=1;
 
 function reset(){kind=null;pages=[];cur=0;sel=-1;exportFmt='auto';qualLevel='mid';
+  var _sr=document.getElementById('scanReport'); if(_sr){_sr.style.display='none';_sr.innerHTML='';}
   if(typeof setZoom==='function') setZoom(1);
   var _zc=document.getElementById('zoomCtrl'); if(_zc) _zc.classList.add('hidden');
   ws.classList.add('hidden');dz.classList.remove('hidden');
@@ -374,7 +387,9 @@ async function loadPDF(file){
       const vp=page.getViewport({scale:BASE_SCALE});
       const cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;
       await page.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
-      pages.push({bitmap:cv,w:vp.width,h:vp.height,boxes:[],renderScale:BASE_SCALE});
+      let pageText='';
+      try{ const tc=await page.getTextContent(); pageText=tc.items.map(it=>it.str).join(' '); }catch(e){ pageText=''; }
+      pages.push({bitmap:cv,w:vp.width,h:vp.height,boxes:[],renderScale:BASE_SCALE,text:pageText});
     }
     kind='pdf';cur=0;sel=-1;exportFmt='pdf';
     loadingMsg.classList.add('hidden');ws.classList.remove('hidden');
@@ -461,6 +476,69 @@ document.getElementById('addBox').onclick=()=>{boxesOf().push({x:0.4,y:0.46,w:0.
 document.getElementById('prevPage').onclick=()=>{if(cur>0){cur--;showPage();}};
 document.getElementById('nextPage').onclick=()=>{if(cur<pages.length-1){cur++;showPage();}};
 
+// === Lokaler Sensitivitäts-Check (Muster-Engine) ===
+// Läuft rein im Browser auf der bereits ausgelesenen Textebene. Keine Übertragung.
+// Nur sichere Muster; validiert wo möglich (Luhn für Karten, mod-97 für IBAN).
+function luhnValid(num){
+  const d=num.replace(/\D/g,''); if(d.length<13) return false;
+  let sum=0, alt=false;
+  for(let i=d.length-1;i>=0;i--){ let n=+d[i]; if(alt){n*=2; if(n>9)n-=9;} sum+=n; alt=!alt; }
+  return sum%10===0;
+}
+function ibanValid(raw){
+  const s=raw.replace(/\s/g,'').toUpperCase();
+  if(!/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/.test(s)) return false;
+  const re=s.slice(4)+s.slice(0,4);
+  const conv=re.replace(/[A-Z]/g,c=>c.charCodeAt(0)-55);
+  let rem=0; for(const ch of conv){ rem=(rem*10+ +ch)%97; }
+  return rem===1;
+}
+const SCAN_PATTERNS=[
+  {key:'email', catKey:'person', label:'E-Mail-Adresse', labelEn:'Email address',
+   re:/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g},
+  {key:'iban', catKey:'finance', label:'IBAN', labelEn:'IBAN',
+   re:/[A-Z]{2}\d{2}\s?(?:[A-Z0-9]{4}\s?){2,7}[A-Z0-9]{1,4}/g, validate:ibanValid},
+  {key:'cc', catKey:'finance', label:'Kreditkartennummer', labelEn:'Credit card number',
+   re:/\b(?:\d[ -]?){13,16}\b/g, validate:luhnValid},
+  {key:'bic', catKey:'finance', label:'BIC', labelEn:'BIC',
+   re:/\b[A-Z]{6}[A-Z0-9]{2}(?:[A-Z0-9]{3})?\b/g},
+  {key:'taxid', catKey:'finance', label:'Steuer-ID (11-stellig)', labelEn:'Tax ID (11 digits)',
+   re:/\b\d{11}\b/g},
+  {key:'plz', catKey:'person', label:'PLZ + Ort (möglich)', labelEn:'Postal code + city (possible)',
+   re:/\b\d{5}\s+[A-ZÄÖÜ][a-zäöüß]+/g},
+  {key:'phone', catKey:'person', label:'Telefonnummer', labelEn:'Phone number',
+   re:/(?:\+\d{1,3}[\s\/-]\d|\b0\d{1,4}[\s\/-]\d)[\d\s\/-]{5,}/g, minDigits:7, maxDigits:15},
+];
+function scanText(text){
+  if(!text) return [];
+  let masked=text; const hits=[];
+  for(const p of SCAN_PATTERNS){
+    p.re.lastIndex=0; let m; const found=[];
+    while((m=p.re.exec(masked))!==null){
+      const raw=m[0];
+      if(p.validate && !p.validate(raw)) continue;
+      const digits=raw.replace(/\D/g,'').length;
+      if(p.minDigits && digits<p.minDigits) continue;
+      if(p.maxDigits && digits>p.maxDigits) continue;
+      found.push({start:m.index, len:raw.length, raw:raw.trim()});
+    }
+    for(const f of found) hits.push({key:p.key, catKey:p.catKey, label:p.label, labelEn:p.labelEn, sample:f.raw});
+    found.sort((a,b)=>b.start-a.start);
+    for(const f of found) masked=masked.slice(0,f.start)+' '.repeat(f.len)+masked.slice(f.start+f.len);
+  }
+  return hits;
+}
+// Prüft alle geladenen Seiten und liefert Treffer mit Seitenzahl + ob überhaupt Text da war.
+function runSensitivityCheck(){
+  const perPage=[]; let anyText=false;
+  for(let i=0;i<pages.length;i++){
+    const t=(pages[i].text||'').trim();
+    if(t.length>0) anyText=true;
+    perPage.push({page:i+1, hits:scanText(t), hasText:t.length>0});
+  }
+  return {perPage, anyText};
+}
+
 function renderFull(p,scale){
   scale=scale||1;
   const w=Math.round(p.w*scale),h=Math.round(p.h*scale);
@@ -535,6 +613,65 @@ document.getElementById('downloadBtn').onclick=async()=>{
   }
 };
 document.getElementById('resetBtn').onclick=reset;
+
+// === Sensitivitäts-Check: Button-Logik + Bericht ===
+(function(){
+  const btn=document.getElementById('scanBtn');
+  const rep=document.getElementById('scanReport');
+  if(!btn||!rep) return;
+  const CAT_LABELS={
+    de:{person:'Personenbezogen', finance:'Finanziell', other:'Sonstige'},
+    en:{person:'Personal', finance:'Financial', other:'Other'}
+  };
+  btn.onclick=()=>{
+    if(!pages.length) return;
+    const L=(lang==='en')?'en':'de';
+    const res=runSensitivityCheck();
+    rep.style.display='block';
+    // Kein Text in der ganzen Datei -> ehrlicher Hinweis (gescanntes Bild-PDF)
+    if(!res.anyText){
+      rep.innerHTML='<b>'+(L==='en'?'No readable text found':'Kein auslesbarer Text gefunden')+'</b><br>'+
+        (L==='en'
+          ? 'This file has no text layer (e.g. a scanned image PDF). The local check cannot read it. Please review the document yourself.'
+          : 'Diese Datei enthält keine Textebene (z.&nbsp;B. ein gescanntes Bild-PDF). Die lokale Prüfung kann hier nichts auslesen. Bitte prüfe das Dokument selbst.');
+      return;
+    }
+    // Treffer einsammeln
+    let total=0; const rows=[];
+    for(const pg of res.perPage){
+      if(!pg.hits.length) continue;
+      // pro Seite nach Kategorie gruppieren
+      const byCat={};
+      for(const h of pg.hits){ (byCat[h.catKey]=byCat[h.catKey]||[]).push(h); total++; }
+      let line='<div style="margin:8px 0 4px;font-weight:600">'+(L==='en'?'Page ':'Seite ')+pg.page+'</div>';
+      for(const ck in byCat){
+        const lbl=CAT_LABELS[L][ck]||ck;
+        const items=byCat[ck].map(h=>(L==='en'?h.labelEn:h.label)).filter((v,i,a)=>a.indexOf(v)===i);
+        const counts={};
+        byCat[ck].forEach(h=>{const k=(L==='en'?h.labelEn:h.label);counts[k]=(counts[k]||0)+1;});
+        const parts=Object.keys(counts).map(k=>k+(counts[k]>1?' ×'+counts[k]:''));
+        line+='<div style="margin-left:10px;color:var(--text-secondary)"><b>'+lbl+':</b> '+parts.join(', ')+'</div>';
+      }
+      rows.push(line);
+    }
+    const head='<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">✓ '+
+      (L==='en'?'Analysis complete – no data was transmitted.':'Analyse abgeschlossen – keine Daten wurden übertragen.')+'</div>';
+    if(total===0){
+      rep.innerHTML=head+'<b>'+(L==='en'?'No typical patterns found.':'Keine typischen Muster gefunden.')+'</b><br>'+
+        '<span style="color:var(--text-secondary)">'+
+        (L==='en'?'This does not guarantee the document is clean. Please review it yourself.'
+                 :'Das ist keine Garantie, dass das Dokument unbedenklich ist. Bitte prüfe es selbst.')+'</span>';
+      return;
+    }
+    const foot='<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted)">'+
+      (L==='en'
+        ? 'Recommendation: review these spots and redact if needed. This is a guide based on patterns – not a guarantee, and only spots with readable text are found.'
+        : 'Empfehlung: Diese Stellen prüfen und bei Bedarf schwärzen. Eine Hilfestellung nach Mustern – keine Garantie, und nur Stellen mit auslesbarem Text werden gefunden.')+'</div>';
+    rep.innerHTML=head+
+      '<b>'+(L==='en'?'Possible sensitive spots found':'Gefundene mögliche sensible Stellen')+' ('+total+'):</b>'+
+      rows.join('')+foot;
+  };
+})();
 
 dz.onclick=()=>fi.click();
 fi.onchange=e=>{if(e.target.files.length)handleFiles(e.target.files);};
