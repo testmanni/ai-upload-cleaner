@@ -42,7 +42,7 @@ Gleiche Idee, gleiche eine Datei, aber:
 - PDF-Seiten werden erst gerendert, wenn sie gebraucht werden. Lange PDFs öffnen sofort und belasten den Speicher nicht mehr.
 - Boxränder werden beim Export auf ganze Pixel nach außen gerundet, keine Mischpixel am Rand.
 
-Unterstützte Browser laut PDF.js-Legacy-Build: Chrome ab 125, Firefox ESR, Safari ab 18, jeweils die letzten zwei Versionen.
+Unterstützte Browser laut PDF.js-Legacy-Build: Chrome ab 125, Firefox ESR, Safari ab 18, jeweils die letzten zwei Versionen. Für Safari vor 18.4 rüstet die Datei zwei fehlende Funktionen selbst nach (Stream-Iteration und `bytes()`), sonst bricht die Prüfung nach dem Export ab.
 
 ## Aufbau des Repos
 

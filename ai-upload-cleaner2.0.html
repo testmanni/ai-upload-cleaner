@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <!--
-  AI Upload Cleaner 2.0.0
+  AI Upload Cleaner 2.0.1
   Copyright (c) 2026 Manfred Just
   Lizenziert unter der MIT-Lizenz. Siehe LICENSE.
 
@@ -28,7 +28,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-aiuc2' blob: 'wasm-unsafe-eval'; worker-src blob: data:; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="application-name" content="AI Upload Cleaner 2.0.0" />
+<meta name="application-name" content="AI Upload Cleaner 2.0.1" />
 <title>AI Upload Cleaner – lokal schwärzen vor dem Upload</title>
 <style>
   :root{
@@ -282,7 +282,31 @@
 
 <script type="module" nonce="aiuc2">
 'use strict';
-const VERSION='2.0.0';
+const VERSION='2.0.1';
+
+// ============================================================================
+// Nachrüstungen für ältere Browser (vor allem Safari vor 18.4). PDF.js verlässt
+// sich auf diese Funktionen; fehlen sie, bricht die Prüfung nach dem Export ab
+// ("undefined is not a function (near '...t of e...')"). Die Funktion läuft hier
+// im Haupt-Thread und wird dem Worker vorangestellt (siehe createPdfWorker).
+// ============================================================================
+function installPolyfills(){
+  if(typeof ReadableStream!=='undefined'&&!ReadableStream.prototype[Symbol.asyncIterator]){
+    ReadableStream.prototype[Symbol.asyncIterator]=async function*(){
+      const reader=this.getReader();
+      try{while(true){const {value,done}=await reader.read();if(done)return;yield value;}}
+      finally{reader.releaseLock();}
+    };
+    if(!ReadableStream.prototype.values)ReadableStream.prototype.values=ReadableStream.prototype[Symbol.asyncIterator];
+  }
+  if(typeof Response!=='undefined'&&!Response.prototype.bytes){
+    Response.prototype.bytes=async function(){return new Uint8Array(await this.arrayBuffer());};
+  }
+  if(typeof Blob!=='undefined'&&!Blob.prototype.bytes){
+    Blob.prototype.bytes=async function(){return new Uint8Array(await this.arrayBuffer());};
+  }
+}
+installPolyfills();
 
 // ============================================================================
 // Eingebettete Bibliotheken
@@ -348,8 +372,13 @@ let pdfWorker=null;
 function createPdfWorker(lib){
   return new Promise(res=>{
     let w=null;
-    try{w=new Worker('data:text/javascript;base64,'+document.getElementById('lib-pdfworker').textContent.trim(),{type:'module'});}
-    catch(e){res(null);return;}
+    try{
+      // Worker-Quelltext = Nachrüstungen + unveränderter PDF.js-Worker. Der eingebettete
+      // Block bleibt byteidentisch; nur zur Laufzeit wird der Vorspann davorgesetzt.
+      const prefix='('+installPolyfills.toString()+')();\n';
+      const bin=atob(document.getElementById('lib-pdfworker').textContent.trim());
+      w=new Worker('data:text/javascript;base64,'+btoa(prefix+bin),{type:'module'});
+    }catch(e){res(null);return;}
     let done=false;
     const finish=ok=>{
       if(done)return;done=true;

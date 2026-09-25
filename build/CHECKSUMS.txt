@@ -11,4 +11,4 @@ lib-wasm-openjpeg    pdfjs-dist@6.3.289    package/wasm/openjpeg.wasm           
 lib-wasm-jbig2       pdfjs-dist@6.3.289    package/wasm/jbig2.wasm              sha256=e6bee67724a7b5436fe8162638e3708cfc8d52b6342db69a49715e30ff27cfdc  BSD-3-Clause (PDFium JBIG2)
 lib-jspdf            jspdf@4.2.1      package/dist/jspdf.umd.min.js        sha256=e6551fcdc32f09d6853b2c5126d18d01d9447e0da618a41a11ebeee0f6c20d54  MIT
 
-ai-upload-cleaner2.0.html  sha256=22e9f197dc485898dac114bac4fd29e90847b997103e87b701a0e46103204812
+ai-upload-cleaner2.0.html  sha256=dd8e3c8e0089833644c5c005c8138a626931e6a1bc88cc1d0b4db5463379e7cc
