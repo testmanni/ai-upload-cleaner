@@ -58,3 +58,104 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ==============================================================================
 Das AI Upload Cleaner-Tool selbst steht unter der MIT-Lizenz (siehe LICENSE).
 ==============================================================================
+
+
+==============================================================================
+ZUSATZ FÜR AI UPLOAD CLEANER 2.0 (ai-upload-cleaner2.0.html)
+==============================================================================
+
+Version 2.0 bettet aktualisierte Bibliotheken ein, byteidentisch mit den
+npm-Paketen pdfjs-dist 6.3.289 und jspdf 4.2.1 (Prüfsummen: build/CHECKSUMS.txt,
+Nachprüfung: python3 build/libs.py verify ai-upload-cleaner2.0.html):
+
+- PDF.js 6.3.289 (pdf.min.mjs, pdf.worker.min.mjs) - Apache License 2.0 (siehe oben, 1)
+- jsPDF 4.2.1 (jspdf.umd.min.js) - MIT License (siehe oben, 2; Lizenztext unverändert)
+
+Dazu kommen zwei WebAssembly-Decoder aus dem Paket pdfjs-dist, die PDF.js für
+Bilder in PDFs benötigt:
+
+------------------------------------------------------------------------------
+3) OpenJPEG (openjpeg.wasm, JPEG-2000-Decoder)
+------------------------------------------------------------------------------
+Projekt:   OpenJPEG, https://www.openjpeg.org/ , https://github.com/uclouvain/openjpeg
+Wrapper:   pdf.js.openjpeg (Mozilla Foundation), https://github.com/mozilla/pdf.js.openjpeg
+Lizenz:    BSD 2-Clause (SPDX: BSD-2-Clause), Wrapper ebenfalls BSD 2-Clause
+Original:  licenses/openjpeg-LICENSE.txt, licenses/pdf.js-openjpeg-wrapper-LICENSE.txt
+
+The copyright in this software is being made available under the 2-clauses
+BSD License, included below. This software may be subject to other third
+party and contributor rights, including patent rights, and no such rights
+are granted under this license.
+
+Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
+Copyright (c) 2002-2014, Professor Benoit Macq
+Copyright (c) 2003-2014, Antonin Descampe
+Copyright (c) 2003-2009, Francois-Olivier Devaux
+Copyright (c) 2005, Herve Drolon, FreeImage Team
+Copyright (c) 2002-2003, Yannick Verschueren
+Copyright (c) 2001-2003, David Janssens
+Copyright (c) 2011-2012, Centre National d'Etudes Spatiales (CNES), France
+Copyright (c) 2012, CS Systemes d'Information, France
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+------------------------------------------------------------------------------
+4) PDFium-JBIG2-Decoder (jbig2.wasm, JBIG2-Decoder)
+------------------------------------------------------------------------------
+Projekt:   PDFium, https://pdfium.googlesource.com/pdfium/
+Wrapper:   pdf.js.jbig2 (Mozilla Foundation), https://github.com/mozilla/pdf.js.jbig2 , Apache License 2.0
+Lizenz:    BSD 3-Clause (SPDX: BSD-3-Clause)
+Original:  licenses/pdfium-jbig2-LICENSE.txt, licenses/pdf.js-jbig2-wrapper-LICENSE.txt
+
+Copyright 2014 The PDFium Authors
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+==============================================================================
+Das AI Upload Cleaner-Tool selbst steht in allen Versionen unter der MIT-Lizenz (siehe LICENSE).
+==============================================================================

@@ -1,0 +1,14 @@
+AI Upload Cleaner 2.0: Herkunft und Prüfsummen der eingebetteten Bibliotheken
+Quelle: registry.npmjs.org, Tarball-Integrität laut Register geprüft.
+Nachprüfen ohne Netz: python3 build/libs.py verify ai-upload-cleaner2.0.html
+
+Tarball pdfjs-dist-6.3.289.tgz  integrity=sha512-ZHjSVpDa3D6izMq8/04lvkhkATUmL9px6ChPaXc1k6nU2Mrhlg1/7F0bdUqCwUjw3NsPTfPZsMDUU6ZIcRaeQw==
+Tarball jspdf-4.2.1.tgz  integrity=sha512-YyAXyvnmjTbR4bHQRLzex3CuINCDlQnBqoSYyjJwTP2x9jDLuKDzy7aKUl0hgx3uhcl7xzg32agn5vlie6HIlQ==
+
+lib-pdf              pdfjs-dist@6.3.289    package/legacy/build/pdf.min.mjs     sha256=f401927e692efc7735e0cd528c490d0dd31b7f0972c122b7040df805be45cce4  Apache-2.0
+lib-pdfworker        pdfjs-dist@6.3.289    package/legacy/build/pdf.worker.min.mjs sha256=a33cfe728c584fdba4fcc1fd54bcdc2f9f2f13889ddbb5b2bd1d0f8cbe49b84e  Apache-2.0
+lib-wasm-openjpeg    pdfjs-dist@6.3.289    package/wasm/openjpeg.wasm           sha256=004a0e62db930ba9ff2a22212f4554d0bb57a0635a8287caf70f98117cee14ba  BSD-2-Clause (OpenJPEG)
+lib-wasm-jbig2       pdfjs-dist@6.3.289    package/wasm/jbig2.wasm              sha256=e6bee67724a7b5436fe8162638e3708cfc8d52b6342db69a49715e30ff27cfdc  BSD-3-Clause (PDFium JBIG2)
+lib-jspdf            jspdf@4.2.1      package/dist/jspdf.umd.min.js        sha256=e6551fcdc32f09d6853b2c5126d18d01d9447e0da618a41a11ebeee0f6c20d54  MIT
+
+ai-upload-cleaner2.0.html  sha256=22e9f197dc485898dac114bac4fd29e90847b997103e87b701a0e46103204812

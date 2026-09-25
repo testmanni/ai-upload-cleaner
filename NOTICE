@@ -12,3 +12,14 @@ Dieses Produkt enthält Software von Drittanbietern:
   Lizenziert unter MIT License
 
 Die vollständigen Lizenztexte stehen in THIRD-PARTY-LICENSES.txt.
+
+Zusatz für AI Upload Cleaner 2.0 (ai-upload-cleaner2.0.html):
+
+- PDF.js 6.3.289 (Mozilla Foundation), Apache License 2.0
+- jsPDF 4.2.1 (James Hall, yWorks GmbH), MIT License
+- OpenJPEG als WebAssembly (openjpeg.wasm aus pdfjs-dist; Universite catholique de Louvain u. a.;
+  Wrapper: Mozilla Foundation), BSD 2-Clause
+- PDFium-JBIG2-Decoder als WebAssembly (jbig2.wasm aus pdfjs-dist; The PDFium Authors;
+  Wrapper: Mozilla Foundation, Apache License 2.0), BSD 3-Clause
+
+Prüfsummen und Herkunft: build/CHECKSUMS.txt
