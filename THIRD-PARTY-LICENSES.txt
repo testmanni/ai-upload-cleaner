@@ -61,10 +61,10 @@ Das AI Upload Cleaner-Tool selbst steht unter der MIT-Lizenz (siehe LICENSE).
 
 
 ==============================================================================
-ZUSATZ FÜR AI UPLOAD CLEANER 2.0 (ai-upload-cleaner2.0.html)
+ZUSATZ FÜR AI UPLOAD CLEANER AB VERSION 2.0 (ai-upload-cleaner2.0.html, ai-upload-cleaner3.0.html)
 ==============================================================================
 
-Version 2.0 bettet aktualisierte Bibliotheken ein, byteidentisch mit den
+Die Versionen 2.0 und 3.0 betten aktualisierte Bibliotheken ein, byteidentisch mit den
 npm-Paketen pdfjs-dist 6.3.289 und jspdf 4.2.1 (Prüfsummen: build/CHECKSUMS.txt,
 Nachprüfung: python3 build/libs.py verify ai-upload-cleaner2.0.html):
 

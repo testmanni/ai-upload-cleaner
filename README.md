@@ -29,7 +29,21 @@ WLAN ausschalten und es trotzdem benutzen – das ist der Beweis, dass nichts ho
 - Das Werkzeug findet sensible Stellen **nicht** selbst. Es schwärzt nur, was du markierst. Die Prüfung bleibt bei dir – eine Checkliste vor dem Export erinnert an typische Stellen.
 - Es garantiert keine vollständige Anonymisierung. Prüfe das Ergebnis nach dem Export selbst mit dem Strg+C-Test.
 
-## Version 2.0 (parallel zur 1.0, Datei `ai-upload-cleaner2.0.html`)
+## Version 3.0 (Datei `ai-upload-cleaner3.0.html`)
+
+Alles aus der 2.0, dazu:
+
+- **Text markieren statt zeichnen.** Bei PDFs mit Textebene liegt eine unsichtbare Textschicht über der Seite. Text mit der Maus überstreichen oder am Handy ein Wort gedrückt halten, dann „Auswahl schwärzen". Die Boxen entstehen zeilengenau aus den echten Schriftmaßen, mit Sicherheitsrand. Umschalter „Box / Text" oben, Tasten B und T.
+- **Suchen und schwärzen.** Begriff eingeben oder ein Muster wählen (IBAN, E-Mail-Adresse, Telefonnummer), Treffer über alle Seiten durchgehen, einzeln oder alle schwärzen. Muster sind Faustregeln, jeder Treffer wird bestätigt. Aus einer Textauswahl heraus: „Überall suchen". Strg+F öffnet die Suche.
+- **Beschriftete Boxen.** Optional steht in Weiß auf der Fläche, was entfernt wurde: [Name], [IBAN], [Adresse] oder Freitext. Wird ins Bild gerechnet, keine Textebene. Die Prüfung nach dem Export kennt die Beschriftung und verlangt, dass der Rest der Fläche schwarz ist.
+- **Box auf alle Seiten**, **Seite drehen**, **Seite ausschließen**, **nur Ausschnitt exportieren** (Rahmen ziehen, nur dieser Bereich landet im Export).
+- **Seitenübersicht** mit Miniaturen, Boxenzahl, Suchtreffern und Markierung ausgeschlossener Seiten. Vor dem Export: „Seiten ohne Box: 2, 4".
+- **Mehrere Dateien in einem Export.** PDFs und Bilder gemischt, in der gewählten Reihenfolge.
+- **Boxen-Vorlage speichern und laden** (nur Koordinaten, nie Inhalte), **wählbarer Dateiname**, **Dunkelmodus** nach Systemeinstellung.
+
+Text markieren und Suche funktionieren nur bei PDFs mit Textebene. Bei Scans und Fotos gibt es keine, dort bleibt es beim Zeichnen. Das Werkzeug zeigt beim Laden an, ob eine Textebene vorhanden ist. Nachprüfen der eingebetteten Bibliotheken: `python3 build/libs.py verify ai-upload-cleaner3.0.html`.
+
+## Version 2.0 (Datei `ai-upload-cleaner2.0.html`)
 
 Gleiche Idee, gleiche eine Datei, aber:
 
@@ -50,8 +64,9 @@ Unterstützte Browser laut PDF.js-Legacy-Build: Chrome ab 125, Firefox ESR, Safa
 |---|---|
 | `ai-upload-cleaner.html` | das Werkzeug, Version 1.0 (einzelne Datei, offline) |
 | `ai-upload-cleaner2.0.html` | das Werkzeug, Version 2.0 (siehe oben) |
-| `build/libs.py` | prüft oder erneuert die in 2.0 eingebetteten Bibliotheken |
-| `build/CHECKSUMS.txt` | Herkunft und SHA-256-Prüfsummen der eingebetteten Bibliotheken (2.0) |
+| `ai-upload-cleaner3.0.html` | das Werkzeug, Version 3.0 (siehe oben) |
+| `build/libs.py` | prüft oder erneuert die in 2.0 und 3.0 eingebetteten Bibliotheken |
+| `build/CHECKSUMS.txt` | Herkunft und SHA-256-Prüfsummen der eingebetteten Bibliotheken und der Werkzeugdateien |
 | `landing.html` | Landingpage mit interaktivem Selbsttest |
 | `LICENSE` | MIT-Lizenz dieses Projekts |
 | `NOTICE` | Übersicht der enthaltenen Drittanbieter-Software |

@@ -171,17 +171,34 @@ def cmd_update(html_path: str, tarball_dir: str | None) -> int:
     file_hash = sha256(open(html_path, "rb").read())
     out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "CHECKSUMS.txt")
     with open(out, "w", encoding="utf-8") as f:
-        f.write("AI Upload Cleaner 2.0: Herkunft und Prüfsummen der eingebetteten Bibliotheken\n")
+        f.write("AI Upload Cleaner: Herkunft und Prüfsummen der eingebetteten Bibliotheken (ab Version 2.0)\n")
         f.write("Quelle: registry.npmjs.org, Tarball-Integrität laut Register geprüft.\n")
-        f.write("Nachprüfen ohne Netz: python3 build/libs.py verify " + os.path.basename(html_path) + "\n\n")
+        f.write("Nachprüfen ohne Netz: python3 build/libs.py verify <datei>.html\n\n")
         for (pkg, ver), (_, integrity) in tarballs.items():
             f.write(f"Tarball {pkg}-{ver}.tgz  integrity={integrity}\n")
         f.write("\n")
         f.write("\n".join(lines) + "\n\n")
-        f.write(f"{os.path.basename(html_path)}  sha256={file_hash}\n")
+        for name, digest in tool_file_hashes(os.path.dirname(os.path.abspath(html_path))):
+            f.write(f"{name}  sha256={digest}\n")
     print(f"Fertig. {html_path} aktualisiert, {out} geschrieben.")
     print("Datei-SHA-256:", file_hash)
     return 0
+
+
+def tool_file_hashes(root: str):
+    """SHA-256 aller Werkzeugdateien im Repo-Wurzelverzeichnis, deren eingebettete Blöcke den Pins entsprechen."""
+    out = []
+    for name in sorted(os.listdir(root)):
+        if not (name.startswith("ai-upload-cleaner") and name.endswith(".html")):
+            continue
+        path = os.path.join(root, name)
+        try:
+            blocks = read_blocks(open(path, encoding="utf-8").read())
+        except SystemExit:
+            continue  # ältere Datei ohne alle Blöcke (1.0)
+        if all(blocks[k] and sha256(blocks[k]) == PINS[k]["sha256"] for k in PINS):
+            out.append((name, sha256(open(path, "rb").read())))
+    return out
 
 
 def main(argv):
