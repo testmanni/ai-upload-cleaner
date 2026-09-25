@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light dark" />
+<title>AI Upload Cleaner 3.0 – Anleitung in fünf Minuten</title>
+<style>
+  :root{--bg:#faf8f5;--card:#fff;--line:#e0d9cf;--ink:#2a2620;--ink2:#6b6356;--mut:#9b9384;--acc:#185FA5;--acc-bg:#e3edf7;--warn-bg:#fbf0d9;--warn:#7a5c12;--ok-bg:#e2f3e4;--ok:#1f6b2c;}
+  @media (prefers-color-scheme: dark){:root{--bg:#1c1a17;--card:#2a2620;--line:#3f3932;--ink:#ece7df;--ink2:#bdb5a9;--mut:#8f877b;--acc:#8ab7e8;--acc-bg:#1f3a57;--warn-bg:#3a2f14;--warn:#e6c46a;--ok-bg:#1e3a24;--ok:#9fd8a8;}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.55;font-size:17px}
+  .wrap{max-width:720px;margin:0 auto;padding:28px 18px 60px}
+  h1{font-size:26px;margin:0 0 6px;line-height:1.25}
+  h2{font-size:20px;margin:34px 0 10px;padding-top:14px;border-top:1px solid var(--line)}
+  p{margin:8px 0}
+  .kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+  .lead{font-size:18px;color:var(--ink2)}
+  .btn{display:block;text-align:center;background:var(--acc);color:#fff;text-decoration:none;font-size:20px;font-weight:600;padding:16px 20px;border-radius:12px;margin:18px 0 6px}
+  .btn:hover{filter:brightness(1.08)}
+  .btn small{display:block;font-size:13px;font-weight:400;opacity:.9;margin-top:2px}
+  .alt{font-size:14px;color:var(--ink2);text-align:center}
+  .alt a{color:var(--acc)}
+  ol.steps{list-style:none;padding:0;margin:0;counter-reset:s}
+  ol.steps li{position:relative;padding:14px 16px 14px 62px;margin:10px 0;background:var(--card);border:1px solid var(--line);border-radius:12px;counter-increment:s}
+  ol.steps li::before{content:counter(s);position:absolute;left:16px;top:14px;width:32px;height:32px;border-radius:50%;background:var(--acc);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+  ol.steps li b{display:block;margin-bottom:2px}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:10px 0}
+  .warn{background:var(--warn-bg);color:var(--warn);border-color:transparent}
+  .ok{background:var(--ok-bg);color:var(--ok);border-color:transparent}
+  .tip{background:var(--acc-bg);border-color:transparent}
+  ul{padding-left:22px;margin:6px 0}
+  li{margin:4px 0}
+  kbd{font-family:inherit;font-size:14px;background:var(--card);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px}
+  .g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media (max-width:560px){.g{grid-template-columns:1fr}body{font-size:16px}}
+  .g .box{margin:0}
+  .foot{margin-top:40px;font-size:13px;color:var(--mut);border-top:1px solid var(--line);padding-top:14px}
+  .foot code{font-size:11px;word-break:break-all}
+  a{color:var(--acc)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">AI Upload Cleaner 3.0 · Anleitung</div>
+  <h1>Dokumente schwärzen, bevor du sie hochlädst. In fünf Minuten erklärt.</h1>
+  <p class="lead">Ein Werkzeug, eine Datei, kein Konto, kein Internet nötig. Was du schwärzt, ist danach wirklich weg, nicht nur verdeckt.</p>
+
+  <a class="btn" href="ai-upload-cleaner3.0.html" download="ai-upload-cleaner3.0.html">⬇️ Werkzeug herunterladen<small>ai-upload-cleaner3.0.html · 3,6 MB · Version 3.0.0</small></a>
+  <p class="alt">Oder von GitHub: <a href="https://github.com/testmanni/ai-upload-cleaner/blob/main/ai-upload-cleaner3.0.html">Datei öffnen</a> und dort rechts oben den Knopf „Download raw file" (Pfeil nach unten) drücken. Nicht „Seite speichern", das speichert die falsche Datei.</p>
+
+  <h2>So geht es am Computer</h2>
+  <ol class="steps">
+    <li><b>Datei speichern und doppelklicken.</b> Sie öffnet sich im Browser wie eine Internetseite, braucht aber kein Internet. Zum Beweis: WLAN aus, es läuft weiter. Die richtige Datei ist rund 3,6 MB groß.</li>
+    <li><b>Dokument hineinziehen.</b> PDF, JPG oder PNG, auch mehrere auf einmal. Sie werden zu einem Export zusammengefasst.</li>
+    <li><b>Schwärzen, auf drei Arten.</b>
+      <ul>
+        <li><b>Box ziehen:</b> mit der Maus ein Rechteck über die Stelle ziehen. Ecken ziehen ändert die Größe, Mitte ziehen verschiebt.</li>
+        <li><b>Text markieren:</b> oben auf <kbd>Text</kbd> klicken, Text wie in einem PDF-Programm überstreichen, dann <kbd>Auswahl schwärzen</kbd>. Geht nur bei PDFs mit echtem Text, nicht bei Scans.</li>
+        <li><b>Suchen:</b> <kbd>🔍 Suchen und schwärzen</kbd>, Begriff eingeben oder IBAN, E-Mail, Telefon wählen. Treffer durchgehen, <kbd>Alle schwärzen</kbd>. Jeden Treffer kurz ansehen.</li>
+      </ul>
+    </li>
+    <li><b>Kontrollieren.</b> Die kleine Seitenübersicht zeigt, wo Boxen liegen. Unter der Checkliste steht „Seiten ohne Box". Geh die Liste durch: Name, Adresse, IBAN, Kundennummer, Unterschrift, Foto, QR-Code.</li>
+    <li><b>Herunterladen.</b> <kbd>⬇️ Geschwärzte Kopie herunterladen</kbd>. Das Werkzeug öffnet das Ergebnis selbst noch einmal und meldet „0 Textzeichen". Erst dann wird die Datei gespeichert. Diese Kopie lädst du hoch, nie das Original.</li>
+  </ol>
+
+  <div class="box ok"><b>Der Test, den jeder machen kann:</b> Öffne die geschwärzte Datei, markiere eine schwarze Stelle mit der Maus, drücke <kbd>Strg</kbd>+<kbd>C</kbd> und füge irgendwo ein. Kommt nichts, ist nichts da. Bei einem Balken aus Word oder Acrobat käme der Text.</div>
+
+  <h2>So geht es am Handy</h2>
+  <ol class="steps">
+    <li><b>Datei öffnen.</b> Am iPhone am besten in Safari über die Website. Die Vorschau in der Dateien-App zeigt das Werkzeug zwar an, speichert aber nichts. Auf Android reicht Chrome.</li>
+    <li><b>Dokument wählen</b>, dann öffnet sich der Vollbild-Editor von selbst.</li>
+    <li><b>Gesten:</b> ein Finger zieht eine Box · zwei Finger zoomen und schieben · Doppeltipp zoomt · für Text: unten <kbd>🔤</kbd> wählen, Wort gedrückt halten, Auswahl ziehen, <kbd>Auswahl schwärzen</kbd>. Eine Lupe zeigt, was unter dem Finger liegt.</li>
+    <li><b>Oben:</b> <kbd>Seite 1 / 3 ▾</kbd> öffnet die Seitenübersicht, <kbd>🔍</kbd> die Suche, <kbd>⋯</kbd> alles Weitere (Drehen, Seite ausschließen, Beschriftung, Ausschnitt, Vorlagen).</li>
+    <li><b><kbd>Fertig</kbd></b>, dann <kbd>Geschwärzte Kopie herunterladen</kbd>. Safari fragt, wo die Datei hin soll.</li>
+  </ol>
+
+  <h2>Nützliche Extras</h2>
+  <div class="g">
+    <div class="box"><b>🏷️ Beschriftung</b><br>Box anklicken, dann „Beschriftung" wählen: auf der schwarzen Fläche steht [Name] oder [IBAN]. Die KI versteht das Dokument trotzdem.</div>
+    <div class="box"><b>✂️ Ausschnitt</b><br>Nur einen Teil der Seite exportieren. Der Rest wird gar nicht erst hochgeladen.</div>
+    <div class="box"><b>🚫 Seite ausschließen</b><br>Seiten, die niemand braucht, fliegen aus dem Export. Etwa die letzte Seite mit deinem Namen im Kleingedruckten.</div>
+    <div class="box"><b>Box auf alle Seiten</b><br>Für Kopf- und Fußzeilen, die auf jeder Seite gleich sitzen.</div>
+    <div class="box"><b>Vorlage speichern</b><br>Boxen für den nächsten Kontoauszug desselben Layouts aufheben. Es werden nur Positionen gespeichert, nie Inhalte.</div>
+    <div class="box"><b>Rückgängig</b><br><kbd>Strg</kbd>+<kbd>Z</kbd> oder ↶. Pfeiltasten verschieben eine Box pixelweise, <kbd>Entf</kbd> löscht sie.</div>
+  </div>
+
+  <h2>Was du wissen musst</h2>
+  <div class="box warn">
+    <ul>
+      <li><b>Das Werkzeug findet nichts von selbst.</b> Es schwärzt, was du markierst oder per Suche bestätigst. Die Verantwortung bleibt bei dir.</li>
+      <li><b>Scans und Fotos haben keinen Text.</b> Dort gibt es nur Boxen. Bei gescannten PDFs mit Texterkennung kann die Suche daneben liegen: nach dem Schwärzen immer hinsehen.</li>
+      <li><b>IBAN, E-Mail und Telefon sind Faustregeln.</b> Sie finden auch mal etwas Falsches oder übersehen ein ungewöhnliches Format.</li>
+      <li><b>Kein Verpixeln, kein Weichzeichnen.</b> Beides lässt sich bei Text teilweise rückgängig machen. Schwarz ist die einzige Option, mit Absicht.</li>
+    </ul>
+  </div>
+
+  <h2>Wenn etwas hakt</h2>
+  <div class="box"><b>„Export fehlgeschlagen"</b><br>Browser aktualisieren. Das Werkzeug braucht Chrome ab 125, Firefox ESR oder Safari ab 18. Ältere Safari-Versionen werden bis 18.0 abgefangen, darunter nicht.</div>
+  <div class="box"><b>Die Datei zeigt eine GitHub-Seite statt des Werkzeugs</b><br>Es wurde die Webseite gespeichert, nicht die Datei. Oben den Download-Knopf nutzen; die richtige Datei ist rund 3,6 MB groß.</div>
+  <div class="box"><b>Am iPhone passiert beim Herunterladen nichts</b><br>Die Datei wurde in der Dateien-Vorschau geöffnet. In Safari öffnen, dann klappt der Download.</div>
+  <div class="box"><b>Handy zu klein zum Zielen</b><br>Zwei Finger zum Zoomen oder Doppeltipp, dann die Box ziehen. Oder gleich Text markieren statt zeichnen.</div>
+
+  <div class="foot">
+    AI Upload Cleaner 3.0.0 · MIT-Lizenz · <a href="https://github.com/testmanni/ai-upload-cleaner">github.com/testmanni/ai-upload-cleaner</a><br>
+    SHA-256 der Werkzeugdatei: <code>3a90df3df493691c88099fd39f8c5f72505d630252c2f61fc095d3da0eee5be5</code><br>
+    Hilfsmittel, keine Rechtsberatung. Sicher ist die Schwärzung erst, wenn du sie mit eigenen Augen geprüft hast.
+  </div>
+</div>
+</body>
+</html>
