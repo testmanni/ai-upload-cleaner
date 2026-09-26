@@ -67,7 +67,8 @@ Unterstützte Browser laut PDF.js-Legacy-Build: Chrome ab 125, Firefox ESR, Safa
 | `ai-upload-cleaner3.0.html` | das Werkzeug, Version 3.0 (siehe oben) |
 | `build/libs.py` | prüft oder erneuert die in 2.0 und 3.0 eingebetteten Bibliotheken |
 | `build/CHECKSUMS.txt` | Herkunft und SHA-256-Prüfsummen der eingebetteten Bibliotheken und der Werkzeugdateien |
-| `landing.html` | Landingpage mit interaktivem Selbsttest |
+| `index.html` | Startseite mit interaktivem Selbsttest, verlinkt Werkzeug 3.0 und Anleitung |
+| `anleitung.html` | kurze Bedienungsanleitung |
 | `LICENSE` | MIT-Lizenz dieses Projekts |
 | `NOTICE` | Übersicht der enthaltenen Drittanbieter-Software |
 | `THIRD-PARTY-LICENSES.txt` | vollständige Lizenztexte von PDF.js und jsPDF |

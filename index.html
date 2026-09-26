@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<!--
+  AI Upload Cleaner – Startseite
+  Copyright (c) 2026 Manfred Just
+  Lizenziert unter der MIT-Lizenz. Siehe LICENSE.
+  Diese Seite lädt nichts nach und setzt keine Cookies. Das Werkzeug selbst liegt in ai-upload-cleaner3.0.html.
+-->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="referrer" content="no-referrer" />
+<title>AI Upload Cleaner – weniger hochladen. Dokumente lokal schwärzen, kürzen, zusammenstellen.</title>
+<meta name="description" content="AI Upload Cleaner bereitet Dokumente lokal im Browser vor, bevor du sie in ChatGPT, Claude, Copilot oder ein Portal hochlädst: Text markieren und schwärzen, Namen und IBAN suchen, Seiten weglassen, Ausschnitt exportieren, Fotos zu einer PDF. Eine HTML-Datei, kostenlos, Open Source, kein Konto, kein Upload, kein Server." />
+<meta name="robots" content="index, follow" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="AI Upload Cleaner – weniger hochladen" />
+<meta property="og:description" content="Schwärze, kürze und bündle Dokumente lokal, bevor du sie in KI-Tools hochlädst. Der schwarze Balken aus Word oder Acrobat schützt nichts, beweis es dir selbst. Eine Datei, kostenlos, offline." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="AI Upload Cleaner – weniger hochladen" />
+<meta name="twitter:description" content="Dokumente lokal schwärzen, kürzen und zusammenstellen, bevor du sie in KI-Tools hochlädst. Eine Datei, kein Konto, kein Server." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"Was ist der AI Upload Cleaner?","acceptedAnswer":{"@type":"Answer","text":"Ein lokales Browser-Werkzeug in einer einzigen HTML-Datei. Es schwärzt, kürzt und bündelt Dokumente, bevor du sie in KI-Tools wie ChatGPT, Claude, Copilot oder Gemini oder in ein Portal hochlädst. Die Schwärzung wird fest in die Pixel gerechnet, der Text darunter ist physisch entfernt. Nichts wird hochgeladen, es gibt keinen Server und kein Konto."}},
+    {"@type":"Question","name":"Entfernt ein schwarzer Balken Text aus einem PDF?","acceptedAnswer":{"@type":"Answer","text":"Nein. Ein schwarzer Balken in Word oder Acrobat verdeckt den Text nur. Markiert man die Stelle und kopiert sie, ist der Text wieder da. Echte Schwärzung muss den Text aus der Datei entfernen. Der AI Upload Cleaner macht jede Seite zu einem Bild ohne Textebene und prüft das Ergebnis vor dem Download selbst nach."}},
+    {"@type":"Question","name":"Bleibt mein Dokument wirklich lokal?","acceptedAnswer":{"@type":"Answer","text":"Ja. Das Werkzeug verarbeitet alles im Browser, ohne Upload und ohne Netzwerkanfrage. Du kannst es selbst prüfen: Internet trennen, Datei öffnen, es funktioniert weiter. Zusätzlich verbietet sich die Datei über eine Content-Security-Policy jede Verbindung, der Browser setzt das durch. Der Quellcode ist offen."}},
+    {"@type":"Question","name":"Findet das Werkzeug Namen und IBANs automatisch?","acceptedAnswer":{"@type":"Answer","text":"Es sucht auf Wunsch: Du gibst einen Begriff ein oder wählst ein Muster wie IBAN, E-Mail oder Telefonnummer, das Werkzeug zeigt alle Treffer auf allen Seiten, und du bestätigst, was geschwärzt wird. Von selbst schwärzt es nichts. Bei Scans ohne Textebene funktioniert die Suche nicht, dort zeichnest du Boxen."}},
+    {"@type":"Question","name":"Kann ich Fotos zu einer PDF zusammenfassen?","acceptedAnswer":{"@type":"Answer","text":"Ja. Mehrere Fotos oder PDFs hineinziehen, drehen, beschriften, Seiten weglassen, Ausschnitt wählen und als eine PDF speichern. Fotos verlieren dabei ihre EXIF-Daten wie GPS-Position und Kameramodell."}},
+    {"@type":"Question","name":"Ist der AI Upload Cleaner kostenlos?","acceptedAnswer":{"@type":"Answer","text":"Ja. Eine einzelne, kostenlose HTML-Datei unter MIT-Lizenz. Keine Installation, kein Konto, keine Internetverbindung nötig. Einmal herunterladen, im Browser öffnen, beliebig oft benutzen."}},
+    {"@type":"Question","name":"Garantiert das Werkzeug Anonymisierung?","acceptedAnswer":{"@type":"Answer","text":"Nein. Es schwärzt zuverlässig, was du markierst oder per Suche bestätigst, und prüft das Ergebnis technisch nach. Ob alles Sensible markiert ist, entscheidest du. Es ist ein Hilfsmittel, keine Rechtsberatung."}}
+  ]
+}
+</script>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#171d25; --panel-2:#1e2630; --line:#2b3440;
+    --ink:#e8edf2; --ink-soft:#9aa7b4; --ink-mut:#64727f;
+    --accent:#3b82d6; --accent-soft:#1d3a5c; --warn:#e0a341; --bad:#e0564a;
+    --good:#46b46e; --mono:'SFMono-Regular',ui-monospace,'Cascadia Code',Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.55;
+    -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:880px;margin:0 auto;padding:0 20px;}
+  a{color:var(--accent);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  .top{display:flex;justify-content:space-between;align-items:center;padding:18px 0;border-bottom:1px solid var(--line);}
+  .brand{font-family:var(--mono);font-size:14px;letter-spacing:.02em;color:var(--ink);display:flex;gap:9px;align-items:center;}
+  .brand .dot{width:9px;height:9px;border-radius:2px;background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+  .lang{font-family:var(--mono);font-size:12px;color:var(--ink-soft);border:1px solid var(--line);
+    background:transparent;padding:5px 9px;border-radius:6px;cursor:pointer;}
+  .lang:hover{border-color:var(--accent);color:var(--ink);}
+  .hero{padding:56px 0 36px;}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:18px;}
+  h1{font-size:clamp(28px,5vw,44px);line-height:1.1;font-weight:680;letter-spacing:-.02em;margin-bottom:18px;}
+  h1 .stk{color:var(--ink-mut);text-decoration:line-through;text-decoration-color:var(--bad);text-decoration-thickness:2px;}
+  .sub{font-size:18px;color:var(--ink-soft);max-width:60ch;margin-bottom:28px;}
+  .test{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:34px 0;}
+  .test-head{padding:14px 18px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;color:var(--ink-soft);
+    display:flex;align-items:center;gap:8px;}
+  .test-head .ic{color:var(--warn);}
+  .test-body{padding:22px 18px;display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .fake{overflow-wrap:anywhere;}
+  @media(max-width:720px){.test-body{grid-template-columns:1fr;}}
+  .card{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:16px;}
+  .card h3{font-size:13px;font-family:var(--mono);font-weight:500;margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+  .card.bad h3{color:var(--bad);}
+  .card.good h3{color:var(--good);}
+  .doc-line{font-size:14px;color:var(--ink);margin-bottom:6px;}
+  .label-mut{color:var(--ink-mut);font-size:12px;}
+  .fake{position:relative;display:inline-block;color:var(--ink);background:#000;border-radius:2px;padding:0 4px;user-select:text;cursor:text;}
+  .fake.revealed{background:transparent;color:var(--bad);outline:1px dashed var(--bad);}
+  .real{display:inline-block;background:#000;border-radius:2px;padding:0 4px;color:#000;user-select:none;width:84px;height:1.25em;vertical-align:middle;}
+  .verdict{margin-top:12px;font-size:12.5px;min-height:1.4em;font-family:var(--mono);}
+  .verdict.bad{color:var(--bad);}
+  .verdict.good{color:var(--good);}
+  .test-foot{padding:13px 18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-mut);}
+  .claim{font-size:clamp(20px,3.2vw,26px);font-weight:640;line-height:1.3;letter-spacing:-.01em;margin:30px 0 22px;max-width:30ch;}
+  .claim .no{color:var(--ink-mut);}
+  .ctas{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:6px 0 8px;}
+  .btn{display:inline-flex;align-items:center;gap:9px;font-size:15px;font-weight:560;padding:12px 20px;border-radius:9px;cursor:pointer;border:1px solid transparent;}
+  .btn.primary{background:var(--accent);color:#fff;}
+  .btn.primary:hover{background:#4a90e2;text-decoration:none;}
+  .btn.ghost{background:transparent;border-color:var(--line);color:var(--ink);}
+  .btn.ghost:hover{border-color:var(--accent);text-decoration:none;}
+  .ghlink{font-size:13px;color:var(--ink-mut);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s;}
+  .ghlink:hover{color:var(--accent);border-bottom-color:var(--accent);}
+  .combo{font-family:var(--mono);font-size:12.5px;color:var(--ink-mut);margin-top:14px;line-height:1.8;}
+  section{padding:40px 0;border-top:1px solid var(--line);}
+  .sec-eye{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.05em;margin-bottom:14px;text-transform:uppercase;}
+  h2{font-size:24px;font-weight:640;letter-spacing:-.01em;margin-bottom:16px;}
+  .lead{color:var(--ink-soft);max-width:62ch;margin-bottom:22px;}
+  .plug{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:26px 24px;display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;}
+  @media(max-width:720px){.plug{grid-template-columns:1fr;}}
+  .plug .ic{font-size:44px;line-height:1;}
+  .plug h2{margin-bottom:8px;}
+  .plug p{color:var(--ink-soft);font-size:15px;}
+  .uses{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  @media(max-width:720px){.uses{grid-template-columns:1fr;}}
+  .use{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:13px 15px;font-size:14.5px;color:var(--ink-soft);display:flex;gap:10px;align-items:flex-start;}
+  .use .n{font-family:var(--mono);color:var(--accent);font-size:12px;padding-top:3px;}
+  .facts{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  @media(max-width:720px){.facts{grid-template-columns:1fr;}}
+  .fact{background:var(--panel);padding:18px;}
+  .fact .k{font-family:var(--mono);font-size:12px;color:var(--accent);margin-bottom:6px;}
+  .fact .v{font-size:14.5px;color:var(--ink-soft);}
+  .fact .v b{color:var(--ink);font-weight:600;}
+  .aside{margin-top:18px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:10px;padding:16px 18px;color:var(--ink);font-size:15px;max-width:64ch;}
+  .aside b{color:#fff;}
+  .trust-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;}
+  @media(max-width:720px){.trust-grid{grid-template-columns:1fr;}}
+  .trust-card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px 18px 16px;}
+  .trust-num{font-family:var(--mono);font-size:13px;color:var(--accent);border:1px solid var(--accent);width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+  .trust-q{font-weight:600;margin-bottom:8px;line-height:1.4;}
+  .trust-a{font-size:13.5px;color:var(--ink-mut);line-height:1.6;}
+  .honest{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:8px;padding:18px 20px;max-width:64ch;color:var(--ink-soft);font-size:14.5px;}
+  .honest b{color:var(--ink);}
+  .faq{display:flex;flex-direction:column;gap:0;max-width:68ch;}
+  .faq .q{font-size:16px;font-weight:600;color:var(--ink);margin:0 0 6px;}
+  .faq .a{font-size:14.5px;color:var(--ink-soft);margin:0;}
+  .faq .item{padding:18px 0;border-bottom:1px solid var(--line);}
+  .faq .item:first-child{padding-top:0;}
+  footer{padding:34px 0 60px;border-top:1px solid var(--line);color:var(--ink-mut);font-size:13px;}
+  footer .row{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .hide{display:none !important;}
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;padding:20px;overflow:auto;}
+  .overlay .box{max-width:720px;margin:40px auto;background:#ffffff;color:#1a1a1a;border:1px solid #ddd;border-radius:12px;padding:28px 30px;line-height:1.6;font-size:14px;}
+  .overlay .close{float:right;background:none;border:none;color:inherit;font-size:22px;cursor:pointer;line-height:1;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="brand"><span class="dot"></span><span>AI Upload Cleaner</span></div>
+    <button class="lang" id="lang">DE / <b style="color:var(--ink)">EN</b></button>
+  </div>
+
+  <div class="hero">
+    <div class="eyebrow" data-t="eyebrow">Bevor du es in ChatGPT, Claude oder Copilot lädst</div>
+    <h1 data-t-html="h1">Dein schwarzer Balken ist <span class="stk">keine</span> Schwärzung.</h1>
+    <p class="sub" data-t="sub">Ein schwarzes Rechteck in Word oder Acrobat verdeckt den Text nur. Markier ihn, kopier ihn, und er ist wieder da. Probier es hier aus.</p>
+
+    <div class="test">
+      <div class="test-head"><span class="ic">▲</span><span data-t="testHead">Der 10-Sekunden-Selbsttest: markiere beide schwarzen Balken mit der Maus</span></div>
+      <div class="test-body">
+        <div class="card bad">
+          <h3>✕ <span data-t="fakeTitle">Balken drübergelegt (Word, Acrobat-Markierung)</span></h3>
+          <div class="doc-line"><span class="label-mut">IBAN:</span> <span class="fake" id="fakeBar">DE89 3704 0044 0532 0130 00</span></div>
+          <div class="verdict bad" id="fakeVerdict"></div>
+        </div>
+        <div class="card good">
+          <h3>✓ <span data-t="realTitle">Mit AI Upload Cleaner geschwärzt</span></h3>
+          <div class="doc-line"><span class="label-mut">IBAN:</span> <span class="real" id="realBar"></span></div>
+          <div class="verdict good" id="realVerdict"></div>
+        </div>
+      </div>
+      <div class="test-foot" data-t="testFoot">Links liegt echter, markierbarer Text unter dem Balken. Rechts ist er aus den Pixeln entfernt, da ist nichts mehr zu markieren.</div>
+    </div>
+
+    <p class="claim" data-t-html="claim">Der AI Upload Cleaner hilft dir <span class="no">nicht, Daten sicher hochzuladen.</span><br>Er hilft dir, weniger Daten hochzuladen.</p>
+
+    <div class="ctas">
+      <a class="btn primary" id="open" href="ai-upload-cleaner3.0.html" target="_blank" rel="noopener">→ <span data-t="openBtn">Tool jetzt öffnen</span></a>
+      <a class="btn ghost" id="dl" href="ai-upload-cleaner3.0.html" download="ai-upload-cleaner3.0.html">⬇ <span data-t="dlBtn">Herunterladen</span> <span style="color:var(--ink-mut);font-weight:400">3,6 MB</span></a>
+      <a class="btn ghost" href="anleitung.html">📖 <span data-t="guideBtn">Anleitung</span></a>
+    </div>
+    <p style="font-size:13px;margin-top:6px"><a class="ghlink" id="gh" href="https://github.com/testmanni/ai-upload-cleaner" target="_blank" rel="noopener">↗ <span data-t="ghBtn">Quellcode auf GitHub</span></a></p>
+    <p class="combo" data-t="combo">eine HTML-Datei · kostenlos · Open Source · kein Konto · kein Upload · kein Server · keine Installation</p>
+  </div>
+
+  <section>
+    <div class="plug">
+      <div class="ic">🔌</div>
+      <div>
+        <h2 data-t="plugH">Du glaubst uns nicht, dass nichts hochgeladen wird?</h2>
+        <p data-t="plugP">Zieh das Netzwerkkabel. Der Cleaner läuft weiter. Und falls du dem Kabel nicht traust: Die Datei verbietet sich jede Verbindung selbst, per Content-Security-Policy. Der Browser setzt das durch, egal was im Code steht.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-eye" data-t="useEye">Wofür Leute es benutzen</div>
+    <h2 data-t="useH">Ein lokaler Vorbereiter für alles, was du irgendwo hochladen willst.</h2>
+    <p class="lead" data-t="useLead">Rechnung, Kontoauszug, Vertrag, Befund, Bewerbung, drei Fotos vom Handy: Reinziehen, Sensibles weg, Überflüssiges weg, eine saubere Datei raus.</p>
+    <div class="uses">
+      <div class="use"><span class="n">01</span><span data-t="u1">Rechnung für ChatGPT vorbereiten, Kundennummer und IBAN schwärzen</span></div>
+      <div class="use"><span class="n">02</span><span data-t="u2">Kontoauszug anonymisieren: Namen suchen, alle Treffer auf allen Seiten schwärzen</span></div>
+      <div class="use"><span class="n">03</span><span data-t="u3">Drei Handyfotos zu einer PDF machen, ohne Scanner-App und ohne GPS-Daten</span></div>
+      <div class="use"><span class="n">04</span><span data-t="u4">Bewerbungsunterlagen zusammenführen, Seite 4 weglassen</span></div>
+      <div class="use"><span class="n">05</span><span data-t="u5">Nur den einen Absatz aus einem Vertrag exportieren, der Rest bleibt zu Hause</span></div>
+      <div class="use"><span class="n">06</span><span data-t="u6">Befund hochladen, Name und Geburtsdatum durch [Name] und [Datum] ersetzen</span></div>
+      <div class="use"><span class="n">07</span><span data-t="u7">Anhang für den Support vorbereiten, ohne dass die Adresse mitreist</span></div>
+      <div class="use"><span class="n">08</span><span data-t="u8">Screenshot beschneiden und schwärzen, bevor er in den Chat geht</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-eye" data-t="factEye">Was drinsteckt</div>
+    <div class="facts">
+      <div class="fact"><div class="k" data-t="f1k">Wirklich entfernt</div><div class="v" data-t-html="f1v">Jede Seite wird zum Bild, die Schwärzung <b>fest in die Pixel</b> gerechnet. Vor dem Download öffnet das Werkzeug sein Ergebnis selbst und meldet: 0 Textzeichen.</div></div>
+      <div class="fact"><div class="k" data-t="f2k">Text markieren statt zeichnen</div><div class="v" data-t-html="f2v">Bei PDFs mit Textebene: Text wie im PDF-Viewer markieren, <b>„Auswahl schwärzen“</b>. Die Box sitzt zeilengenau.</div></div>
+      <div class="fact"><div class="k" data-t="f3k">Suchen und schwärzen</div><div class="v" data-t-html="f3v">Begriff eingeben oder IBAN, E-Mail, Telefon wählen. Alle Treffer auf allen Seiten, <b>du bestätigst</b>, das Werkzeug schwärzt.</div></div>
+      <div class="fact"><div class="k" data-t="f4k">Weniger hochladen</div><div class="v" data-t-html="f4v">Seiten ausschließen, <b>nur einen Ausschnitt</b> exportieren, Boxen beschriften. Was nicht drin ist, kann nicht abfließen.</div></div>
+      <div class="fact"><div class="k" data-t="f5k">Handy und Rechner</div><div class="v" data-t-html="f5v">Vollbild-Editor mit Lupe, zwei Finger zoomen, Wort gedrückt halten. <b>Ausweis direkt mobil</b> schwärzen.</div></div>
+      <div class="fact"><div class="k" data-t="f6k">Eine Datei</div><div class="v" data-t-html="f6v">Eine HTML-Datei, 3,6 MB. <b>Keine Installation</b>, kein Add-on, nichts, was die IT freigeben muss. Die eingebetteten Bibliotheken sind byteidentisch mit den offiziellen Paketen, Prüfsummen liegen bei.</div></div>
+    </div>
+    <div class="aside" data-t-html="aside"><b>Übrigens:</b> Drei Fotos vom Handy? Reinziehen, drehen, beschriften, Seiten weglassen, als eine PDF speichern. Dafür installieren andere eine Scanner-App.</div>
+  </section>
+
+  <section>
+    <div class="sec-eye" data-t="honEye">Ehrlich gesagt</div>
+    <div class="honest" data-t-html="honest"><b>Was das Werkzeug nicht tut:</b> Es schwärzt nichts von selbst. Es schwärzt, was <i>du</i> markierst oder per Suche bestätigst. Bei Scans und Fotos gibt es keine Textebene, dort bleibt nur das Zeichnen. Die Suchmuster für IBAN, E-Mail und Telefon sind Faustregeln. Verpixeln oder Weichzeichnen gibt es mit Absicht nicht, weil beides bei Text teilweise umkehrbar ist. Sicher ist das Ergebnis erst, wenn du es mit eigenen Augen geprüft hast. Ein Hilfsmittel, keine Rechtsberatung.</div>
+  </section>
+
+  <section id="trustSection">
+    <div class="sec-eye" data-t="trustEye">Vertrau keiner Behauptung</div>
+    <h2 data-t="trustH">Prüf es nach, bei jeder Lösung, auch bei uns</h2>
+    <p class="lead" data-t-html="trustLead">Fast jedes Schwärzungs-Tool schreibt „läuft lokal“ oder „nichts wird hochgeladen“. Das ist leicht behauptet und selten belegt. Du musst es niemandem glauben, du kannst es in einer Minute prüfen. Diese drei Fragen funktionieren bei <i>jeder</i> Lösung:</p>
+    <div class="trust-grid">
+      <div class="trust-card">
+        <div class="trust-num">1</div>
+        <div class="trust-q" data-t="trustQ1">Kannst du den Code einsehen?</div>
+        <div class="trust-a" data-t="trustA1">Bei geschlossener Software ist „lädt nichts hoch“ eine reine Behauptung. Offener Code lässt sich nachlesen.</div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-num">2</div>
+        <div class="trust-q" data-t="trustQ2">Läuft es ohne Internet weiter?</div>
+        <div class="trust-a" data-t="trustA2">WLAN aus, Tool öffnen. Funktioniert es weiter, kann es nichts hochladen. Braucht es das Netz, wofür eigentlich?</div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-num">3</div>
+        <div class="trust-q" data-t="trustQ3">Bleibt der Netzwerk-Tab leer?</div>
+        <div class="trust-a" data-t="trustA3">F12 drücken, Reiter „Netzwerk“, Datei laden. Siehst du eine Übertragung deines Dokuments? Dann verlässt es dein Gerät.</div>
+      </div>
+    </div>
+    <div class="honest" style="border-left-color:var(--accent)" data-t-html="trustClose"><b>Stell diese Fragen auch uns.</b> Unser Code ist offen, das WLAN darfst du ausschalten, und der Netzwerk-Tab bleibt leer. Wir behaupten Transparenz nicht, wir laden dich ein, sie zu überprüfen.</div>
+  </section>
+
+  <section>
+    <div class="sec-eye" data-t="faqEye">Häufige Fragen</div>
+    <h2 data-t="faqH">Was Leute vor dem ersten Upload fragen</h2>
+    <div class="faq">
+      <div class="item"><p class="q" data-t="q1">Was ist der AI Upload Cleaner?</p><p class="a" data-t="a1">Ein lokales Browser-Werkzeug in einer einzigen HTML-Datei. Es schwärzt, kürzt und bündelt Dokumente, bevor du sie in KI-Tools oder ein Portal hochlädst. Die Schwärzung wird fest in die Pixel gerechnet, der Text darunter ist physisch entfernt. Kein Upload, kein Server, kein Konto.</p></div>
+      <div class="item"><p class="q" data-t="q2">Entfernt ein schwarzer Balken Text aus einem PDF?</p><p class="a" data-t="a2">Nein. Ein Balken in Word oder Acrobat verdeckt den Text nur. Markierst du die Stelle und kopierst sie, ist der Text wieder da. Echte Schwärzung muss den Text aus der Datei entfernen. Hier wird jede Seite zu einem Bild ohne Textebene, und das Werkzeug prüft das Ergebnis vor dem Download selbst nach.</p></div>
+      <div class="item"><p class="q" data-t="q3">Bleibt mein Dokument wirklich lokal?</p><p class="a" data-t="a3">Ja. Alles passiert im Browser, ohne Upload und ohne Netzwerkanfrage. Internet trennen, Datei öffnen, es läuft weiter. Zusätzlich verbietet sich die Datei jede Verbindung selbst, der Browser setzt das durch. Der Quellcode ist offen.</p></div>
+      <div class="item"><p class="q" data-t="q4">Findet das Werkzeug Namen und IBANs automatisch?</p><p class="a" data-t="a4">Es sucht auf Wunsch: Begriff eingeben oder ein Muster wie IBAN, E-Mail oder Telefon wählen, alle Treffer auf allen Seiten ansehen, bestätigen. Von selbst schwärzt es nichts. Bei Scans ohne Textebene funktioniert die Suche nicht, dort zeichnest du Boxen.</p></div>
+      <div class="item"><p class="q" data-t="q5">Kann ich Fotos zu einer PDF zusammenfassen?</p><p class="a" data-t="a5">Ja. Mehrere Fotos oder PDFs hineinziehen, drehen, beschriften, Seiten weglassen, Ausschnitt wählen, als eine PDF speichern. Fotos verlieren dabei ihre EXIF-Daten wie GPS-Position und Kameramodell.</p></div>
+      <div class="item"><p class="q" data-t="q6">Ist der AI Upload Cleaner kostenlos?</p><p class="a" data-t="a6">Ja. Eine einzelne, kostenlose HTML-Datei unter MIT-Lizenz. Keine Installation, kein Konto, keine Internetverbindung nötig. Einmal herunterladen, im Browser öffnen, beliebig oft benutzen.</p></div>
+      <div class="item"><p class="q" data-t="q7">Garantiert das Werkzeug Anonymisierung?</p><p class="a" data-t="a7">Nein. Es schwärzt zuverlässig, was du markierst oder per Suche bestätigst, und prüft das Ergebnis technisch nach. Ob alles Sensible markiert ist, entscheidest du. Ein Hilfsmittel, keine Rechtsberatung.</p></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="row">
+      <div data-t="footL">AI Upload Cleaner · kostenlos · offline · ohne Tracking</div>
+      <div><a href="anleitung.html" data-t="footGuide">Anleitung</a> &nbsp;·&nbsp; <a id="gh2" href="https://github.com/testmanni/ai-upload-cleaner" target="_blank" rel="noopener" data-t="footR">Quellcode und ältere Versionen auf GitHub</a></div>
+    </div>
+    <div class="row" style="margin-top:10px;font-size:12px;opacity:.85">
+      <div data-t="footTech">Version 3.0.0 · MIT-Lizenz · enthält PDF.js, jsPDF, OpenJPEG und einen JBIG2-Decoder · keine Netzwerkanfragen</div>
+    </div>
+    <div class="row" style="margin-top:8px;font-size:12px">
+      <div>
+        <a href="#" id="lnkImpressum" style="color:inherit" data-t="lnkImpressum">Impressum</a>
+        &nbsp;·&nbsp;
+        <a href="#" id="lnkDatenschutz" style="color:inherit" data-t="lnkDatenschutz">Datenschutz</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<div id="legalOverlay" class="overlay">
+  <div class="box">
+    <button id="legalClose" class="close" aria-label="Schließen">×</button>
+    <div id="legalContent"></div>
+  </div>
+</div>
+
+<script>
+// === Selbsttest-Interaktion ===
+const fakeBar=document.getElementById('fakeBar');
+const fakeVerdict=document.getElementById('fakeVerdict');
+const realBar=document.getElementById('realBar');
+const realVerdict=document.getElementById('realVerdict');
+function checkSelection(){
+  const sel=window.getSelection();
+  const txt=sel?sel.toString():'';
+  if(txt&&fakeBar.textContent.replace(/\s/g,'').includes(txt.replace(/\s/g,'').slice(0,6))&&txt.replace(/\s/g,'').length>3){
+    fakeBar.classList.add('revealed');
+    fakeVerdict.textContent=L().fakeReveal;
+  }
+}
+document.addEventListener('selectionchange',checkSelection);
+fakeBar.addEventListener('mouseup',()=>setTimeout(checkSelection,0));
+realBar.addEventListener('mouseup',()=>{realVerdict.textContent=L().realNothing;});
+realBar.addEventListener('touchend',()=>{realVerdict.textContent=L().realNothing;});
+
+// === Sprachen ===
+const TR={
+  de:{
+    eyebrow:'Bevor du es in ChatGPT, Claude oder Copilot lädst',
+    h1:'Dein schwarzer Balken ist <span class="stk">keine</span> Schwärzung.',
+    sub:'Ein schwarzes Rechteck in Word oder Acrobat verdeckt den Text nur. Markier ihn, kopier ihn, und er ist wieder da. Probier es hier aus.',
+    testHead:'Der 10-Sekunden-Selbsttest: markiere beide schwarzen Balken mit der Maus',
+    fakeTitle:'Balken drübergelegt (Word, Acrobat-Markierung)',
+    realTitle:'Mit AI Upload Cleaner geschwärzt',
+    testFoot:'Links liegt echter, markierbarer Text unter dem Balken. Rechts ist er aus den Pixeln entfernt, da ist nichts mehr zu markieren.',
+    fakeReveal:'↑ Text war lesbar. Der Balken schützt nichts.',
+    realNothing:'Nichts markierbar. Der Text ist wirklich weg.',
+    claim:'Der AI Upload Cleaner hilft dir <span class="no">nicht, Daten sicher hochzuladen.</span><br>Er hilft dir, weniger Daten hochzuladen.',
+    openBtn:'Tool jetzt öffnen', dlBtn:'Herunterladen', guideBtn:'Anleitung', ghBtn:'Quellcode auf GitHub',
+    combo:'eine HTML-Datei · kostenlos · Open Source · kein Konto · kein Upload · kein Server · keine Installation',
+    plugH:'Du glaubst uns nicht, dass nichts hochgeladen wird?',
+    plugP:'Zieh das Netzwerkkabel. Der Cleaner läuft weiter. Und falls du dem Kabel nicht traust: Die Datei verbietet sich jede Verbindung selbst, per Content-Security-Policy. Der Browser setzt das durch, egal was im Code steht.',
+    useEye:'Wofür Leute es benutzen',
+    useH:'Ein lokaler Vorbereiter für alles, was du irgendwo hochladen willst.',
+    useLead:'Rechnung, Kontoauszug, Vertrag, Befund, Bewerbung, drei Fotos vom Handy: Reinziehen, Sensibles weg, Überflüssiges weg, eine saubere Datei raus.',
+    u1:'Rechnung für ChatGPT vorbereiten, Kundennummer und IBAN schwärzen',
+    u2:'Kontoauszug anonymisieren: Namen suchen, alle Treffer auf allen Seiten schwärzen',
+    u3:'Drei Handyfotos zu einer PDF machen, ohne Scanner-App und ohne GPS-Daten',
+    u4:'Bewerbungsunterlagen zusammenführen, Seite 4 weglassen',
+    u5:'Nur den einen Absatz aus einem Vertrag exportieren, der Rest bleibt zu Hause',
+    u6:'Befund hochladen, Name und Geburtsdatum durch [Name] und [Datum] ersetzen',
+    u7:'Anhang für den Support vorbereiten, ohne dass die Adresse mitreist',
+    u8:'Screenshot beschneiden und schwärzen, bevor er in den Chat geht',
+    factEye:'Was drinsteckt',
+    f1k:'Wirklich entfernt', f1v:'Jede Seite wird zum Bild, die Schwärzung <b>fest in die Pixel</b> gerechnet. Vor dem Download öffnet das Werkzeug sein Ergebnis selbst und meldet: 0 Textzeichen.',
+    f2k:'Text markieren statt zeichnen', f2v:'Bei PDFs mit Textebene: Text wie im PDF-Viewer markieren, <b>„Auswahl schwärzen“</b>. Die Box sitzt zeilengenau.',
+    f3k:'Suchen und schwärzen', f3v:'Begriff eingeben oder IBAN, E-Mail, Telefon wählen. Alle Treffer auf allen Seiten, <b>du bestätigst</b>, das Werkzeug schwärzt.',
+    f4k:'Weniger hochladen', f4v:'Seiten ausschließen, <b>nur einen Ausschnitt</b> exportieren, Boxen beschriften. Was nicht drin ist, kann nicht abfließen.',
+    f5k:'Handy und Rechner', f5v:'Vollbild-Editor mit Lupe, zwei Finger zoomen, Wort gedrückt halten. <b>Ausweis direkt mobil</b> schwärzen.',
+    f6k:'Eine Datei', f6v:'Eine HTML-Datei, 3,6 MB. <b>Keine Installation</b>, kein Add-on, nichts, was die IT freigeben muss. Die eingebetteten Bibliotheken sind byteidentisch mit den offiziellen Paketen, Prüfsummen liegen bei.',
+    aside:'<b>Übrigens:</b> Drei Fotos vom Handy? Reinziehen, drehen, beschriften, Seiten weglassen, als eine PDF speichern. Dafür installieren andere eine Scanner-App.',
+    honEye:'Ehrlich gesagt',
+    honest:'<b>Was das Werkzeug nicht tut:</b> Es schwärzt nichts von selbst. Es schwärzt, was <i>du</i> markierst oder per Suche bestätigst. Bei Scans und Fotos gibt es keine Textebene, dort bleibt nur das Zeichnen. Die Suchmuster für IBAN, E-Mail und Telefon sind Faustregeln. Verpixeln oder Weichzeichnen gibt es mit Absicht nicht, weil beides bei Text teilweise umkehrbar ist. Sicher ist das Ergebnis erst, wenn du es mit eigenen Augen geprüft hast. Ein Hilfsmittel, keine Rechtsberatung.',
+    trustEye:'Vertrau keiner Behauptung',
+    trustH:'Prüf es nach, bei jeder Lösung, auch bei uns',
+    trustLead:'Fast jedes Schwärzungs-Tool schreibt „läuft lokal“ oder „nichts wird hochgeladen“. Das ist leicht behauptet und selten belegt. Du musst es niemandem glauben, du kannst es in einer Minute prüfen. Diese drei Fragen funktionieren bei <i>jeder</i> Lösung:',
+    trustQ1:'Kannst du den Code einsehen?',
+    trustA1:'Bei geschlossener Software ist „lädt nichts hoch“ eine reine Behauptung. Offener Code lässt sich nachlesen.',
+    trustQ2:'Läuft es ohne Internet weiter?',
+    trustA2:'WLAN aus, Tool öffnen. Funktioniert es weiter, kann es nichts hochladen. Braucht es das Netz, wofür eigentlich?',
+    trustQ3:'Bleibt der Netzwerk-Tab leer?',
+    trustA3:'F12 drücken, Reiter „Netzwerk“, Datei laden. Siehst du eine Übertragung deines Dokuments? Dann verlässt es dein Gerät.',
+    trustClose:'<b>Stell diese Fragen auch uns.</b> Unser Code ist offen, das WLAN darfst du ausschalten, und der Netzwerk-Tab bleibt leer. Wir behaupten Transparenz nicht, wir laden dich ein, sie zu überprüfen.',
+    faqEye:'Häufige Fragen', faqH:'Was Leute vor dem ersten Upload fragen',
+    q1:'Was ist der AI Upload Cleaner?',
+    a1:'Ein lokales Browser-Werkzeug in einer einzigen HTML-Datei. Es schwärzt, kürzt und bündelt Dokumente, bevor du sie in KI-Tools oder ein Portal hochlädst. Die Schwärzung wird fest in die Pixel gerechnet, der Text darunter ist physisch entfernt. Kein Upload, kein Server, kein Konto.',
+    q2:'Entfernt ein schwarzer Balken Text aus einem PDF?',
+    a2:'Nein. Ein Balken in Word oder Acrobat verdeckt den Text nur. Markierst du die Stelle und kopierst sie, ist der Text wieder da. Echte Schwärzung muss den Text aus der Datei entfernen. Hier wird jede Seite zu einem Bild ohne Textebene, und das Werkzeug prüft das Ergebnis vor dem Download selbst nach.',
+    q3:'Bleibt mein Dokument wirklich lokal?',
+    a3:'Ja. Alles passiert im Browser, ohne Upload und ohne Netzwerkanfrage. Internet trennen, Datei öffnen, es läuft weiter. Zusätzlich verbietet sich die Datei jede Verbindung selbst, der Browser setzt das durch. Der Quellcode ist offen.',
+    q4:'Findet das Werkzeug Namen und IBANs automatisch?',
+    a4:'Es sucht auf Wunsch: Begriff eingeben oder ein Muster wie IBAN, E-Mail oder Telefon wählen, alle Treffer auf allen Seiten ansehen, bestätigen. Von selbst schwärzt es nichts. Bei Scans ohne Textebene funktioniert die Suche nicht, dort zeichnest du Boxen.',
+    q5:'Kann ich Fotos zu einer PDF zusammenfassen?',
+    a5:'Ja. Mehrere Fotos oder PDFs hineinziehen, drehen, beschriften, Seiten weglassen, Ausschnitt wählen, als eine PDF speichern. Fotos verlieren dabei ihre EXIF-Daten wie GPS-Position und Kameramodell.',
+    q6:'Ist der AI Upload Cleaner kostenlos?',
+    a6:'Ja. Eine einzelne, kostenlose HTML-Datei unter MIT-Lizenz. Keine Installation, kein Konto, keine Internetverbindung nötig. Einmal herunterladen, im Browser öffnen, beliebig oft benutzen.',
+    q7:'Garantiert das Werkzeug Anonymisierung?',
+    a7:'Nein. Es schwärzt zuverlässig, was du markierst oder per Suche bestätigst, und prüft das Ergebnis technisch nach. Ob alles Sensible markiert ist, entscheidest du. Ein Hilfsmittel, keine Rechtsberatung.',
+    footL:'AI Upload Cleaner · kostenlos · offline · ohne Tracking', footGuide:'Anleitung',
+    footR:'Quellcode und ältere Versionen auf GitHub',
+    footTech:'Version 3.0.0 · MIT-Lizenz · enthält PDF.js, jsPDF, OpenJPEG und einen JBIG2-Decoder · keine Netzwerkanfragen',
+    lnkImpressum:'Impressum', lnkDatenschutz:'Datenschutz',
+    langBtn:'DE / <b style="color:var(--ink)">EN</b>'
+  },
+  en:{
+    eyebrow:'Before you drop it into ChatGPT, Claude or Copilot',
+    h1:'Your black bar is <span class="stk">not</span> redaction.',
+    sub:'A black rectangle in Word or Acrobat only covers the text. Select it, copy it, and it\'s back. Try it right here.',
+    testHead:'The 10-second self-test: select both black bars with your mouse',
+    fakeTitle:'Bar placed on top (Word, Acrobat highlight)',
+    realTitle:'Redacted with AI Upload Cleaner',
+    testFoot:'On the left, real selectable text sits under the bar. On the right it\'s removed from the pixels, there is nothing left to select.',
+    fakeReveal:'↑ Text was readable. The bar protects nothing.',
+    realNothing:'Nothing to select. The text is really gone.',
+    claim:'AI Upload Cleaner doesn\'t help you <span class="no">upload data safely.</span><br>It helps you upload less data.',
+    openBtn:'Open the tool now', dlBtn:'Download', guideBtn:'Guide', ghBtn:'Source on GitHub',
+    combo:'one HTML file · free · open source · no account · no upload · no server · no installation',
+    plugH:'Don\'t believe that nothing is uploaded?',
+    plugP:'Pull the network cable. The cleaner keeps running. And if you don\'t trust the cable: the file forbids itself any connection through a Content Security Policy. The browser enforces it, whatever the code says.',
+    useEye:'What people use it for',
+    useH:'A local preparer for anything you want to upload somewhere.',
+    useLead:'Invoice, bank statement, contract, medical report, job application, three photos from your phone: drag in, sensitive stuff out, superfluous stuff out, one clean file out.',
+    u1:'Prepare an invoice for ChatGPT, redact customer number and IBAN',
+    u2:'Anonymise a bank statement: search the name, redact every hit on every page',
+    u3:'Turn three phone photos into one PDF, no scanner app, no GPS data',
+    u4:'Merge application documents, leave out page 4',
+    u5:'Export only the one paragraph of a contract, the rest stays home',
+    u6:'Upload a medical report with name and birth date replaced by [Name] and [Date]',
+    u7:'Prepare an attachment for support without your address travelling along',
+    u8:'Crop and redact a screenshot before it goes into the chat',
+    factEye:'What\'s inside',
+    f1k:'Really removed', f1v:'Every page becomes an image, the redaction is <b>burned into the pixels</b>. Before the download the tool reopens its own result and reports: 0 text characters.',
+    f2k:'Select text instead of drawing', f2v:'For PDFs with a text layer: select text like in a PDF viewer, <b>"Redact selection"</b>. The box fits the line exactly.',
+    f3k:'Search and redact', f3v:'Enter a term or choose IBAN, email, phone. Every hit on every page, <b>you confirm</b>, the tool redacts.',
+    f4k:'Upload less', f4v:'Exclude pages, export <b>only a crop</b>, label boxes. What isn\'t in the file can\'t leak.',
+    f5k:'Phone and desktop', f5v:'Full-screen editor with loupe, two-finger zoom, press and hold a word. Redact an <b>ID right on your phone</b>.',
+    f6k:'One file', f6v:'One HTML file, 3.6 MB. <b>No installation</b>, no add-on, nothing for IT to approve. The embedded libraries are byte-identical to the official packages, checksums included.',
+    aside:'<b>By the way:</b> three photos from your phone? Drag in, rotate, label, drop pages, save as one PDF. Others install a scanner app for that.',
+    honEye:'Honestly',
+    honest:'<b>What the tool does not do:</b> it redacts nothing on its own. It redacts what <i>you</i> mark or confirm via search. Scans and photos have no text layer, there only drawing works. The search patterns for IBAN, email and phone are rules of thumb. There is no pixelation or blur on purpose, because both are partly reversible for text. The result is safe only once you\'ve checked it with your own eyes. A helper, not legal advice.',
+    trustEye:'Trust no claim',
+    trustH:'Verify it, on any solution, including ours',
+    trustLead:'Almost every redaction tool says "runs locally" or "nothing is uploaded". That is easy to claim and rarely proven. You don\'t have to take anyone\'s word, you can check it in a minute. These three questions work on <i>any</i> solution:',
+    trustQ1:'Can you see the code?',
+    trustA1:'With closed software, "uploads nothing" is a pure claim. Open code can be read.',
+    trustQ2:'Does it keep working offline?',
+    trustA2:'Turn off Wi-Fi, open the tool. If it still works, it cannot upload anything. If it needs the network, what for?',
+    trustQ3:'Does the network tab stay empty?',
+    trustA3:'Press F12, "Network" tab, load a file. Do you see your document being transferred? Then it left your device.',
+    trustClose:'<b>Ask us these questions too.</b> Our code is open, you may switch off Wi-Fi, and the network tab stays empty. We don\'t claim transparency, we invite you to verify it.',
+    faqEye:'FAQ', faqH:'What people ask before the first upload',
+    q1:'What is AI Upload Cleaner?',
+    a1:'A local browser tool in a single HTML file. It redacts, trims and bundles documents before you upload them to AI tools or a portal. The redaction is burned into the pixels, the text underneath is physically removed. No upload, no server, no account.',
+    q2:'Does a black bar remove text from a PDF?',
+    a2:'No. A bar in Word or Acrobat only covers the text. Select the spot and copy it, and the text is back. Real redaction has to remove the text from the file. Here every page becomes an image without a text layer, and the tool verifies the result itself before the download.',
+    q3:'Does my document really stay local?',
+    a3:'Yes. Everything happens in the browser, no upload, no network request. Disconnect the internet, open the file, it keeps working. In addition the file forbids itself any connection and the browser enforces it. The source code is open.',
+    q4:'Does the tool find names and IBANs automatically?',
+    a4:'It searches on request: enter a term or choose a pattern like IBAN, email or phone, review every hit on every page, confirm. It redacts nothing by itself. On scans without a text layer search doesn\'t work, there you draw boxes.',
+    q5:'Can I combine photos into one PDF?',
+    a5:'Yes. Drag in several photos or PDFs, rotate, label, drop pages, choose a crop, save as one PDF. Photos lose their EXIF data such as GPS position and camera model on the way.',
+    q6:'Is AI Upload Cleaner free?',
+    a6:'Yes. A single, free HTML file under the MIT license. No installation, no account, no internet connection needed. Download once, open in the browser, use as often as you like.',
+    q7:'Does the tool guarantee anonymisation?',
+    a7:'No. It reliably redacts what you mark or confirm via search and verifies the result technically. Whether everything sensitive is marked is your call. A helper, not legal advice.',
+    footL:'AI Upload Cleaner · free · offline · no tracking', footGuide:'Guide',
+    footR:'Source and older versions on GitHub',
+    footTech:'Version 3.0.0 · MIT License · includes PDF.js, jsPDF, OpenJPEG and a JBIG2 decoder · no network requests',
+    lnkImpressum:'Legal notice', lnkDatenschutz:'Privacy',
+    langBtn:'<b style="color:var(--ink)">DE</b> / EN'
+  }
+};
+let lang='de';
+function L(){return TR[lang];}
+function apply(){
+  const t=L();
+  document.querySelectorAll('[data-t]').forEach(el=>{const k=el.getAttribute('data-t');if(t[k]!=null)el.textContent=t[k];});
+  document.querySelectorAll('[data-t-html]').forEach(el=>{const k=el.getAttribute('data-t-html');if(t[k]!=null)el.innerHTML=t[k];});
+  document.getElementById('lang').innerHTML=t.langBtn;
+  document.documentElement.lang=lang;
+  fakeVerdict.textContent='';realVerdict.textContent='';fakeBar.classList.remove('revealed');
+}
+document.getElementById('lang').addEventListener('click',()=>{lang=lang==='de'?'en':'de';apply();});
+apply();
+if(!(navigator.language||'de').toLowerCase().startsWith('de')){lang='en';apply();}
+
+// === Impressum / Datenschutz ===
+(function(){
+  var LG={
+    de:{
+      impressum:'<h2 style="margin-top:0">Impressum</h2>'+
+        '<p>Angaben gemäß § 5 DDG</p>'+
+        '<p>Manfred Just<br>Am Ritterskamp 21<br>40489 Düsseldorf<br>Deutschland</p>'+
+        '<p><strong>Kontakt</strong><br>E-Mail: info@just-support.de</p>'+
+        '<p><strong>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</strong><br>Manfred Just, Anschrift wie oben</p>'+
+        '<p><strong>Haftung für Inhalte</strong><br>Die Inhalte dieser Seite wurden mit Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität wird keine Gewähr übernommen.</p>'+
+        '<p><strong>Haftung für Links</strong><br>Diese Seite enthält Links zu externen Websites Dritter, auf deren Inhalte kein Einfluss besteht. Für diese fremden Inhalte wird keine Gewähr übernommen.</p>',
+      datenschutz:'<h2 style="margin-top:0">Datenschutzerklärung</h2>'+
+        '<p><strong>Verantwortlicher</strong><br>Manfred Just, Am Ritterskamp 21, 40489 Düsseldorf, info@just-support.de</p>'+
+        '<p><strong>Das Werkzeug selbst.</strong> Der „AI Upload Cleaner“ läuft vollständig lokal in Ihrem Browser. Die von Ihnen geöffneten Dokumente verlassen Ihr Gerät nicht, werden nicht hochgeladen und nicht gespeichert. Das Werkzeug enthält kein Tracking, keine Cookies und keine Analyse-Werkzeuge und untersagt sich Netzwerkverbindungen zusätzlich selbst über eine Content-Security-Policy.</p>'+
+        '<p><strong>Diese Website (Hosting).</strong> Diese Website wird bei der Host Europe GmbH, Hansestraße 111, 51149 Köln, gehostet. Beim Aufruf der Seite werden durch den Server automatisch Zugriffsdaten in sogenannten Server-Logfiles erfasst (u. a. anonymisierte IP-Adresse, Datum und Uhrzeit, abgerufene Datei, übertragene Datenmenge, Browsertyp). Diese Daten dienen ausschließlich dem sicheren Betrieb der Website und werden nach kurzer Zeit gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO.</p>'+
+        '<p><strong>Auftragsverarbeitung.</strong> Mit dem Hoster besteht ein Vertrag zur Auftragsverarbeitung nach Art. 28 DSGVO.</p>'+
+        '<p><strong>Keine Weitergabe, keine Cookies.</strong> Es werden keine personenbezogenen Daten an Dritte weitergegeben und keine Cookies gesetzt, die über das technisch Notwendige hinausgehen.</p>'+
+        '<p><strong>Ihre Rechte.</strong> Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch sowie ein Beschwerderecht bei einer Datenschutz-Aufsichtsbehörde.</p>'
+    },
+    en:{
+      impressum:'<h2 style="margin-top:0">Legal Notice</h2>'+
+        '<p>Information pursuant to § 5 DDG (German law)</p>'+
+        '<p>Manfred Just<br>Am Ritterskamp 21<br>40489 Düsseldorf<br>Germany</p>'+
+        '<p><strong>Contact</strong><br>Email: info@just-support.de</p>'+
+        '<p><strong>Liability for content</strong><br>The contents of this page were created with care. No guarantee is given for accuracy, completeness or timeliness.</p>'+
+        '<p><strong>Liability for links</strong><br>This page contains links to external third-party websites over whose content we have no influence. No liability is assumed for such external content.</p>',
+      datenschutz:'<h2 style="margin-top:0">Privacy Policy</h2>'+
+        '<p><strong>Controller</strong><br>Manfred Just, Am Ritterskamp 21, 40489 Düsseldorf, Germany, info@just-support.de</p>'+
+        '<p><strong>The tool itself.</strong> The “AI Upload Cleaner” runs entirely locally in your browser. The documents you open never leave your device, are not uploaded and are not stored. The tool contains no tracking, cookies or analytics and additionally forbids itself any network connection through a Content Security Policy.</p>'+
+        '<p><strong>This website (hosting).</strong> This website is hosted by Host Europe GmbH, Hansestraße 111, 51149 Cologne, Germany. When the page is accessed, the server automatically records access data in server log files (including anonymised IP address, date and time, file requested, volume transferred, browser type). This data serves solely the secure operation of the website and is deleted after a short time. The legal basis is Art. 6 (1) (f) GDPR.</p>'+
+        '<p><strong>Data processing agreement.</strong> A data processing agreement pursuant to Art. 28 GDPR exists with the host.</p>'+
+        '<p><strong>No disclosure, no cookies.</strong> No personal data is passed to third parties, and no cookies beyond what is technically necessary are set.</p>'+
+        '<p><strong>Your rights.</strong> You have the right to access, rectification, erasure, restriction of processing, data portability and objection, as well as the right to lodge a complaint with a data protection authority.</p>'
+    }
+  };
+  var ov=document.getElementById('legalOverlay'),ct=document.getElementById('legalContent');
+  function openM(which){ct.innerHTML=LG[lang][which];ov.style.display='block';}
+  function closeM(){ov.style.display='none';}
+  document.getElementById('lnkImpressum').addEventListener('click',function(e){e.preventDefault();openM('impressum');});
+  document.getElementById('lnkDatenschutz').addEventListener('click',function(e){e.preventDefault();openM('datenschutz');});
+  document.getElementById('legalClose').addEventListener('click',closeM);
+  ov.addEventListener('click',function(e){if(e.target===ov)closeM();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeM();});
+})();
+</script>
+</body>
+</html>
