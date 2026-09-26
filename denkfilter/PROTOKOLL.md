@@ -83,3 +83,23 @@ Die Grafiken sind nur deutsch. Die englischen Texte lassen sich daher nur mittel
 9. **Aufnahmeregel, unschärfer als die Grafik:** Die Startseite schreibt „eine tragfähige Quelle vorliegt“. Die Grafik verlangt „eine Primärquelle des Verursachers, einer Behörde oder Prüfstelle, ersatzweise zwei unabhängige Leitmedien“ und dass „alle vier Punkte erfüllt sind“.
 10. **Kennzeichnung:** Die Startseite sagt, neue und geänderte Fälle würden „in jeder Fassung kenntlich gemacht“. Die Grafik beschreibt dafür den Chip „Neu“ und einen Fassungsvergleich. Die vorliegende Vorfälle-Grafik enthält aber weder einen „Neu“-Chip noch einen Fassungsvergleich (vermutlich Erstfassung); die Aussage ist daran derzeit nicht überprüfbar.
 11. **Unterzeile:** Startseite „Was aus Testumgebungen entwich“, Grafik „Was aus *den* Testumgebungen entwich“.
+
+## Nachtrag 26.09.2026: Impressum, Datenschutz, Methodik
+
+- **Quelle:** `denkfilter-methodik-einblender.html`, im Ordner abgelegt. Die Texte wurden per Skript aus dem Objekt `L` der Vorlage übernommen und automatisch auf Wortgleichheit geprüft. Sie stehen in `startseite_daten.py` unter `EINBLENDER`.
+- **Ohne JavaScript:** Die Vorlage öffnet die Einblender per Skript. Das widerspricht der Vorgabe „kein JavaScript“. Umgesetzt ist deshalb eine reine CSS-Lösung über `:target`:
+  - Die Fußlinks zeigen auf `#impressum`, `#datenschutz` und `#methodik`.
+  - Schließen geht über das ×, die Schaltfläche „Schließen“, einen Klick auf den abgedunkelten Hintergrund oder die Zurück-Taste des Browsers.
+  - Die Escape-Taste schließt ohne Skript nicht.
+  - Solange ein Einblender offen ist, scrollt die Seite dahinter nicht.
+- **Sprache:** Die Einblender folgen der DE/EN-Umschaltung. `methodik` hat noch keine englische Fassung. Im EN-Modus erscheint deshalb der deutsche Text mit dem Hinweis „This text is currently available in German only.“
+  - Neu formuliert habe ich nur diesen Hinweis sowie die EN-Linktexte „How a DENKFILTER is made“ und „Close“. „Legal Notice“ und „Privacy Policy“ stammen aus der Vorlage.
+- **Prüfungen:**
+  - Bei 1366, 390 und 320 px lässt sich jeder der drei Einblender öffnen und schließen; es gibt keinen horizontalen Überlauf, das Panel bleibt im Viewport, der Schließen-Knopf misst 44 × 44 px und externe Abrufe gibt es nicht.
+  - Die Tab-Taste führt nach dem Öffnen zuerst auf das ×.
+  - Die Gesamtprüfung bei allen sieben Breiten zeigt 0 Probleme.
+  - Außer den zwei Grafik-Links gibt es als neue Ziele nur `mailto:info@just-support.de` (6×). Das ist kein Abruf; der Generator lässt `mailto:` zu.
+- **Dateigröße:** jetzt 244.553 Byte.
+- **Inhaltlicher Hinweis:**
+  - Die Methodik wiederholt die Aufnahmeregel mit „eine tragfähige Quelle vorliegt“. Die Vorfälle-Grafik ist hier strenger (Primärquelle, ersatzweise zwei unabhängige Leitmedien), siehe Abweichung 9.
+  - Das Impressum spricht von „Links zu externen Websites Dritter“. Die Startseite selbst verlinkt nur auf die beiden Grafiken; deren Quellenlinks sind extern.

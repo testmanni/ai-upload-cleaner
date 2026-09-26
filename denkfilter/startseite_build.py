@@ -251,6 +251,31 @@ def fall(g, werte):
     }
 
 
+SCHLIESSEN = ('<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" '
+              'fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>')
+
+
+def einblender(e):
+    """Impressum, Datenschutz, Methodik: öffnen über #id (:target), schließen über #fuss.
+    Fehlt die englische Fassung, erscheint der deutsche Text mit Hinweis."""
+    ui = D.EINBLENDER_UI
+    if e["en"]:
+        en = '<div class="einblender-text" data-lang="en" lang="en">%s</div>' % e["en"]
+    else:
+        en = ('<div class="einblender-text" data-lang="en" lang="de"><p class="nur-deutsch" lang="en">%s</p>%s</div>'
+              % (ui["nur_deutsch"], e["de"]))
+    return '''<section class="einblender" id="%(id)s" aria-label="%(name)s">
+  <a class="einblender-hinter" href="#fuss" tabindex="-1" aria-hidden="true"></a>
+  <div class="einblender-panel">
+    <a class="einblender-zu" href="#fuss">%(x)s<span class="sr">%(zu)s</span></a>
+    <div class="einblender-text" data-lang="de">%(de)s</div>
+    %(en)s
+    <a class="einblender-knopf" href="#fuss">%(zu)s</a>
+  </div>
+</section>''' % {"id": e["id"], "name": e["link"]["de"], "x": SCHLIESSEN, "de": e["de"], "en": en,
+                  "zu": zwei(ui["schliessen"])}
+
+
 CSS = r'''
 /* ==== Farben: Dunkelblau und Türkis aus den Grafiken, warmer Akzent ==== */
 :root{
@@ -442,7 +467,47 @@ main{display:block}
   .schema-text{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
   .pill{min-width:34px;padding:0 8px}
 }
+/* ==== Einblender: Impressum, Datenschutz, Methodik (ohne Skript, über :target) ==== */
+.fuss-recht{display:flex;flex-wrap:wrap;gap:4px 20px;list-style:none;padding:0;margin-top:18px}
+.fuss-recht a{display:inline-flex;align-items:center;min-height:32px;font-size:14px;font-weight:600;color:var(--muted);text-decoration:underline;
+  text-decoration-color:color-mix(in srgb,var(--muted) 45%,transparent);text-underline-offset:3px}
+.fuss-recht a:hover{color:var(--ink);text-decoration-color:var(--accent)}
+.einblender{display:none;position:fixed;inset:0;z-index:50;overflow-y:auto;overscroll-behavior:contain;padding:48px 20px}
+.einblender:target{display:block;animation:einblenden .2s ease}
+html:has(.einblender:target){overflow:hidden}
+.einblender-hinter{position:fixed;inset:0;background:rgba(10,20,36,.62);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);cursor:default}
+.einblender-panel{position:relative;max-width:760px;margin:0 auto;background:var(--paper);color:var(--ink);border:1px solid var(--line);
+  border-radius:var(--radius);box-shadow:0 30px 80px rgba(0,0,0,.35);padding:40px 44px 34px}
+.einblender-zu{position:absolute;top:14px;right:14px;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:var(--ink);
+  border:1px solid var(--line);background:var(--paper)}
+.einblender-zu:hover{border-color:var(--accent);color:var(--accent-ink)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+.einblender-text{font-size:16px;line-height:1.62;padding-right:36px}
+.einblender-text h2{font-family:var(--display);font-weight:800;font-size:clamp(26px,3vw,34px);line-height:1.1;letter-spacing:-.015em;margin:0 0 18px}
+.einblender-text h3{font-family:var(--display);font-weight:800;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-ink);margin:26px 0 8px}
+.einblender-text p{margin:0 0 12px}
+.einblender-text ul{margin:0 0 12px 20px;padding:0}
+.einblender-text li{margin:0 0 7px;padding-left:2px}
+.einblender-text strong{font-weight:700}
+.einblender-text a{color:var(--accent-ink);font-weight:600;text-underline-offset:3px}
+.einblender-text .tag{display:inline-block;border:1.4px solid var(--ink);border-radius:999px;padding:1px 9px;font-family:var(--display);font-size:12px;
+  line-height:1.5;letter-spacing:.06em;text-transform:uppercase;font-weight:700;vertical-align:1px}
+.einblender-text .tag.offen{border-style:dashed}
+.einblender-text .stand{color:var(--muted);font-size:14px;margin-top:22px;padding-top:14px;border-top:1px solid var(--line)}
+.einblender-text .nur-deutsch{font-size:14px;color:var(--muted);border:1px dashed var(--line);border-radius:10px;padding:8px 12px;margin-bottom:18px}
+.einblender-knopf{display:inline-flex;align-items:center;min-height:44px;padding:0 20px;margin-top:14px;border-radius:999px;background:var(--ink);color:var(--bg);
+  text-decoration:none;font-size:15px;font-weight:700}
+.einblender-knopf:hover{background:var(--accent-ink);color:#fff}
+@keyframes einblenden{from{opacity:0}to{opacity:1}}
+@media (max-width:800px){
+  .einblender{padding:16px 10px}
+  .einblender-panel{padding:28px 20px 24px}
+  .einblender-zu{top:10px;right:10px}
+  .einblender-text{padding-right:34px}
+  .einblender-text h2{padding-right:10px}
+}
 @media (prefers-reduced-motion:reduce){
+  .einblender:target{animation:none}
   html{scroll-behavior:auto}
   *,*:before,*:after{transition:none!important}
 }
@@ -536,14 +601,16 @@ def baue():
 <hr class="linie">
 %(faelle)s
 
-<footer class="fuss">
+<footer class="fuss" id="fuss">
   <div>
     <div class="fuss-marke">DENKFILTER</div>
     %(fuss)s
+    <ul class="fuss-recht">%(recht)s</ul>
   </div>
   <nav aria-label="%(index_label)s"><ul class="fuss-index">%(index)s</ul></nav>
 </footer>
 </main>
+%(einblender)s
 </div>
 </body>
 </html>
@@ -554,6 +621,8 @@ def baue():
         "kicker": S["kicker"], "hero": zwei(S["hero"], tag="p"),
         "hero_stand": zwei(S["hero_stand"], hw), "faelle": "\n".join(faelle),
         "fuss": zwei(S["fuss"], tag="p"), "index_label": S["ui"]["index"], "index": index,
+        "recht": "".join('<li><a href="#%s">%s</a></li>' % (e["id"], zwei(e["link"])) for e in D.EINBLENDER),
+        "einblender": "\n".join(einblender(e) for e in D.EINBLENDER),
     }
     pruefe(seite, schriften)
     with open(ZIEL, "w", encoding="utf-8") as f:
@@ -584,6 +653,8 @@ def pruefe(seite, schriften):
         fehler("src-Attribut gefunden; alles muss inline sein.")
     ids = set(re.findall(r'\sid="([^"]+)"', seite))
     for ziel in re.findall(r'href="([^"]+)"', seite):
+        if ziel.startswith("mailto:"):
+            continue
         if ziel.startswith("#"):
             if ziel[1:] not in ids:
                 fehler("Anker %s existiert nicht." % ziel)
