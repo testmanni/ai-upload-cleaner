@@ -29,6 +29,20 @@ WLAN ausschalten und es trotzdem benutzen – das ist der Beweis, dass nichts ho
 - Das Werkzeug findet sensible Stellen **nicht** selbst. Es schwärzt nur, was du markierst. Die Prüfung bleibt bei dir – eine Checkliste vor dem Export erinnert an typische Stellen.
 - Es garantiert keine vollständige Anonymisierung. Prüfe das Ergebnis nach dem Export selbst mit dem Strg+C-Test.
 
+## Version 4.0 (Datei `ai-upload-cleaner4.0.html`)
+
+Alles aus der 3.0, dazu **Texterkennung (OCR) für Scans und Fotos**, vollständig offline:
+
+- Ein Knopf „Texterkennung“ erkennt den Text auf Seiten ohne Textebene (Scans, Fotos, Bild-PDFs). Danach funktionieren **Text markieren** und **Suchen und schwärzen** (auch IBAN, E-Mail, Telefon) dort genauso wie bei PDFs mit Textebene. Das Text-Werkzeug startet die Erkennung bei Bedarf selbst, das Suchfeld bietet sie an.
+- Sprache: Deutsch (Tesseract-Modell `deu`, schnelle Variante). Zahlen, IBANs, E-Mail-Adressen und die meisten englischen Wörter werden damit ebenfalls erkannt; für englische Fließtexte wäre ein zweites Modell nötig.
+- Die Erkennung ist eine Näherung. Boxen aus OCR bekommen einen größeren Sicherheitsrand (30 % der Zeilenhöhe), das Werkzeug zeigt die mittlere Sicherheit der Erkennung an und sagt dazu, dass man nach dem Schwärzen hinsehen muss. Erkannter Text landet nie im Export; der bleibt ein Bild, die Prüfung nach dem Export bleibt gleich.
+- Läuft in einem eigenen Worker aus eingebettetem Code. WebAssembly-Kern (Tesseract 5, SIMD) und Sprachmodell werden dem Worker per Nachricht übergeben, nichts wird aus dem Netz geladen. Die Content-Security-Policy ist unverändert (`connect-src 'none'`).
+- Größe: rund 9,4 MB (3.0: 3,6 MB). Braucht WebAssembly-SIMD: Chrome ab 91, Firefox ab 89, Safari ab 16.4; sonst bleibt der Knopf verborgen und alles andere funktioniert wie in der 3.0.
+- Gemessen in Chromium am Rechner: drei A4-Scanseiten in unter 3 Sekunden. Am Handy dauert es länger; die Erkennung zeigt den Fortschritt je Seite und lässt sich abbrechen.
+- Nach dem Drehen einer Seite bleibt das OCR-Ergebnis gültig, die Textschicht dreht mit.
+
+Nachprüfen der eingebetteten Bibliotheken: `python3 build/libs.py verify ai-upload-cleaner4.0.html`.
+
 ## Version 3.0 (Datei `ai-upload-cleaner3.0.html`)
 
 Alles aus der 2.0, dazu:
@@ -65,13 +79,14 @@ Unterstützte Browser laut PDF.js-Legacy-Build: Chrome ab 125, Firefox ESR, Safa
 | `ai-upload-cleaner.html` | das Werkzeug, Version 1.0 (einzelne Datei, offline) |
 | `ai-upload-cleaner2.0.html` | das Werkzeug, Version 2.0 (siehe oben) |
 | `ai-upload-cleaner3.0.html` | das Werkzeug, Version 3.0 (siehe oben) |
-| `build/libs.py` | prüft oder erneuert die in 2.0 und 3.0 eingebetteten Bibliotheken |
+| `ai-upload-cleaner4.0.html` | das Werkzeug, Version 4.0 mit Texterkennung (siehe oben) |
+| `build/libs.py` | prüft oder erneuert die in 2.0, 3.0 und 4.0 eingebetteten Bibliotheken |
 | `build/CHECKSUMS.txt` | Herkunft und SHA-256-Prüfsummen der eingebetteten Bibliotheken und der Werkzeugdateien |
 | `index.html` | Startseite mit interaktivem Selbsttest, verlinkt Werkzeug 3.0 und Anleitung |
 | `anleitung.html` | kurze Bedienungsanleitung |
 | `LICENSE` | MIT-Lizenz dieses Projekts |
 | `NOTICE` | Übersicht der enthaltenen Drittanbieter-Software |
-| `THIRD-PARTY-LICENSES.txt` | vollständige Lizenztexte von PDF.js und jsPDF |
+| `THIRD-PARTY-LICENSES.txt` | vollständige Lizenztexte aller eingebetteten Bibliotheken |
 | `licenses/` | unveränderte Original-Lizenzdateien der Bibliotheken |
 
 ## Lizenz
@@ -85,5 +100,9 @@ Es bündelt zwei quelloffene Bibliotheken:
 Version 2.0 bettet zusätzlich zwei WebAssembly-Decoder aus dem PDF.js-Paket ein:
 - **OpenJPEG** (JPEG 2000) – BSD 2-Clause
 - **PDFium-JBIG2-Decoder** – BSD 3-Clause
+
+Version 4.0 bettet für die Texterkennung zusätzlich ein:
+- **Tesseract.js** und **tesseract.js-core** (Tesseract OCR als WebAssembly, mit Leptonica, libjpeg, libpng, libtiff, libwebp, giflib, zlib, OpenLibm) – Apache License 2.0 und weitere permissive Lizenzen
+- **Sprachmodell** `deu.traineddata` aus tessdata_fast – Apache License 2.0
 
 Vollständige Lizenztexte in `THIRD-PARTY-LICENSES.txt` und im Ordner `licenses/`.

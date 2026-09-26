@@ -23,3 +23,16 @@ Zusatz für AI Upload Cleaner ab Version 2.0 (ai-upload-cleaner2.0.html, ai-uplo
   Wrapper: Mozilla Foundation, Apache License 2.0), BSD 3-Clause
 
 Prüfsummen und Herkunft: build/CHECKSUMS.txt
+
+Zusatz für AI Upload Cleaner ab Version 4.0 (ai-upload-cleaner4.0.html), Texterkennung:
+
+- Tesseract.js 7.0.0 (https://github.com/naptha/tesseract.js), Apache License 2.0
+- tesseract.js-core 6.1.2 (https://github.com/naptha/tesseract.js-core), Apache License 2.0;
+  WebAssembly-Kern mit Tesseract OCR (Apache License 2.0), Leptonica (BSD 2-Clause),
+  libjpeg (IJG License), libpng (PNG Reference Library License), libtiff (libtiff License),
+  libwebp (BSD 3-Clause), giflib (MIT License), zlib (zlib License), OpenLibm (MIT License u. a.)
+- Sprachmodell deu.traineddata aus tesseract-ocr/tessdata_fast 4.1.0, Apache License 2.0
+
+This software is based in part on the work of the Independent JPEG Group.
+
+Prüfsummen und Herkunft: build/CHECKSUMS.txt; Lizenztexte: THIRD-PARTY-LICENSES.txt und licenses/

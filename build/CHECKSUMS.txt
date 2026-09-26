@@ -1,15 +1,23 @@
-AI Upload Cleaner: Herkunft und Prüfsummen der eingebetteten Bibliotheken (ab Version 2.0)
-Quelle: registry.npmjs.org, Tarball-Integrität laut Register geprüft.
+AI Upload Cleaner: Herkunft und Prüfsummen der eingebetteten Bibliotheken (ab Version 2.0; Texterkennung ab 4.0)
+Quelle: registry.npmjs.org (Tarball-Integrität laut Register geprüft) und das tessdata_fast-Repository von tesseract-ocr.
 Nachprüfen ohne Netz: python3 build/libs.py verify <datei>.html
 
 Tarball pdfjs-dist-6.3.289.tgz  integrity=sha512-ZHjSVpDa3D6izMq8/04lvkhkATUmL9px6ChPaXc1k6nU2Mrhlg1/7F0bdUqCwUjw3NsPTfPZsMDUU6ZIcRaeQw==
 Tarball jspdf-4.2.1.tgz  integrity=sha512-YyAXyvnmjTbR4bHQRLzex3CuINCDlQnBqoSYyjJwTP2x9jDLuKDzy7aKUl0hgx3uhcl7xzg32agn5vlie6HIlQ==
+Tarball tesseract.js-7.0.0.tgz  integrity=sha512-exPBkd+z+wM1BuMkx/Bjv43OeLBxhL5kKWsz/9JY+DXcXdiBjiAch0V49QR3oAJqCaL5qURE0vx9Eo+G5YE7mA==
+Tarball tesseract.js-core-6.1.2.tgz  integrity=sha512-pv4GjmramjdObhDyR1q85Td8X60Puu/lGQn7Kw2id05LLgHhAcWgnz6xSdMCSxBMWjQDmMyDXPTC2aqADdpiow==
+Datei https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/4.1.0/deu.traineddata  sha256=19d219bbb6672c869d20a9636c6816a81eb9a71796cb93ebe0cb1530e2cdb22d
 
-lib-pdf              pdfjs-dist@6.3.289    package/legacy/build/pdf.min.mjs     sha256=f401927e692efc7735e0cd528c490d0dd31b7f0972c122b7040df805be45cce4  Apache-2.0
+lib-pdf              pdfjs-dist@6.3.289    package/legacy/build/pdf.min.mjs sha256=f401927e692efc7735e0cd528c490d0dd31b7f0972c122b7040df805be45cce4  Apache-2.0
 lib-pdfworker        pdfjs-dist@6.3.289    package/legacy/build/pdf.worker.min.mjs sha256=a33cfe728c584fdba4fcc1fd54bcdc2f9f2f13889ddbb5b2bd1d0f8cbe49b84e  Apache-2.0
-lib-wasm-openjpeg    pdfjs-dist@6.3.289    package/wasm/openjpeg.wasm           sha256=004a0e62db930ba9ff2a22212f4554d0bb57a0635a8287caf70f98117cee14ba  BSD-2-Clause (OpenJPEG)
-lib-wasm-jbig2       pdfjs-dist@6.3.289    package/wasm/jbig2.wasm              sha256=e6bee67724a7b5436fe8162638e3708cfc8d52b6342db69a49715e30ff27cfdc  BSD-3-Clause (PDFium JBIG2)
-lib-jspdf            jspdf@4.2.1      package/dist/jspdf.umd.min.js        sha256=e6551fcdc32f09d6853b2c5126d18d01d9447e0da618a41a11ebeee0f6c20d54  MIT
+lib-wasm-openjpeg    pdfjs-dist@6.3.289    package/wasm/openjpeg.wasm     sha256=004a0e62db930ba9ff2a22212f4554d0bb57a0635a8287caf70f98117cee14ba  BSD-2-Clause (OpenJPEG)
+lib-wasm-jbig2       pdfjs-dist@6.3.289    package/wasm/jbig2.wasm        sha256=e6bee67724a7b5436fe8162638e3708cfc8d52b6342db69a49715e30ff27cfdc  BSD-3-Clause (PDFium JBIG2)
+lib-jspdf            jspdf@4.2.1      package/dist/jspdf.umd.min.js       sha256=e6551fcdc32f09d6853b2c5126d18d01d9447e0da618a41a11ebeee0f6c20d54  MIT
+lib-tessworker       tesseract.js@7.0.0      package/dist/worker.min.js   sha256=576b7df7e3393e137e51849357c9adb53fe7ac1bb69bfa06cf3d61520f182c6d  Apache-2.0
+lib-tesscore         tesseract.js-core@6.1.2      package/tesseract-core-simd-lstm.js sha256=be3504705d7111d1d1f3f7f9dff326c26d334031ede36e31c4d3cf883027e982  Apache-2.0
+lib-tesscore-wasm    tesseract.js-core@6.1.2      package/tesseract-core-simd-lstm.wasm sha256=187d76742dfc0d8929f0b49a619f145bb6370730776c7bd0d3e20c6b2098808d  Apache-2.0 (Tesseract), BSD-2-Clause (Leptonica) u. a., siehe THIRD-PARTY-LICENSES.txt
+lib-ocr-deu          tesseract-ocr/tessdata_fast, Tag 4.1.0, deu.traineddata sha256=19d219bbb6672c869d20a9636c6816a81eb9a71796cb93ebe0cb1530e2cdb22d  Apache-2.0
 
 ai-upload-cleaner2.0.html  sha256=dd8e3c8e0089833644c5c005c8138a626931e6a1bc88cc1d0b4db5463379e7cc
 ai-upload-cleaner3.0.html  sha256=3a90df3df493691c88099fd39f8c5f72505d630252c2f61fc095d3da0eee5be5
+ai-upload-cleaner4.0.html  sha256=069118eb7f00f9e2795eae6a4765b840b77a58cebda1e7292b31cb0a636f4b9c
