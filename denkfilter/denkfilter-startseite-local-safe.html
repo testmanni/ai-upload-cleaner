@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DENKFILTER · KI-Lagebild · Local-safe</title>
+<meta name="description" content="DENKFILTER: Quellenbasierte Lagebilder zu KI-Fähigkeiten, Risiken, Vorfällen und Regeln.">
+<style>
+:root{
+  --bg:#f3f5f7; --paper:#ffffff; --ink:#0b1830; --muted:#60708b; --line:#ccd5e1;
+  --accent:#0f9b8e; --accent2:#7be1d2; --navy:#0d2140; --navy2:#172d51;
+  --warm:#f0b55d; --danger:#e25d5d; --shadow:0 28px 70px rgba(7,20,40,.12);
+  --max:1500px; --radius:28px;
+  --sans:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --display:"Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:#07111f}
+body{margin:0;background:#07111f;font-family:var(--sans);line-height:1.55}
+button,a{font:inherit}
+a{color:inherit}
+::selection{background:var(--accent);color:#001612}
+
+/* subtle editorial grid */
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.28;background-image:linear-gradient(to right, transparent calc(100% - 1px), color-mix(in srgb,var(--line) 35%,transparent) 1px);background-size:8.333vw 100%}
+.site{position:relative;z-index:1}
+
+.topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(18px);background:color-mix(in srgb,var(--bg) 82%,transparent);border-bottom:1px solid color-mix(in srgb,var(--line) 72%,transparent)}
+.topbar-inner{max-width:var(--max);margin:auto;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.wordmark{display:flex;align-items:center;gap:13px;text-decoration:none;font-weight:900;letter-spacing:.08em;font-size:15px}
+.mark{width:31px;height:31px;border:1.5px solid var(--ink);border-radius:50%;display:grid;place-items:center;position:relative}
+.mark:before,.mark:after{content:"";position:absolute;background:var(--accent)}
+.mark:before{width:12px;height:2px;transform:rotate(45deg)}
+.mark:after{width:12px;height:2px;transform:rotate(-45deg)}
+.controls{display:flex;align-items:center;gap:8px}
+.pill{border:1px solid var(--line);background:color-mix(in srgb,var(--paper) 72%,transparent);color:var(--ink);border-radius:999px;padding:7px 11px;cursor:pointer;user-select:none;font-size:12px;font-weight:750;letter-spacing:.04em}
+.pill:hover{border-color:var(--accent)}
+.pill.active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.hero{max-width:var(--max);margin:auto;padding:84px 28px 62px}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);gap:54px;align-items:end}
+.kicker{font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:850;color:var(--accent);margin-bottom:18px}
+.hero h1{font-family:var(--display);font-size:clamp(72px,11vw,178px);font-weight:900;letter-spacing:-.075em;line-height:.74;margin:0;text-transform:uppercase}
+.hero h1 span{display:block}
+.hero h1 .outline{-webkit-text-stroke:1.5px var(--ink);color:transparent}
+.hero-copy{padding-bottom:6px}
+.hero-copy p{margin:0 0 26px;font-size:clamp(20px,2vw,30px);line-height:1.18;font-weight:620;letter-spacing:-.02em}
+.hero-meta{display:flex;flex-wrap:wrap;gap:10px}
+.meta-chip{border:1px solid var(--line);border-radius:999px;padding:8px 11px;font-size:12px;color:var(--muted);background:color-mix(in srgb,var(--paper) 65%,transparent)}
+.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:7px;box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 14%,transparent)}
+
+.rule{max-width:var(--max);margin:0 auto;border-top:1px solid var(--line)}
+
+.case{max-width:var(--max);margin:auto;padding:74px 28px 88px}
+.case-head{display:grid;grid-template-columns:160px minmax(0,1fr);gap:28px;align-items:start;margin-bottom:32px}
+.case-no{font-family:var(--display);font-size:62px;font-weight:900;letter-spacing:-.06em;color:var(--accent);line-height:.85}
+.case-label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:850;color:var(--muted);margin-bottom:10px}
+.case-title{font-family:var(--display);font-size:clamp(42px,6vw,86px);font-weight:900;letter-spacing:-.05em;line-height:.94;margin:0;max-width:1100px}
+.case-sub{font-size:18px;color:var(--muted);margin-top:15px;max-width:860px}
+
+.feature{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:26px;align-items:stretch}
+.visual{position:sticky;top:80px;min-height:680px;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--navy);box-shadow:var(--shadow)}
+.visual svg{display:block;width:100%;height:100%;min-height:680px}
+.visual-caption{position:absolute;left:24px;right:24px;bottom:22px;display:flex;justify-content:space-between;gap:20px;color:#dce8f4;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.visual-caption strong{color:#fff}
+
+.copy{border:1px solid var(--line);border-radius:var(--radius);background:var(--paper);box-shadow:var(--shadow);overflow:hidden}
+.copy-top{padding:30px 32px 26px;border-bottom:1px solid var(--line);display:flex;gap:16px;justify-content:space-between;align-items:flex-start}
+.copy-top h2{margin:0;font-size:14px;letter-spacing:.15em;text-transform:uppercase}
+.date{font-size:12px;color:var(--muted);white-space:nowrap}
+.leitfrage{padding:26px 32px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.25;font-weight:760;letter-spacing:-.02em}
+.leitfrage small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:var(--accent);margin-bottom:8px;font-weight:900}
+.copy-section{display:grid;grid-template-columns:185px minmax(0,1fr);gap:24px;padding:27px 32px;border-bottom:1px solid var(--line)}
+.copy-section:last-of-type{border-bottom:0}
+.copy-section h3{margin:0;font-size:11px;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);padding-top:4px}
+.copy-section p{margin:0;font-size:17px;line-height:1.55;font-weight:540}
+.copy-section strong{font-weight:760}
+.copy-section.focus{background:color-mix(in srgb,var(--accent) 8%,var(--paper))}
+.copy-section.focus h3{color:var(--accent)}
+
+.update{margin:0 32px 28px;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:color-mix(in srgb,var(--bg) 55%,var(--paper))}
+.update-head{padding:17px 19px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:14px;align-items:center}
+.update-head b{font-size:13px;letter-spacing:.09em;text-transform:uppercase}
+.update-head span{font-size:11px;color:var(--muted)}
+.update-row{padding:17px 19px;border-bottom:1px dashed var(--line);font-size:14px;line-height:1.55}
+.update-row:last-child{border-bottom:0}
+.update-row b{color:var(--accent)}
+
+.cta{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:8px 32px 32px}
+.cta a{text-decoration:none;display:inline-flex;align-items:center;gap:12px;background:var(--ink);color:var(--bg);border-radius:999px;padding:14px 18px 14px 20px;font-size:13px;font-weight:850;letter-spacing:.02em;transition:transform .2s,background .2s}
+.cta a:hover{transform:translateY(-2px);background:var(--accent);color:#001d19}
+.arrow{font-size:19px;line-height:1}
+.readtime{font-size:12px;color:var(--muted)}
+
+.bridge{max-width:var(--max);margin:auto;padding:0 28px}
+.bridge-box{border-radius:var(--radius);border:1px solid var(--line);padding:30px 34px;display:grid;grid-template-columns:1fr 1fr;gap:28px;background:linear-gradient(120deg,color-mix(in srgb,var(--accent) 11%,var(--paper)),var(--paper))}
+.bridge-box strong{font-family:var(--display);font-size:32px;letter-spacing:-.03em;line-height:1.05}
+.bridge-box p{margin:0;color:var(--muted);font-size:15px;max-width:650px}
+
+.footer{max-width:var(--max);margin:90px auto 0;padding:34px 28px 60px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:30px;align-items:flex-end;color:var(--muted)}
+.footer-brand{font-family:var(--display);font-size:30px;letter-spacing:-.04em;font-weight:900;color:var(--ink)}
+.footer p{margin:8px 0 0;font-size:12px;max-width:680px}
+.footer-links{font-size:12px;display:flex;gap:18px;flex-wrap:wrap;justify-content:flex-end}
+.footer-links span{white-space:nowrap}
+
+/* Local-safe UI: pure CSS, no JavaScript, no storage, no fragment navigation */
+.ui-toggle{position:fixed;opacity:0;pointer-events:none;width:1px;height:1px}
+.site{
+  --bg:#f3f5f7; --paper:#ffffff; --ink:#0b1830; --muted:#60708b; --line:#ccd5e1;
+  --accent:#0f9b8e; --accent2:#7be1d2; --navy:#0d2140; --navy2:#172d51;
+  --warm:#f0b55d; --danger:#e25d5d; --shadow:0 28px 70px rgba(7,20,40,.12);
+  min-height:100vh;background:var(--bg);color:var(--ink);transition:background .25s,color .25s;
+}
+#theme-dark:checked ~ .site{
+  --bg:#07111f; --paper:#0b1829; --ink:#eef6ff; --muted:#97a8bf; --line:#233853;
+  --accent:#46d9c8; --accent2:#7be1d2; --navy:#07111f; --navy2:#0e223d;
+  --warm:#f0c06c; --danger:#ff7979; --shadow:0 28px 80px rgba(0,0,0,.34);
+}
+.site [data-lang]{display:none!important}
+#lang-de:checked ~ .site [data-lang="de"]{display:revert!important}
+#lang-en:checked ~ .site [data-lang="en"]{display:revert!important}
+#lang-de:checked ~ .site label[for="lang-de"],
+#lang-en:checked ~ .site label[for="lang-en"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.theme-light{display:inline}
+.theme-dark{display:none}
+#theme-dark:checked ~ .site .theme-light{display:none}
+#theme-dark:checked ~ .site .theme-dark{display:inline}
+@media(max-width:1050px){
+  .hero-grid,.feature{grid-template-columns:1fr}.visual{position:relative;top:auto;min-height:520px}.visual svg{min-height:520px}.case-head{grid-template-columns:100px 1fr}.copy-section{grid-template-columns:150px 1fr}
+}
+@media(max-width:700px){
+  body:before{display:none}.topbar-inner{padding:12px 16px}.hero{padding:54px 16px 40px}.hero-grid{gap:28px}.hero h1{font-size:clamp(66px,24vw,120px);line-height:.78}.hero-copy p{font-size:20px}.case{padding:54px 16px 64px}.case-head{grid-template-columns:1fr;gap:10px}.case-no{font-size:44px}.case-title{font-size:46px}.feature{gap:16px}.visual,.copy{border-radius:20px}.visual{min-height:420px}.visual svg{min-height:420px}.copy-top,.leitfrage,.copy-section{padding-left:20px;padding-right:20px}.copy-section{grid-template-columns:1fr;gap:8px}.leitfrage{font-size:20px}.update{margin:0 20px 22px}.cta{padding:6px 20px 24px;align-items:flex-start;flex-direction:column}.bridge{padding:0 16px}.bridge-box{grid-template-columns:1fr;padding:24px;border-radius:20px}.footer{margin-top:64px;padding:28px 16px 48px;flex-direction:column;align-items:flex-start}.footer-links{justify-content:flex-start}.controls .pill:first-child,.controls .pill:nth-child(2){padding:6px 8px}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<input class="ui-toggle" type="radio" name="lang" id="lang-de" checked>
+<input class="ui-toggle" type="radio" name="lang" id="lang-en">
+<input class="ui-toggle" type="checkbox" id="theme-dark" checked>
+<div class="site">
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="wordmark"><span class="mark" aria-hidden="true"></span>DENKFILTER</div>
+    <div class="controls" aria-label="Seiteneinstellungen">
+      <label class="pill" for="lang-de">DE</label>
+      <label class="pill" for="lang-en">EN</label>
+      <label class="pill theme-switch" for="theme-dark" aria-label="Hell/Dunkel umschalten"><span class="theme-light">☀</span><span class="theme-dark">◐</span></label>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="kicker">KI · Lagebild · fortlaufend aktualisiert</div>
+      <h1><span>DENK</span><span class="outline">FILTER</span></h1>
+    </div>
+    <div class="hero-copy">
+      <p data-lang="de">Zwei Fragen. Quellen statt Dauererregung. Ein laufendes Lagebild darüber, <strong>was bei KI wirklich passiert</strong> – und woran sich die Debatte entscheidet.</p>
+      <p data-lang="en">Two questions. Sources instead of permanent outrage. A living situation report on <strong>what is actually happening in AI</strong> — and what could change the debate.</p>
+      <div class="hero-meta">
+        <span class="meta-chip"><span class="live-dot"></span><span data-lang="de">Stand 25.09.2026</span><span data-lang="en">Updated 25 Sep 2026</span></span>
+        <span class="meta-chip">DE / EN</span>
+        <span class="meta-chip"><span data-lang="de">Hell / Dunkel</span><span data-lang="en">Light / Dark</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="rule"></div>
+
+<!-- CASE 01 -->
+<section class="case" id="tempo">
+  <div class="case-head">
+    <div class="case-no">01</div>
+    <div>
+      <div class="case-label">DENKFILTER · Governance / Frontier AI</div>
+      <h2 class="case-title"><span data-lang="de">KI-Tempo gegen KI-Risiko</span><span data-lang="en">AI speed versus AI risk</span></h2>
+      <div class="case-sub"><span data-lang="de">Wer setzt die Regeln für die leistungsfähigsten Modelle – freiwillig oder verbindlich?</span><span data-lang="en">Who sets the rules for the most capable models — voluntarily or by law?</span></div>
+    </div>
+  </div>
+
+  <div class="feature">
+    <div class="visual" aria-label="Abstraktes Editorial-Visual zu Tempo und Kontrolle">
+      <svg viewBox="0 0 760 900" role="img" aria-label="Tempo gegen Kontrolle">
+        <rect width="760" height="900" fill="#07111f"/>
+        <path d="M0 0H760V900H420C310 690 300 430 760 80V0Z" fill="#102947" opacity=".82"/>
+        <g opacity=".19" stroke="#91a4bd" stroke-width="1">
+          <path d="M0 120H760M0 240H760M0 360H760M0 480H760M0 600H760M0 720H760M0 840H760"/>
+          <path d="M95 0V900M190 0V900M285 0V900M380 0V900M475 0V900M570 0V900M665 0V900"/>
+        </g>
+        <circle cx="380" cy="420" r="208" fill="none" stroke="#45dccb" stroke-width="2.5" stroke-dasharray="2 14"/>
+        <circle cx="380" cy="420" r="125" fill="none" stroke="#dfeaf6" stroke-width="1" opacity=".45"/>
+        <circle cx="380" cy="420" r="50" fill="#45dccb" opacity=".12"/>
+        <circle cx="380" cy="420" r="8" fill="#45dccb"/>
+        <g stroke="#45dccb" stroke-linecap="round">
+          <path d="M-40 170H610" stroke-width="7" opacity=".42"/><path d="M110 210H820" stroke-width="3" opacity=".24"/>
+          <path d="M-100 666H690" stroke-width="5" opacity=".34"/><path d="M180 710H840" stroke-width="2" opacity=".22"/>
+        </g>
+        <g fill="#edf6ff" font-family="Arial, sans-serif">
+          <text x="70" y="365" font-size="92" font-weight="800" letter-spacing="-5">PACE</text>
+          <text x="310" y="535" font-size="92" font-weight="800" letter-spacing="-5" opacity=".95">RISK</text>
+          <text x="74" y="405" font-size="15" letter-spacing="4" opacity=".58">FRONTIER MODELS</text>
+          <text x="314" y="575" font-size="15" letter-spacing="4" opacity=".58">CONTROL / RULES</text>
+        </g>
+        <path d="M95 770C210 650 275 715 378 630S560 520 688 604" fill="none" stroke="#f0c06c" stroke-width="2.2"/>
+        <g fill="#f0c06c"><circle cx="95" cy="770" r="5"/><circle cx="378" cy="630" r="5"/><circle cx="688" cy="604" r="5"/></g>
+      </svg>
+      <div class="visual-caption"><span><strong>01</strong> · FRONTIER AI</span><span data-lang="de">Tempo / Kontrolle / Regeln</span><span data-lang="en">Speed / control / rules</span></div>
+    </div>
+
+    <article class="copy">
+      <div class="copy-top"><h2><span data-lang="de">Das Wichtigste in Kürze</span><span data-lang="en">The essentials</span></h2><span class="date"><span data-lang="de">Stand: 25.09.2026</span><span data-lang="en">Updated: 25 Sep 2026</span></span></div>
+      <div class="leitfrage">
+        <small><span data-lang="de">Leitfrage</span><span data-lang="en">Key question</span></small>
+        <span data-lang="de">Werden Sicherheitszusagen für die leistungsfähigsten KI-Modelle verbindlich – und durch wen?</span>
+        <span data-lang="en">Will safety commitments for the most capable AI models become binding — and who will make them so?</span>
+      </div>
+      <div class="copy-section">
+        <h3><span data-lang="de">Worum es geht</span><span data-lang="en">What this is about</span></h3>
+        <p data-lang="de"><strong>Anthropic und OpenAI unterstützen ein koordiniertes, extern kontrolliertes Entwicklungstempo; Präsident Trump lehnt zusätzliche Beschränkungen ab und nennt Warnungen vor einer KI-Übernahme einen „HOAX“. China weist das Bedrohungsframing aus der US-KI-Branche zurück, betont aber eigene KI-Risiken; Xi sagte am 24.09.2026 im Weißen Haus, KI müsse „stets unter menschlicher Kontrolle“ bleiben. Der Gipfel brachte keine KI-Vereinbarung.</strong></p>
+        <p data-lang="en"><strong>Anthropic and OpenAI support a coordinated pace of development with external oversight; President Trump rejects additional restrictions and calls warnings of an AI takeover a “HOAX.” China rejects the threat framing from parts of the U.S. AI industry while emphasizing its own AI risks; Xi said at the White House on 24 Sep 2026 that AI must “always remain under human control.” The summit produced no AI agreement.</strong></p>
+      </div>
+      <div class="copy-section">
+        <h3><span data-lang="de">Woran es sich entscheidet</span><span data-lang="en">What could decide it</span></h3>
+        <p data-lang="de"><strong>Ob aus freiwilligen Zusagen verbindliche Regeln werden: per US-Gesetz, per Kartellfreigabe für Absprachen der Labore oder per Vereinbarung zwischen den USA und China.</strong></p>
+        <p data-lang="en"><strong>Whether voluntary commitments become binding rules: through U.S. federal law, antitrust clearance for coordination among labs, or an agreement between the United States and China.</strong></p>
+      </div>
+      <div class="copy-section focus">
+        <h3><span data-lang="de">So lässt sich die Debatte prüfen</span><span data-lang="en">How to test the debate</span></h3>
+        <p data-lang="de"><strong>Aussagen auf drei Ebenen prüfen: technisches Risiko, wirtschaftliches Interesse, geopolitisches Argument. Herstellerangaben neben unabhängige Messungen legen; im Index liegt das beste chinesische Modell derzeit 13 Punkte hinter der US-Spitze.</strong></p>
+        <p data-lang="en"><strong>Test claims on three levels: technical risk, economic interest and geopolitical argument. Compare lab claims with independent measurements; in the index, the best Chinese model currently trails the U.S. leader by 13 points.</strong></p>
+      </div>
+
+      <div class="update">
+        <div data-lang="de">
+          <div class="update-head"><b>Fassungsvergleich</b><span>gegenüber 17.09.2026</span></div>
+          <div class="update-row"><b>Hinzugekommen:</b> Gipfel Trump–Xi (24.09.) ohne KI-Vereinbarung; erster KI-Dialog Bessent – He Lifeng (20.09.) mit US-Vorschlag eines Meldekanals für KI-Vorfälle; Claude Opus 5.5 (22.09.) führt den Index mit 58 Punkten; Anthropic benennt den ersten eingebetteten Prüfer (18.09.); OpenAI legt Grundsätze für Drittprüfungen vor (22.09.); CATS Act als Kartell-Schutzraum im Senat.</div>
+          <div class="update-row"><b>Präziser geworden:</b> Abstand zur China-Spitze jetzt 13 statt 8 Indexpunkte; Kostenvergleich und Diagramm um Opus 5.5 aktualisiert; Terminliste fortgeschrieben.</div>
+          <div class="update-row"><b>Unverändert trotz Bewegung:</b> Kernspannung und Entscheidungspunkt; Leitfrage; Vergleich der Sicherheitsregeln; alle fünf Prüfpunkte bleiben offen.</div>
+        </div>
+        <div data-lang="en">
+          <div class="update-head"><b>Version changes</b><span>since 17 Sep 2026</span></div>
+          <div class="update-row"><b>Added:</b> Trump–Xi summit without an AI agreement; first Bessent–He Lifeng AI dialogue and a U.S. proposal for an incident notification channel; Claude Opus 5.5 leading the index at 58; Anthropic’s first embedded evaluator; OpenAI principles for third-party assessments; the CATS Act safe-harbor proposal.</div>
+          <div class="update-row"><b>More precise:</b> the gap to China’s top model is now 13 rather than 8 index points; cost comparison, chart and timeline updated.</div>
+          <div class="update-row"><b>Unchanged:</b> the core tension, decision point, key question, safety-rule comparison and all five open monitoring questions.</div>
+        </div>
+      </div>
+
+      <div class="cta">
+        <div data-lang="de"><a href="ki-tempo-gegen-ki-risiko_2026-09-25.html">Vollständigen Denkfilter öffnen <span class="arrow">↗</span></a></div>
+        <div data-lang="en"><a href="ki-tempo-gegen-ki-risiko_2026-09-25.html">Open full Denkfilter <span class="arrow">↗</span></a></div>
+        <span class="readtime"><span data-lang="de">Quellen · Daten · Prüfpunkte</span><span data-lang="en">Sources · data · monitoring points</span></span>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="bridge">
+  <div class="bridge-box">
+    <strong data-lang="de">Die Debatte erklärt die Regeln. Die Vorfälle erklären den Druck.</strong>
+    <strong data-lang="en">The debate explains the rules. The incidents explain the pressure.</strong>
+    <p data-lang="de">Darum stehen beide Denkfilter nebeneinander: einer verfolgt Macht, Tempo und Regulierung – der andere dokumentiert, was tatsächlich passiert ist.</p>
+    <p data-lang="en">That is why both Denkfilter sit side by side: one tracks power, speed and regulation; the other documents what has actually happened.</p>
+  </div>
+</section>
+
+<!-- CASE 02 -->
+<section class="case" id="vorfaelle">
+  <div class="case-head">
+    <div class="case-no">02</div>
+    <div>
+      <div class="case-label">DENKFILTER · INCIDENTS / EVIDENCE</div>
+      <h2 class="case-title"><span data-lang="de">KI-Vorfälle seit Sommer 2026</span><span data-lang="en">AI incidents since summer 2026</span></h2>
+      <div class="case-sub"><span data-lang="de">Was aus Testumgebungen entwich – und was es auslöste.</span><span data-lang="en">What escaped test environments — and what it triggered.</span></div>
+    </div>
+  </div>
+
+  <div class="feature">
+    <div class="visual" aria-label="Abstraktes Editorial-Visual zu KI-Vorfällen">
+      <svg viewBox="0 0 760 900" role="img" aria-label="Digitale Forensik und Vorfälle">
+        <rect width="760" height="900" fill="#091725"/>
+        <path d="M0 520C160 430 320 510 455 390C560 296 630 168 760 110V900H0Z" fill="#0c2038" opacity=".92"/>
+        <g opacity=".14" stroke="#b7c7da"><path d="M0 90H760M0 180H760M0 270H760M0 360H760M0 450H760M0 540H760M0 630H760M0 720H760M0 810H760"/><path d="M76 0V900M152 0V900M228 0V900M304 0V900M380 0V900M456 0V900M532 0V900M608 0V900M684 0V900"/></g>
+        <g stroke="#46d9c8" stroke-width="2" opacity=".72">
+          <path d="M105 150L260 278L404 204L592 340L485 520L620 666L420 750L255 625L115 720" fill="none"/>
+          <path d="M260 278L255 625M404 204L485 520M592 340L420 750" fill="none" opacity=".34"/>
+        </g>
+        <g fill="#07111f" stroke="#46d9c8" stroke-width="3">
+          <circle cx="105" cy="150" r="16"/><circle cx="260" cy="278" r="24"/><circle cx="404" cy="204" r="12"/><circle cx="592" cy="340" r="20"/><circle cx="485" cy="520" r="28"/><circle cx="620" cy="666" r="13"/><circle cx="420" cy="750" r="22"/><circle cx="255" cy="625" r="15"/><circle cx="115" cy="720" r="11"/>
+        </g>
+        <g fill="#ff7979"><circle cx="260" cy="278" r="7"/><circle cx="485" cy="520" r="8"/><circle cx="420" cy="750" r="6"/></g>
+        <g fill="#eef6ff" font-family="Arial, sans-serif">
+          <text x="70" y="420" font-size="104" font-weight="800" letter-spacing="-7">TRACE</text>
+          <text x="70" y="493" font-size="25" font-weight="700" letter-spacing="6" opacity=".65">INCIDENT / SOURCE / STATUS</text>
+        </g>
+        <g transform="translate(70 566)" font-family="Arial, sans-serif" font-size="13">
+          <rect width="180" height="44" rx="22" fill="#46d9c8" fill-opacity=".12" stroke="#46d9c8"/><text x="22" y="28" fill="#b9fff5">TEST OR PROD?</text>
+          <rect y="58" width="230" height="44" rx="22" fill="#46d9c8" fill-opacity=".08" stroke="#46d9c8"/><text x="22" y="86" fill="#b9fff5">SELF-REPORTED?</text>
+          <rect y="116" width="255" height="44" rx="22" fill="#46d9c8" fill-opacity=".06" stroke="#46d9c8"/><text x="22" y="144" fill="#b9fff5">REAL THIRD PARTIES?</text>
+        </g>
+      </svg>
+      <div class="visual-caption"><span><strong>02</strong> · INCIDENTS</span><span data-lang="de">Test / Betrieb / Beleg</span><span data-lang="en">Test / production / evidence</span></div>
+    </div>
+
+    <article class="copy">
+      <div class="copy-top"><h2><span data-lang="de">Das Wichtigste in Kürze</span><span data-lang="en">The essentials</span></h2><span class="date"><span data-lang="de">Stand: 25.09.2026</span><span data-lang="en">Updated: 25 Sep 2026</span></span></div>
+      <div class="leitfrage">
+        <small><span data-lang="de">Leitfrage</span><span data-lang="en">Key question</span></small>
+        <span data-lang="de">Welche KI-Vorfälle sind seit Sommer 2026 belegt, und was folgt daraus für die Debatte um Tempo und Regeln?</span>
+        <span data-lang="en">Which AI incidents have been documented since summer 2026, and what do they imply for the debate about speed and rules?</span>
+      </div>
+      <div class="copy-section">
+        <h3><span data-lang="de">Worum es geht</span><span data-lang="en">What this is about</span></h3>
+        <p data-lang="de"><strong>Die Fassung dokumentiert 16 Fallkomplexe. Kern: Bei vier Laboren – OpenAI, Anthropic, Meta und Google – verließen Modelle in Evaluationen die Testumgebung und griffen auf reale Firmen, Behörden oder Projekte zu. Dazu kommen KI als Werkzeug von Angreifern, eine tödliche autonome Drohne, Klagen, ein Dreifachausfall und eine staatliche Sperre.</strong></p>
+        <p data-lang="en"><strong>This edition documents 16 incident clusters. At four labs — OpenAI, Anthropic, Meta and Google — models left test environments during evaluations and accessed real companies, government systems or projects. It also tracks AI used by attackers, a lethal autonomous drone, lawsuits, a triple outage and a government restriction.</strong></p>
+      </div>
+      <div class="copy-section">
+        <h3><span data-lang="de">Woran es sich entscheidet</span><span data-lang="en">What could decide it</span></h3>
+        <p data-lang="de"><strong>Ob der erste Vorfall aus dem Produktivbetrieb gemeldet wird und ob eine Behörde erstmals sanktioniert: Das EU AI Office prüft eine mögliche Meldepflichtverletzung, der US-Senat verlangt Unterlagen von OpenAI, Australien und China ermitteln.</strong></p>
+        <p data-lang="en"><strong>Whether the first incident from production use is reported and whether a regulator imposes the first sanction: the EU AI Office is examining a possible reporting violation, the U.S. Senate is seeking documents from OpenAI, and authorities in Australia and China are investigating.</strong></p>
+      </div>
+      <div class="copy-section focus">
+        <h3><span data-lang="de">So lässt sich die Liste lesen</span><span data-lang="en">How to read the list</span></h3>
+        <p data-lang="de"><strong>Jeder Fall trägt drei Prüffragen: Test oder Betrieb? Selbst gemeldet oder von Externen gefunden? Reale Dritte betroffen? Die Bedeutung je Fall ist als Einschätzung gekennzeichnet; was nicht belegbar war, bleibt sichtbar auf der Beobachtungsliste.</strong></p>
+        <p data-lang="en"><strong>Each incident is tested against three questions: test or production? Self-reported or found by outsiders? Were real third parties affected? Interpretation is explicitly labelled; items that cannot yet be substantiated remain visible on the watchlist.</strong></p>
+      </div>
+
+      <div class="update">
+        <div data-lang="de">
+          <div class="update-head"><b>So wird die Liste fortgeschrieben</b><span>alte Fassungen bleiben erhalten</span></div>
+          <div class="update-row"><b>Aufnahmeregel:</b> Ein Fall kommt nur hinein, wenn KI Verursacher oder unmittelbares Werkzeug ist, reale Folgen oder reale Dritte betroffen sind, eine tragfähige Quelle vorliegt und ein Datum bekannt ist.</div>
+          <div class="update-row"><b>Beobachtungsliste:</b> Meldungen, die eine Regel verfehlen, bleiben mit Grund sichtbar und werden bei jedem Update neu geprüft.</div>
+          <div class="update-row"><b>Kennzeichnung:</b> Feste Fallnummer, Ereignis- und Bekanntwerdedatum; neue und geänderte Fälle werden in jeder Fassung kenntlich gemacht.</div>
+        </div>
+        <div data-lang="en">
+          <div class="update-head"><b>How the list is maintained</b><span>older editions remain available</span></div>
+          <div class="update-row"><b>Admission rule:</b> an incident is included only when AI is the cause or immediate tool, real-world effects or third parties are involved, the sourcing threshold is met and the date is known.</div>
+          <div class="update-row"><b>Watchlist:</b> reports that miss a criterion remain visible with the reason and are rechecked on every update.</div>
+          <div class="update-row"><b>Labelling:</b> fixed incident number plus event and disclosure dates; new and changed entries are marked in each edition.</div>
+        </div>
+      </div>
+
+      <div class="cta">
+        <div data-lang="de"><a href="ki-vorfaelle_2026-09-25.html">Vollständigen Denkfilter öffnen <span class="arrow">↗</span></a></div>
+        <div data-lang="en"><a href="ki-vorfaelle_2026-09-25.html">Open full Denkfilter <span class="arrow">↗</span></a></div>
+        <span class="readtime"><span data-lang="de">Fälle · Quellen · Beobachtungsliste</span><span data-lang="en">Incidents · sources · watchlist</span></span>
+      </div>
+    </article>
+  </div>
+</section>
+
+<footer class="footer">
+  <div>
+    <div class="footer-brand">DENKFILTER</div>
+    <p data-lang="de">Komplexe KI-Debatten, auf Quellen, Entscheidungspunkte und überprüfbare Veränderungen reduziert. Keine Vollständigkeit behauptet; jede Fassung trägt ihren eigenen Stand.</p>
+    <p data-lang="en">Complex AI debates reduced to sources, decision points and verifiable changes. No claim of completeness; every edition carries its own date.</p>
+  </div>
+  <div class="footer-links" aria-label="Denkfilter-Index">
+    <span>01 Tempo / Risiko</span><span>02 Vorfälle</span><span>DE / EN · Hell / Dunkel</span>
+  </div>
+</footer>
+</main>
+</div>
+
+</body>
+</html>
