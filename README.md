@@ -29,7 +29,11 @@ WLAN ausschalten und es trotzdem benutzen – das ist der Beweis, dass nichts ho
 - Das Werkzeug findet sensible Stellen **nicht** selbst. Es schwärzt nur, was du markierst. Die Prüfung bleibt bei dir – eine Checkliste vor dem Export erinnert an typische Stellen.
 - Es garantiert keine vollständige Anonymisierung. Prüfe das Ergebnis nach dem Export selbst mit dem Strg+C-Test.
 
-## Version 6.0 (Datei `ai-upload-cleaner6.0.html`)
+## Beta: Versionen 4.0 bis 6.0
+
+Die Versionen 4.0, 5.0 und 6.0 sind Beta. Sie sind in Chromium geprüft (Rechner und Handy-Emulation), aber nicht auf echten iPhones und Android-Geräten und nicht mit Scans aus der Praxis (schiefe Handyfotos, schwacher Kontrast, Handschrift). Die 3.0 bleibt die empfohlene stabile Version und ist die Datei, auf die Startseite und Anleitung zeigen. Wer eine Beta nutzt: Ergebnis nach dem Export immer selbst prüfen, Fehler bitte an die Adresse im Impressum melden.
+
+## Version 6.0 (Datei `ai-upload-cleaner6.0.html`, Beta)
 
 Alles aus der 5.0, dazu zwei Prüfhilfen. Nichts Neues ist eingebettet, die Datei bleibt rund 15,3 MB.
 
@@ -40,7 +44,7 @@ Alles aus der 5.0, dazu zwei Prüfhilfen. Nichts Neues ist eingebettet, die Date
 
 Nachprüfen der eingebetteten Bibliotheken: `python3 build/libs.py verify ai-upload-cleaner6.0.html`.
 
-## Version 5.0 (Datei `ai-upload-cleaner5.0.html`)
+## Version 5.0 (Datei `ai-upload-cleaner5.0.html`, Beta)
 
 Alles aus der 4.0, dazu **Englisch als zweite Sprache der Texterkennung**:
 
@@ -52,7 +56,7 @@ Alles aus der 4.0, dazu **Englisch als zweite Sprache der Texterkennung**:
 
 Nachprüfen der eingebetteten Bibliotheken: `python3 build/libs.py verify ai-upload-cleaner5.0.html`.
 
-## Version 4.0 (Datei `ai-upload-cleaner4.0.html`)
+## Version 4.0 (Datei `ai-upload-cleaner4.0.html`, Beta)
 
 Alles aus der 3.0, dazu **Texterkennung (OCR) für Scans und Fotos**, vollständig offline:
 
@@ -102,9 +106,9 @@ Unterstützte Browser laut PDF.js-Legacy-Build: Chrome ab 125, Firefox ESR, Safa
 | `ai-upload-cleaner.html` | das Werkzeug, Version 1.0 (einzelne Datei, offline) |
 | `ai-upload-cleaner2.0.html` | das Werkzeug, Version 2.0 (siehe oben) |
 | `ai-upload-cleaner3.0.html` | das Werkzeug, Version 3.0 (siehe oben) |
-| `ai-upload-cleaner4.0.html` | das Werkzeug, Version 4.0 mit Texterkennung Deutsch (siehe oben) |
-| `ai-upload-cleaner5.0.html` | das Werkzeug, Version 5.0 mit Texterkennung Deutsch und Englisch (siehe oben) |
-| `ai-upload-cleaner6.0.html` | das Werkzeug, Version 6.0 mit Fundstellenliste und Prüftext (siehe oben) |
+| `ai-upload-cleaner4.0.html` | Beta: Version 4.0 mit Texterkennung Deutsch (siehe oben) |
+| `ai-upload-cleaner5.0.html` | Beta: Version 5.0 mit Texterkennung Deutsch und Englisch (siehe oben) |
+| `ai-upload-cleaner6.0.html` | Beta: Version 6.0 mit Fundstellenliste und Prüftext (siehe oben) |
 | `build/libs.py` | prüft oder erneuert die ab 2.0 eingebetteten Bibliotheken |
 | `build/CHECKSUMS.txt` | Herkunft und SHA-256-Prüfsummen der eingebetteten Bibliotheken und der Werkzeugdateien |
 | `index.html` | Startseite mit interaktivem Selbsttest, verlinkt Werkzeug 3.0 und Anleitung |
