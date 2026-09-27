@@ -29,6 +29,17 @@ WLAN ausschalten und es trotzdem benutzen – das ist der Beweis, dass nichts ho
 - Das Werkzeug findet sensible Stellen **nicht** selbst. Es schwärzt nur, was du markierst. Die Prüfung bleibt bei dir – eine Checkliste vor dem Export erinnert an typische Stellen.
 - Es garantiert keine vollständige Anonymisierung. Prüfe das Ergebnis nach dem Export selbst mit dem Strg+C-Test.
 
+## Version 6.0 (Datei `ai-upload-cleaner6.0.html`)
+
+Alles aus der 5.0, dazu zwei Prüfhilfen. Nichts Neues ist eingebettet, die Datei bleibt rund 15,3 MB.
+
+- **Fundstellenliste.** Im Suchfeld gibt es den Modus „Alle Muster“: IBAN, E-Mail, Telefon und SSN/NI in einem Durchgang über alle Seiten, als Liste mit Muster, Text und Seite und einem Knopf „schwärzen“ je Treffer. Treffer, die schon unter einer Box liegen, sind als „geschwärzt“ markiert und werden von „Alle schwärzen“ übersprungen. Das gilt auch für die einzelnen Muster und die Textsuche.
+- **Prüftext.** Der Knopf „🧾 Prüftext“ zeigt den Text aller Seiten, wie ihn das Werkzeug kennt: aus der PDF-Textebene oder aus der Texterkennung, je Seite mit Angabe der Quelle (bei OCR mit Sicherheit in Prozent). Wörter unter einer Box oder außerhalb des Ausschnitts stehen als ████, ausgeschlossene Seiten ohne Inhalt. So liest man das Dokument so, wie es ein Empfänger sähe. Ein Filterfeld sucht nach Namen, Nummern oder @; ein Schalter zeigt die geschwärzten Wörter auf Wunsch an. „Fundstellen prüfen“ springt in die Fundstellenliste.
+- **TXT nur auf ausdrücklichen Klick.** „Als TXT speichern“ fragt nach und warnt: Die Datei enthält Klartext, und Download-Ordner werden oft automatisch in eine Cloud gesichert. Der Dateiname lautet `pruefung_nicht_hochladen.txt`. Ohne Klick verlässt nichts den Browser.
+- Grenzen, ehrlich: Die Reihenfolge des Textes folgt der PDF-Textebene, bei Tabellen und Spalten ist das nicht die Lesereihenfolge. Scans ohne Texterkennung liefern nichts. Ob ein Wort „unter einer Box“ liegt, wird über seine Position in der Textschicht geprüft; bei OCR ist die eine Näherung.
+
+Nachprüfen der eingebetteten Bibliotheken: `python3 build/libs.py verify ai-upload-cleaner6.0.html`.
+
 ## Version 5.0 (Datei `ai-upload-cleaner5.0.html`)
 
 Alles aus der 4.0, dazu **Englisch als zweite Sprache der Texterkennung**:
@@ -93,6 +104,7 @@ Unterstützte Browser laut PDF.js-Legacy-Build: Chrome ab 125, Firefox ESR, Safa
 | `ai-upload-cleaner3.0.html` | das Werkzeug, Version 3.0 (siehe oben) |
 | `ai-upload-cleaner4.0.html` | das Werkzeug, Version 4.0 mit Texterkennung Deutsch (siehe oben) |
 | `ai-upload-cleaner5.0.html` | das Werkzeug, Version 5.0 mit Texterkennung Deutsch und Englisch (siehe oben) |
+| `ai-upload-cleaner6.0.html` | das Werkzeug, Version 6.0 mit Fundstellenliste und Prüftext (siehe oben) |
 | `build/libs.py` | prüft oder erneuert die ab 2.0 eingebetteten Bibliotheken |
 | `build/CHECKSUMS.txt` | Herkunft und SHA-256-Prüfsummen der eingebetteten Bibliotheken und der Werkzeugdateien |
 | `index.html` | Startseite mit interaktivem Selbsttest, verlinkt Werkzeug 3.0 und Anleitung |
