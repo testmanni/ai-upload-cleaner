@@ -29,6 +29,18 @@ WLAN ausschalten und es trotzdem benutzen – das ist der Beweis, dass nichts ho
 - Das Werkzeug findet sensible Stellen **nicht** selbst. Es schwärzt nur, was du markierst. Die Prüfung bleibt bei dir – eine Checkliste vor dem Export erinnert an typische Stellen.
 - Es garantiert keine vollständige Anonymisierung. Prüfe das Ergebnis nach dem Export selbst mit dem Strg+C-Test.
 
+## Version 5.0 (Datei `ai-upload-cleaner5.0.html`)
+
+Alles aus der 4.0, dazu **Englisch als zweite Sprache der Texterkennung**:
+
+- Auswahl neben dem Knopf „Texterkennung“: Deutsch, Englisch oder Deutsch + Englisch. Vorbelegt nach der Sprache des Browsers. Beide Modelle liegen in der Datei, gewechselt wird ohne Neuladen. „Deutsch + Englisch“ lässt Tesseract je Wort das bessere Modell wählen und dauert entsprechend länger.
+- Das Werkzeug merkt sich je Seite, mit welcher Sprache erkannt wurde, und zeigt es an. Erneut erkennen ersetzt das Ergebnis.
+- Das Telefonmuster kennt jetzt auch internationale Nummern mit ein- bis dreistelliger Vorwahl (+1, +44, +49), US-Schreibweisen wie „(415) 555-0123“, „415-555-0123“ und „415.555.0123“ sowie UK-Nummern.
+- Neues Muster „US-SSN / UK-NI“: US Social Security Numbers („123-45-6789“) und UK National Insurance Numbers („AB 12 34 56 C“). Wie alle Muster eine Faustregel, jeder Treffer wird bestätigt.
+- Größe: rund 15,3 MB (4.0: 9,4 MB), der Unterschied ist das englische Modell.
+
+Nachprüfen der eingebetteten Bibliotheken: `python3 build/libs.py verify ai-upload-cleaner5.0.html`.
+
 ## Version 4.0 (Datei `ai-upload-cleaner4.0.html`)
 
 Alles aus der 3.0, dazu **Texterkennung (OCR) für Scans und Fotos**, vollständig offline:
@@ -79,8 +91,9 @@ Unterstützte Browser laut PDF.js-Legacy-Build: Chrome ab 125, Firefox ESR, Safa
 | `ai-upload-cleaner.html` | das Werkzeug, Version 1.0 (einzelne Datei, offline) |
 | `ai-upload-cleaner2.0.html` | das Werkzeug, Version 2.0 (siehe oben) |
 | `ai-upload-cleaner3.0.html` | das Werkzeug, Version 3.0 (siehe oben) |
-| `ai-upload-cleaner4.0.html` | das Werkzeug, Version 4.0 mit Texterkennung (siehe oben) |
-| `build/libs.py` | prüft oder erneuert die in 2.0, 3.0 und 4.0 eingebetteten Bibliotheken |
+| `ai-upload-cleaner4.0.html` | das Werkzeug, Version 4.0 mit Texterkennung Deutsch (siehe oben) |
+| `ai-upload-cleaner5.0.html` | das Werkzeug, Version 5.0 mit Texterkennung Deutsch und Englisch (siehe oben) |
+| `build/libs.py` | prüft oder erneuert die ab 2.0 eingebetteten Bibliotheken |
 | `build/CHECKSUMS.txt` | Herkunft und SHA-256-Prüfsummen der eingebetteten Bibliotheken und der Werkzeugdateien |
 | `index.html` | Startseite mit interaktivem Selbsttest, verlinkt Werkzeug 3.0 und Anleitung |
 | `anleitung.html` | kurze Bedienungsanleitung |
@@ -104,5 +117,7 @@ Version 2.0 bettet zusätzlich zwei WebAssembly-Decoder aus dem PDF.js-Paket ein
 Version 4.0 bettet für die Texterkennung zusätzlich ein:
 - **Tesseract.js** und **tesseract.js-core** (Tesseract OCR als WebAssembly, mit Leptonica, libjpeg, libpng, libtiff, libwebp, giflib, zlib, OpenLibm) – Apache License 2.0 und weitere permissive Lizenzen
 - **Sprachmodell** `deu.traineddata` aus tessdata_fast – Apache License 2.0
+
+Version 5.0 bettet zusätzlich das englische Sprachmodell `eng.traineddata` aus tessdata_fast ein (Apache License 2.0).
 
 Vollständige Lizenztexte in `THIRD-PARTY-LICENSES.txt` und im Ordner `licenses/`.

@@ -4,14 +4,15 @@ Eingebettete Bibliotheken des AI Upload Cleaner (ab 2.0) prüfen oder aktualisie
 
 Das Werkzeug ist eine einzelne HTML-Datei. PDF.js, jsPDF und zwei WebAssembly-Decoder liegen
 darin als Base64 in <script type="application/octet-stream">-Blöcken; die 4.0 enthält zusätzlich
-Tesseract.js (Worker, WebAssembly-Kern) und das deutsche Sprachmodell für die Texterkennung.
+Tesseract.js (Worker, WebAssembly-Kern) und das deutsche Sprachmodell für die Texterkennung,
+die 5.0 dazu das englische Sprachmodell.
 Dieses Skript stellt sicher, dass diese Blöcke byteidentisch mit den offiziellen Quellen sind
 (npm-Pakete bzw. das tessdata_fast-Repository von tesseract-ocr).
 
     python3 build/libs.py verify ai-upload-cleaner4.0.html
         Entpackt jeden eingebetteten Block, berechnet SHA-256 und vergleicht mit den
         hier festgeschriebenen Prüfsummen. Braucht kein Netz. Exit-Code 0 = alles identisch.
-        Blöcke, die es nur in der 4.0 gibt, gelten in 2.0 und 3.0 als "nicht enthalten".
+        Blöcke, die es nur in 4.0 oder 5.0 gibt, gelten in älteren Dateien als "nicht enthalten".
 
     python3 build/libs.py update ai-upload-cleaner4.0.html [--tarball-dir VERZEICHNIS]
         Lädt die festgeschriebenen Paketversionen von registry.npmjs.org (Tarball gegen die
@@ -39,7 +40,7 @@ REGISTRY = "https://registry.npmjs.org"
 # Festgeschriebene Versionen und SHA-256-Prüfsummen der eingebetteten Dateien.
 # Stand: 25.09.2026 (PDF.js, jsPDF) und 26.09.2026 (Tesseract.js, Sprachmodell), berechnet aus den
 # npm-Tarballs bzw. der heruntergeladenen Datei (Tarball-Integrität laut registry.npmjs.org: siehe CHECKSUMS.txt).
-# "optional": True kennzeichnet Blöcke, die nur in der 4.0 vorkommen (Texterkennung).
+# "optional": True kennzeichnet Blöcke, die erst ab 4.0 bzw. 5.0 vorkommen (Texterkennung).
 PINS = {
     # Das "legacy"-Build enthält Polyfills und deckt laut PDF.js-Build (gulpfile, ENV_TARGETS)
     # Chrome >= 125, Firefox ESR, Safari >= 18 und die jeweils letzten zwei Versionen ab.
@@ -88,11 +89,18 @@ PINS = {
         "sha256": "187d76742dfc0d8929f0b49a619f145bb6370730776c7bd0d3e20c6b2098808d",
         "license": "Apache-2.0 (Tesseract), BSD-2-Clause (Leptonica) u. a., siehe THIRD-PARTY-LICENSES.txt", "optional": True,
     },
-    # Sprachmodell Deutsch, schnelle Variante (tessdata_fast), festgeschrieben auf den Git-Tag 4.1.0.
+    # Sprachmodelle, schnelle Variante (tessdata_fast), festgeschrieben auf den Git-Tag 4.1.0.
+    # Deutsch ab 4.0, Englisch ab 5.0.
     "lib-ocr-deu": {
         "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/4.1.0/deu.traineddata",
         "origin": "tesseract-ocr/tessdata_fast, Tag 4.1.0, deu.traineddata",
         "sha256": "19d219bbb6672c869d20a9636c6816a81eb9a71796cb93ebe0cb1530e2cdb22d",
+        "license": "Apache-2.0", "optional": True,
+    },
+    "lib-ocr-eng": {
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/4.1.0/eng.traineddata",
+        "origin": "tesseract-ocr/tessdata_fast, Tag 4.1.0, eng.traineddata",
+        "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
         "license": "Apache-2.0", "optional": True,
     },
 }

@@ -7,6 +7,7 @@ Tarball jspdf-4.2.1.tgz  integrity=sha512-YyAXyvnmjTbR4bHQRLzex3CuINCDlQnBqoSYyj
 Tarball tesseract.js-7.0.0.tgz  integrity=sha512-exPBkd+z+wM1BuMkx/Bjv43OeLBxhL5kKWsz/9JY+DXcXdiBjiAch0V49QR3oAJqCaL5qURE0vx9Eo+G5YE7mA==
 Tarball tesseract.js-core-6.1.2.tgz  integrity=sha512-pv4GjmramjdObhDyR1q85Td8X60Puu/lGQn7Kw2id05LLgHhAcWgnz6xSdMCSxBMWjQDmMyDXPTC2aqADdpiow==
 Datei https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/4.1.0/deu.traineddata  sha256=19d219bbb6672c869d20a9636c6816a81eb9a71796cb93ebe0cb1530e2cdb22d
+Datei https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/4.1.0/eng.traineddata  sha256=7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2
 
 lib-pdf              pdfjs-dist@6.3.289    package/legacy/build/pdf.min.mjs sha256=f401927e692efc7735e0cd528c490d0dd31b7f0972c122b7040df805be45cce4  Apache-2.0
 lib-pdfworker        pdfjs-dist@6.3.289    package/legacy/build/pdf.worker.min.mjs sha256=a33cfe728c584fdba4fcc1fd54bcdc2f9f2f13889ddbb5b2bd1d0f8cbe49b84e  Apache-2.0
@@ -17,7 +18,9 @@ lib-tessworker       tesseract.js@7.0.0      package/dist/worker.min.js   sha256
 lib-tesscore         tesseract.js-core@6.1.2      package/tesseract-core-simd-lstm.js sha256=be3504705d7111d1d1f3f7f9dff326c26d334031ede36e31c4d3cf883027e982  Apache-2.0
 lib-tesscore-wasm    tesseract.js-core@6.1.2      package/tesseract-core-simd-lstm.wasm sha256=187d76742dfc0d8929f0b49a619f145bb6370730776c7bd0d3e20c6b2098808d  Apache-2.0 (Tesseract), BSD-2-Clause (Leptonica) u. a., siehe THIRD-PARTY-LICENSES.txt
 lib-ocr-deu          tesseract-ocr/tessdata_fast, Tag 4.1.0, deu.traineddata sha256=19d219bbb6672c869d20a9636c6816a81eb9a71796cb93ebe0cb1530e2cdb22d  Apache-2.0
+lib-ocr-eng          tesseract-ocr/tessdata_fast, Tag 4.1.0, eng.traineddata sha256=7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2  Apache-2.0
 
 ai-upload-cleaner2.0.html  sha256=dd8e3c8e0089833644c5c005c8138a626931e6a1bc88cc1d0b4db5463379e7cc
 ai-upload-cleaner3.0.html  sha256=3a90df3df493691c88099fd39f8c5f72505d630252c2f61fc095d3da0eee5be5
 ai-upload-cleaner4.0.html  sha256=069118eb7f00f9e2795eae6a4765b840b77a58cebda1e7292b31cb0a636f4b9c
+ai-upload-cleaner5.0.html  sha256=f4a6d497975295d7c0f6d6a95ebd090eddc6cde6612cf3491dad2a07b15be9be

@@ -158,7 +158,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ==============================================================================
-ZUSATZ FÜR AI UPLOAD CLEANER AB VERSION 4.0 (ai-upload-cleaner4.0.html)
+ZUSATZ FÜR AI UPLOAD CLEANER AB VERSION 4.0 (ai-upload-cleaner4.0.html, ai-upload-cleaner5.0.html)
 ==============================================================================
 
 Die Version 4.0 enthält zusätzlich eine Texterkennung (OCR). Dafür sind eingebettet,
@@ -710,7 +710,7 @@ are under the LGPL.
 >   02111-1307 USA.
 
 ------------------------------------------------------------------------------
-15) Sprachmodell deu.traineddata (tessdata_fast 4.1.0)
+15) Sprachmodelle deu.traineddata (ab 4.0) und eng.traineddata (ab 5.0), tessdata_fast 4.1.0
 ------------------------------------------------------------------------------
 Projekt:   https://github.com/tesseract-ocr/tessdata_fast
 Lizenz:    Apache License, Version 2.0 (SPDX: Apache-2.0)
