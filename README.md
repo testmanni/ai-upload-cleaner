@@ -112,7 +112,8 @@ Unterstützte Browser laut PDF.js-Legacy-Build: Chrome ab 125, Firefox ESR, Safa
 | `build/libs.py` | prüft oder erneuert die ab 2.0 eingebetteten Bibliotheken |
 | `build/CHECKSUMS.txt` | Herkunft und SHA-256-Prüfsummen der eingebetteten Bibliotheken und der Werkzeugdateien |
 | `index.html` | Startseite mit interaktivem Selbsttest, verlinkt Werkzeug 3.0 und Anleitung |
-| `anleitung.html` | kurze Bedienungsanleitung |
+| `anleitung.html` | kurze Bedienungsanleitung zur 3.0 |
+| `anleitung6.0.html` | Anleitung zur 6.0 (Beta) mit allen Funktionen seit der 3.0 |
 | `LICENSE` | MIT-Lizenz dieses Projekts |
 | `NOTICE` | Übersicht der enthaltenen Drittanbieter-Software |
 | `THIRD-PARTY-LICENSES.txt` | vollständige Lizenztexte aller eingebetteten Bibliotheken |
