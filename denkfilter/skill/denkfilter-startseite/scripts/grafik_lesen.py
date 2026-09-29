@@ -8,6 +8,8 @@ CSS und Skript. Damit lässt sich eine 300-kB-Grafik vollständig lesen.
     python3 grafik_lesen.py GRAFIK.html --kurz     # nur Kernfelder
     python3 grafik_lesen.py NEU.html --vergleich ALT.html
                                                    # welche Kernfelder sich geändert haben
+    python3 grafik_lesen.py NEU.html --vergleich ALT.html --volltext
+                                                   # zusätzlich neue und entfallene Sätze
 
 Kernfelder: Titel, Kopfzeile, TL;DR (Leitfrage und Zellen), Fassungsvergleich.
 Nur Standardbibliothek.
@@ -58,6 +60,16 @@ def main():
     if "--vergleich" in sys.argv:
         alt = open(sys.argv[sys.argv.index("--vergleich") + 1], encoding="utf-8").read()
         vergleiche(quelle, alt)
+        if "--volltext" in sys.argv:
+            saetze = lambda q: set(x.strip() for x in re.split(r"(?<=[.!?])\s+|\s·\s|;\s", text(
+                re.sub(r"<(style|script)\b.*?</\1>", " ", q, flags=re.S))) if len(x.split()) >= 3)
+            a, n = saetze(alt), saetze(quelle)
+            print("\n==== NEU IM VOLLTEXT ====")
+            for x in sorted(n - a):
+                print("+", x)
+            print("\n==== ENTFALLEN ====")
+            for x in sorted(a - n):
+                print("-", x)
         return
     ohne = re.sub(r"<(style|script)\b.*?</\1>", " ", quelle, flags=re.S)
 

@@ -40,6 +40,8 @@ In einen Ordner gehören:
 
 Gibt es noch keine Datendatei, `assets/startseite_daten.py` aus dem Skill kopieren. Sie enthält den Stand vom 25.09.2026 als vollständiges Beispiel mit Impressum, Datenschutz und Methodik.
 
+Einige Kurztexte darin weichen bewusst vom Wortlaut der Grafiken ab. Der Nutzer hatte die Startseiten-Texte vorgegeben; der Generator meldet diese Stellen als `HINWEIS`. Sie bleiben, bis der Nutzer sie angleichen lässt oder die zugehörige TL;DR-Zelle sich inhaltlich ändert.
+
 Ältere Fassungen der Grafiken bleiben im Ordner: Sie sind die Datumsadressen früherer Fassungen und die Grundlage für den Vergleich in Schritt 2.
 
 Vor dem Bearbeiten sichern:
@@ -47,6 +49,8 @@ Vor dem Bearbeiten sichern:
 - die bisherige Seite als `denkfilter-startseite.vorher.html`.
 
 Der Generator überschreibt `denkfilter-startseite.html` ohne Rückfrage.
+
+Andere Dateien im Ordner (z. B. Vorlagen für Einblender) nicht anfassen; der Generator liest nur die Datendatei und die dort genannten Grafiken.
 
 Den Generator nicht in den Arbeitsordner kopieren, sondern aus dem Skill aufrufen:
 
@@ -68,15 +72,19 @@ Die Kernfelder sind Titel, Kopfzeile (Recherchestand), Leitfrage, die drei TL;DR
 Was sich seit der letzten Fassung geändert hat, zeigt:
 
 ```bash
-python3 <skill>/scripts/grafik_lesen.py <neu.html> --vergleich <alt.html>
+python3 <skill>/scripts/grafik_lesen.py <neu.html> --vergleich <alt.html> --volltext
 ```
+
+Die Ausgabe zeigt zuerst die Kernfelder (unverändert oder alt gegen neu), dann die neuen und entfallenen Sätze im Volltext.
+
+**Nur neu datiert:** Hat sich außer Datumsangaben nichts geändert und ist die „jüngste berücksichtigte Quelle“ älter als der Stand der Vorfassung, ist die Grafik nur neu datiert. Trotzdem bauen, weil Stand und Links stimmen sollen. In der Antwort sagen, dass die Grafik keine neuen Inhalte hat.
 
 **Widersprüche innerhalb einer Grafik** (Beispiel: TL;DR nennt 11 Punkte, eine Bühne noch 13; ein Stichtag liegt in der Vergangenheit, aber ohne Ergebnis):
 - Nicht selbst auflösen. Die Startseite kann eine fehlerhafte Grafik nicht reparieren.
 - Maßgeblich für die Startseite sind TL;DR und Fassungsvergleich, weil sie den Stand der Fassung zusammenfassen.
 - Die Tafel nur auf Werte stützen, die in der Grafik mindestens an zwei Stellen übereinstimmen oder im TL;DR stehen.
 - Jeden Widerspruch in der Antwort mit Fundstellen nennen und die Korrektur der Grafik mit infografik-update empfehlen.
-- Ist ein Widerspruch so grob, dass die Startseite damit eine falsche Kernaussage zeigen würde, nicht bauen, sondern melden.
+- Nicht bauen, sondern melden, wenn ein Wert, den die Startseite selbst zeigt (Tafel, Kurztext, Kasten), an einer anderen Stelle derselben Grafik widersprochen wird und sich nicht klären lässt, welcher gilt. Widersprüche an Stellen, die die Startseite nicht übernimmt, nur melden.
 
 ### 3. Datendatei nachziehen
 
@@ -85,7 +93,8 @@ Das Format steht in `references/datenformat.md`. Bei jedem Lauf zu tun:
 1. **`datei`** auf den neuen Dateinamen setzen. Stand und Bezugsdatum („gegenüber …“) liest der Generator selbst aus der Grafik; nicht von Hand eintragen.
 2. **`leitfrage`** mit der Grafik abgleichen und bei Änderung wörtlich übernehmen.
 3. **`kurztexte`**: Maßstab ist der Vergleich aus Schritt 2.
-   - **TL;DR-Zelle hat sich geändert:** Die Kurztexte wörtlich aus der neuen Zelle übernehmen.
+   - **TL;DR-Zelle hat sich inhaltlich geändert:** Die Kurztexte wörtlich aus der neuen Zelle übernehmen.
+   - **Nur ein Datum hat sich geändert** (z. B. das Enddatum eines Zeitraums): Im bisherigen Text nur dieses Datum austauschen, falls es dort vorkommt; sonst den Text lassen.
    - **TL;DR-Zelle ist unverändert:** Den bisherigen Startseiten-Text stehen lassen, auch wenn er vom Wortlaut abweicht. Das kann eine bewusste Entscheidung des Nutzers sein. Die Abweichung meldet der Generator als `HINWEIS`; sie gehört in die Antwort.
    - **Kein Vergleich möglich**, weil die alte Grafik fehlt: Bestehende Texte lassen, Abweichungen melden, den Nutzer fragen.
    - **Kürzen** ist erlaubt, aber nur durch Weglassen ganzer Sätze oder ganzer Glieder zwischen Semikolons, nie durch Umformulieren. Umformulieren erzeugt genau die Abweichungen, die im Erstlauf gefunden wurden: „Bedrohungsframing“ statt „Bedrohungsbild“, „tragfähige Quelle“ statt der genauen Aufnahmeregel.
@@ -94,7 +103,7 @@ Das Format steht in `references/datenformat.md`. Bei jedem Lauf zu tun:
    - **Fassungsvergleich:** Die Zeilen „Hinzugekommen“, „Präziser geworden“ und „Unverändert trotz Bewegung“ bei jedem Lauf wörtlich aus der Grafik übernehmen, denn sie ändern sich immer.
    - **Fortschreibungsregeln** (Vorfälle): Nur nachziehen, wenn sich die Regeln in der Grafik geändert haben.
 5. **Englisch:**
-   - EN-Texte sind Übersetzungen der DE-Texte, nah am Wortlaut.
+   - EN-Texte sind Übersetzungen der DE-Texte, eng am Wortlaut. Nur geänderte DE-Stellen neu übersetzen; unveränderte EN-Texte bleiben.
    - Die Grafiken sind nur deutsch. EN lässt sich daher nicht gegen sie belegen; im Protokoll als Übersetzung kennzeichnen.
    - Englische Daten im Format „25 Sep 2026“ bzw. „2 Oct 2026“, ohne führende Null, wie der Generator sie für `{stand_en}` erzeugt.
 6. **`tafel`**:
