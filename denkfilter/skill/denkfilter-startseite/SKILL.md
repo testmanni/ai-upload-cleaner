@@ -40,6 +40,14 @@ In einen Ordner gehören:
 
 Gibt es noch keine Datendatei, `assets/startseite_daten.py` aus dem Skill kopieren. Sie enthält den Stand vom 25.09.2026 als vollständiges Beispiel mit Impressum, Datenschutz und Methodik.
 
+Ältere Fassungen der Grafiken bleiben im Ordner: Sie sind die Datumsadressen früherer Fassungen und die Grundlage für den Vergleich in Schritt 2.
+
+Vor dem Bearbeiten sichern:
+- `startseite_daten.py` als `startseite_daten.vorher.py`,
+- die bisherige Seite als `denkfilter-startseite.vorher.html`.
+
+Der Generator überschreibt `denkfilter-startseite.html` ohne Rückfrage.
+
 Den Generator nicht in den Arbeitsordner kopieren, sondern aus dem Skill aufrufen:
 
 ```bash
@@ -57,25 +65,43 @@ python3 <skill>/scripts/grafik_lesen.py <grafik.html> --kurz   # nur Kernfelder
 
 Die Kernfelder sind Titel, Kopfzeile (Recherchestand), Leitfrage, die drei TL;DR-Zellen und der Fassungsvergleich. Den Volltext trotzdem lesen, denn Belege für die Tafel stehen oft auf den Bühnen (Kennzahlen, Verteilungen, Muster).
 
+Was sich seit der letzten Fassung geändert hat, zeigt:
+
+```bash
+python3 <skill>/scripts/grafik_lesen.py <neu.html> --vergleich <alt.html>
+```
+
+**Widersprüche innerhalb einer Grafik** (Beispiel: TL;DR nennt 11 Punkte, eine Bühne noch 13; ein Stichtag liegt in der Vergangenheit, aber ohne Ergebnis):
+- Nicht selbst auflösen. Die Startseite kann eine fehlerhafte Grafik nicht reparieren.
+- Maßgeblich für die Startseite sind TL;DR und Fassungsvergleich, weil sie den Stand der Fassung zusammenfassen.
+- Die Tafel nur auf Werte stützen, die in der Grafik mindestens an zwei Stellen übereinstimmen oder im TL;DR stehen.
+- Jeden Widerspruch in der Antwort mit Fundstellen nennen und die Korrektur der Grafik mit infografik-update empfehlen.
+- Ist ein Widerspruch so grob, dass die Startseite damit eine falsche Kernaussage zeigen würde, nicht bauen, sondern melden.
+
 ### 3. Datendatei nachziehen
 
 Das Format steht in `references/datenformat.md`. Bei jedem Lauf zu tun:
 
 1. **`datei`** auf den neuen Dateinamen setzen. Stand und Bezugsdatum („gegenüber …“) liest der Generator selbst aus der Grafik; nicht von Hand eintragen.
 2. **`leitfrage`** mit der Grafik abgleichen und bei Änderung wörtlich übernehmen.
-3. **`kurztexte`**:
-   - DE wörtlich aus den TL;DR-Zellen übernehmen.
-   - Kürzen ist erlaubt, aber nur durch Weglassen ganzer Sätze oder ganzer Glieder zwischen Semikolons, nie durch Umformulieren. Umformulieren erzeugt genau die Abweichungen, die im Erstlauf gefunden wurden: „Bedrohungsframing“ statt „Bedrohungsbild“, „tragfähige Quelle“ statt der genauen Aufnahmeregel.
-   - Wenn die bisherigen Startseiten-Texte bewusst anders formuliert sind, nicht überschreiben, sondern den Nutzer fragen oder die Abweichung melden.
-4. **`kasten`** (Fassungsvergleich): Zeilen „Hinzugekommen“, „Präziser geworden“, „Unverändert trotz Bewegung“ wörtlich aus der Grafik übernehmen, mit derselben Kürzungsregel.
+3. **`kurztexte`**: Maßstab ist der Vergleich aus Schritt 2.
+   - **TL;DR-Zelle hat sich geändert:** Die Kurztexte wörtlich aus der neuen Zelle übernehmen.
+   - **TL;DR-Zelle ist unverändert:** Den bisherigen Startseiten-Text stehen lassen, auch wenn er vom Wortlaut abweicht. Das kann eine bewusste Entscheidung des Nutzers sein. Die Abweichung meldet der Generator als `HINWEIS`; sie gehört in die Antwort.
+   - **Kein Vergleich möglich**, weil die alte Grafik fehlt: Bestehende Texte lassen, Abweichungen melden, den Nutzer fragen.
+   - **Kürzen** ist erlaubt, aber nur durch Weglassen ganzer Sätze oder ganzer Glieder zwischen Semikolons, nie durch Umformulieren. Umformulieren erzeugt genau die Abweichungen, die im Erstlauf gefunden wurden: „Bedrohungsframing“ statt „Bedrohungsbild“, „tragfähige Quelle“ statt der genauen Aufnahmeregel.
+   - **Verweise auf Stellen innerhalb der Grafik** („auf Bühne 7“, „siehe unten“) zeigen auf der Startseite ins Leere. Das betroffene Glied oder den Satz weglassen; trägt er darüber hinaus Inhalt, stehen lassen und in der Antwort nennen. Diese Regel in Kurztexten und Kasten einheitlich anwenden.
+4. **`kasten`**: Es gibt zwei Arten, für beide gelten die Regeln aus Punkt 3.
+   - **Fassungsvergleich:** Die Zeilen „Hinzugekommen“, „Präziser geworden“ und „Unverändert trotz Bewegung“ bei jedem Lauf wörtlich aus der Grafik übernehmen, denn sie ändern sich immer.
+   - **Fortschreibungsregeln** (Vorfälle): Nur nachziehen, wenn sich die Regeln in der Grafik geändert haben.
 5. **Englisch:**
    - EN-Texte sind Übersetzungen der DE-Texte, nah am Wortlaut.
    - Die Grafiken sind nur deutsch. EN lässt sich daher nicht gegen sie belegen; im Protokoll als Übersetzung kennzeichnen.
-   - Englische Daten im Format „25 Sep 2026“.
+   - Englische Daten im Format „25 Sep 2026“ bzw. „2 Oct 2026“, ohne führende Null, wie der Generator sie für `{stand_en}` erzeugt.
 6. **`tafel`**:
    - Die Kennzahl für die Tafel aus der Grafik wählen. Geeignet ist die Zahl, die den Kern des Falls am knappsten zeigt, z. B. ein Abstand und dessen Veränderung oder eine Zählung nach Gruppen.
    - Werte eintragen und in `belege` die Sätze der Grafik wörtlich hinterlegen, in denen die Zahlen stehen.
    - Beschriftungen so genau wie der Beleg. Gilt eine Null nur für eine Teilmenge, sagt die Beschriftung das.
+   - Die Datumsbeschriftungen im `verlauf` folgen aus den Ständen der jeweiligen Fassungen und brauchen keinen eigenen Beleg; die Zahlen daneben schon.
 7. **Einblender** (Impressum, Datenschutz, Methodik) sind Texte des Nutzers und bleiben unangetastet, außer er liefert neue.
 
 ### 4. Bauen
@@ -86,6 +112,7 @@ python3 <skill>/scripts/startseite_build.py <arbeitsordner>
 
 Der Generator bricht mit `FEHLER:` ab, wenn:
 - Dateiname, Titel und Kopfzeile einer Grafik unterschiedliche Daten tragen,
+- das Datum der Vorfassung im Fassungsvergleich nicht vor dem Stand liegt (ein Fehler in der Grafik),
 - ein Tafel-Beleg nicht wörtlich in der Grafik steht oder eine Tafel-Zahl in keinem Beleg,
 - externe Abrufe, `<script>`, Storage, Cookies, „Register“ oder „ & “ im Ergebnis stehen,
 - ein Link auf eine fehlende Datei oder einen fehlenden Anker zeigt,
@@ -93,7 +120,9 @@ Der Generator bricht mit `FEHLER:` ab, wenn:
 
 Bei einem Fehler die Daten korrigieren, nie die Prüfung lockern. Die Prüfungen sind die Zusicherungen, die der Nutzer verlangt hat.
 
-Ein `HINWEIS:` (z. B. „im Ordner liegt eine neuere Fassung“) ist kein Abbruch, gehört aber in die Antwort.
+Ein `HINWEIS:` ist kein Abbruch, gehört aber in die Antwort. Die wichtigsten Arten:
+- **„im Ordner liegt eine neuere Fassung“:** Möglicherweise wurde `datei` vergessen.
+- **„nicht wörtlich in der Grafik“:** Ein Satz oder Glied der deutschen Leitfrage, Kurztexte oder Kastenzeilen steht so nicht in der Grafik. Jede dieser Stellen ist entweder bewusst so (siehe Punkt 3) oder ein Fehler, den du korrigierst.
 
 ### 5. Render-Prüfung
 
@@ -105,7 +134,7 @@ node <skill>/scripts/render_pruefung.js <arbeitsordner>/denkfilter-startseite.ht
 
 Das Skript prüft sieben Breiten (1600 bis 320 px): Überlauf, Schriften, Lauftext mobil mindestens 16 px, Touchziele mindestens 24 px und externe Abrufe. Dazu testet es Sprach- und Schemawechsel per Klick, den Tastaturfokus und alle Einblender. Findet es ein Problem, endet es mit Exit-Code 1.
 
-Danach mindestens den Screenshot bei 390 px und den dunklen bei 1366 px ansehen: Eine neue Tafel kann technisch sauber und trotzdem schief sein, etwa wenn ein langes Label an die Kante läuft.
+Danach die Nahaufnahmen `tafel-<n>-390.png` und `tafel-<n>-1366.png` sowie `de-dunkel-1366.png` ansehen. Eine neue Tafel kann technisch sauber und trotzdem schief sein, etwa wenn ein langes Label an die Kante läuft. Die ganzseitigen Screenshots sind zum Beurteilen der Tafeln zu klein.
 
 Ohne Playwright: `npm i playwright` in einem Hilfsordner und `NODE_PATH` setzen. Wenn ein Chromium schon installiert ist, `playwright install` nicht ausführen. Ist die Prüfung gar nicht möglich, das in der Antwort sagen, statt sie zu übergehen.
 
@@ -114,7 +143,7 @@ Ohne Playwright: `npm i playwright` in einem Hilfsordner und `NODE_PATH` setzen.
 Kurz und in dieser Reihenfolge:
 1. Was ist neu: Stand je Grafik, geänderte Texte, neue Tafelwerte.
 2. Prüfergebnis: Generator, Render-Prüfung mit Breiten, Dateigröße.
-3. Abweichungen zwischen Startseite und Grafiken, die bewusst stehen blieben oder dem Nutzer auffallen sollten, jeweils mit beiden Wortlauten.
+3. Abweichungen zwischen Startseite und Grafiken (die `HINWEIS`-Zeilen), jeweils mit beiden Wortlauten und ob sie bewusst stehen blieben. Außerdem Widersprüche innerhalb der Grafiken.
 4. Nächster Schritt, falls etwas offen ist.
 
 Alle Datumsangaben deutsch. Keine Floskeln.

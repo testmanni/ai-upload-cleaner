@@ -60,6 +60,10 @@ def datum_en(de):
     return "%d %s %s" % (int(t), MONATE_EN[int(m) - 1], j)
 
 
+def sortierbar(d):
+    return d[6:] + d[3:5] + d[:2]
+
+
 def lies_grafik(g):
     datei = g["datei"]
     pfad = os.path.join(ORDNER, datei)
@@ -84,6 +88,9 @@ def lies_grafik(g):
 
     m = re.search(r"Fassungsvergleich\s*·\s*gegenüber der Fassung vom (\d\d\.\d\d\.\d{4})", quelle)
     vergleich = m.group(1) if m else None
+    if vergleich and sortierbar(vergleich) >= sortierbar(aus_kopf):
+        fehler("%s: Fassungsvergleich 'gegenüber der Fassung vom %s' liegt nicht vor dem Stand %s. "
+               "Das ist ein Fehler in der Grafik; dort korrigieren (infografik-update)." % (datei, vergleich, aus_kopf))
 
     m = re.search(r'<style id="schriften">.*?</style>', quelle, re.S)
     schriften = m.group(0) if m else None
@@ -103,7 +110,35 @@ def lies_grafik(g):
 
     return {"stand": aus_kopf, "stand_en": datum_en(aus_kopf),
             "vergleich": vergleich, "vergleich_en": datum_en(vergleich) if vergleich else None,
-            "schriften": schriften}
+            "schriften": schriften, "text": text}
+
+
+def abschnitte(fragment):
+    """Zerlegt einen Text in Sätze und Glieder zwischen Semikolons (ohne HTML)."""
+    t = re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", fragment))).strip()
+    teile = []
+    for satz in re.split(r"(?<=[.!?])\s+(?=[A-ZÄÖÜ„])", t):
+        for glied in satz.split("; "):
+            glied = glied.strip().rstrip(".;:")
+            if len(glied.split()) >= 4:
+                teile.append(glied)
+    return teile
+
+
+def pruefe_woertlich(g, text):
+    """Meldet deutsche Startseiten-Texte, die nicht wörtlich in der Grafik stehen.
+    Hinweis statt Fehler: Abweichungen sollen sichtbar werden, nicht den Bau stoppen."""
+    quellen = [("Leitfrage", g["leitfrage"]["de"])]
+    quellen += [("Kurztext " + k["h"]["de"], k["de"]) for k in g["kurztexte"]]
+    quellen += [("Kasten " + a.rstrip(":"), b) for a, b in g["kasten"]["de"]["zeilen"]]
+    funde = []
+    for wo, inhalt in quellen:
+        for teil in abschnitte(re.sub(r"\{\w+\}", "", inhalt)):
+            if teil not in text:
+                funde.append((wo, teil))
+    for wo, teil in funde:
+        print("HINWEIS: %s · %s · nicht wörtlich in der Grafik: „%s“" % (g["anker"], wo, teil))
+    return len(funde)
 
 
 def fuelle(text, werte):
@@ -578,6 +613,7 @@ html:has(.einblender:target){overflow:hidden}
 
 def baue():
     werte_je = [lies_grafik(g) for g in D.GRAFIKEN]
+    abweichungen = sum(pruefe_woertlich(g, w["text"]) for g, w in zip(D.GRAFIKEN, werte_je))
     schriften = werte_je[0]["schriften"]
     if not schriften:
         fehler("Kein Block <style id=\"schriften\"> in %s." % D.GRAFIKEN[0]["datei"])
@@ -690,6 +726,8 @@ def baue():
     with open(ZIEL, "w", encoding="utf-8") as f:
         f.write(seite)
     print("geschrieben: %s (%s Byte)" % (os.path.basename(ZIEL), format(len(seite.encode("utf-8")), ",").replace(",", ".")))
+    if abweichungen:
+        print("  %d Textstelle(n) weichen vom Wortlaut der Grafiken ab (siehe HINWEIS oben)." % abweichungen)
     for g, w in zip(D.GRAFIKEN, werte_je):
         print("  %s  Stand %s%s" % (g["datei"], w["stand"],
               ("  Vorfassung %s" % w["vergleich"]) if w["vergleich"] else ""))

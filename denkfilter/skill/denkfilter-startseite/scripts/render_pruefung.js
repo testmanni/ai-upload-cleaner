@@ -7,6 +7,8 @@
 // herausragende oder abgeschnittene Elemente, eingebettete Schriften geladen,
 // Lauftext mobil >= 16 px, Touchziele >= 24 px, keine externen Abrufe.
 // Dazu Sprach- und Schemawechsel per Klick, Tastaturfokus und alle Einblender.
+// Screenshots: de-hell-<breite>.png (ganze Seite), de-dunkel-1366.png,
+// en-dunkel-1366.png und tafel-<n>-<breite>.png (Nahaufnahme je Tafel).
 // Exit-Code 1, wenn ein Problem gefunden wurde.
 const { chromium } = require('playwright');
 const path = require('path');
@@ -90,7 +92,17 @@ async function seite(browser, w, h = 900) {
     const bg = await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor);
     if (bg === 'rgb(246, 248, 251)') melde('Dunkelmodus ändert den html-Hintergrund nicht');
     await page.screenshot({ path: `${OUT}/en-dunkel-1366.png`, fullPage: true });
+    await page.click('label[for=lang-de]'); await page.waitForTimeout(200);
+    await page.screenshot({ path: `${OUT}/de-dunkel-1366.png`, fullPage: true });
     console.log(`Sprache: "${de}" -> "${en}" · dunkel: html ${bg}`);
+    await ctx.close();
+  }
+
+  // Nahaufnahmen der Kennzahl-Tafeln (ganzseitige Bilder sind zum Beurteilen zu klein)
+  for (const w of [1366, 390]) {
+    const { page, ctx } = await seite(browser, w);
+    const tafeln = await page.$$('.visual');
+    for (let i = 0; i < tafeln.length; i++) await tafeln[i].screenshot({ path: `${OUT}/tafel-${i + 1}-${w}.png` });
     await ctx.close();
   }
 

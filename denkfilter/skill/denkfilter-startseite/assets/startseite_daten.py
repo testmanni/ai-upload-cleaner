@@ -9,7 +9,9 @@ Nach jedem neuen Lauf der Grafiken
 3. Kurztexte, Fassungsvergleich-Zeilen und Werte der Kennzahl-Tafeln bei
    Bedarf anpassen (Abschnitte "kurztexte", "kasten", "tafel"); jeder Wert der
    Tafel braucht einen wörtlichen Beleg aus der Grafik in "belege".
-4. python3 startseite_build.py  ->  schreibt denkfilter-startseite.html
+4. Generator mit diesem Ordner als Arbeitsordner aufrufen:
+   python3 startseite_build.py [ARBEITSORDNER]  ->  schreibt denkfilter-startseite.html
+   (im Skill: python3 <skill>/scripts/startseite_build.py <arbeitsordner>)
 
 Stand-Datum und Bezugsdatum des Fassungsvergleichs trägt hier niemand von Hand
 ein: Der Generator liest sie aus der Grafik selbst (Titel, Kopfzeile,
