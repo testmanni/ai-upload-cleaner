@@ -60,8 +60,7 @@ def lade(pfad):
     return s
 
 
-B.VISUALS = {"tempo": lambda: lade(TAUSCH["tempo"]),
-             "vorfaelle": lambda: lade(TAUSCH["vorfaelle"])}
+B.visual = lambda g: lade(TAUSCH[g["anker"]])
 B.ZIEL = ZIEL
 # Die SVGs sind vollständige Tafeln mit eigenem Kopf und Fuß: Bildunterschrift
 # ausblenden, Seitenverhältnis überall 760:900.

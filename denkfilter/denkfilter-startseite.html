@@ -115,7 +115,7 @@ main{display:block}
 .fall-unter{font-size:19px;color:var(--muted);margin-top:16px;max-width:860px;text-wrap:pretty}
 .fall-raster{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:28px;align-items:start}
 
-.visual{position:sticky;top:84px;aspect-ratio:760/900;border-radius:var(--radius);overflow:hidden;background:#16294e;box-shadow:var(--shadow)}
+.visual{position:sticky;top:84px;aspect-ratio:760/900;height:auto;border-radius:var(--radius);overflow:hidden;background:#16294e;box-shadow:var(--shadow)}
 .visual svg{display:block;width:100%;height:100%}
 .visual figcaption{position:absolute;left:24px;right:24px;bottom:20px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
   color:#d4e0ef;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
@@ -171,7 +171,7 @@ main{display:block}
 /* ==== Umbrüche ==== */
 @media (max-width:1100px){
   .hero-raster,.fall-raster{grid-template-columns:1fr}
-  .visual{position:relative;top:auto;aspect-ratio:4/3}
+  .visual{position:relative;top:auto;max-width:560px;width:100%;margin:0 auto}
   .fall-kopf{grid-template-columns:100px minmax(0,1fr)}
   .abschnitt{grid-template-columns:150px minmax(0,1fr)}
 }
@@ -188,8 +188,8 @@ main{display:block}
   .fall-titel{font-size:clamp(32px,9vw,46px)}
   .fall-unter{font-size:17px}
   .fall-raster{gap:16px}
-  .visual{aspect-ratio:auto}
-  .visual svg{height:auto;aspect-ratio:1/1}
+  .visual{aspect-ratio:auto;max-width:none}
+  .visual svg{height:auto;aspect-ratio:760/900}
   .visual figcaption{position:static;padding:14px 18px 16px}
   .karte-kopf,.leitfrage,.abschnitt{padding-left:20px;padding-right:20px}
   .abschnitt{grid-template-columns:1fr;gap:8px}
@@ -307,34 +307,7 @@ html:has(.einblender:target){overflow:hidden}
   </div>
   <div class="fall-raster">
     <figure class="visual">
-      <svg viewBox="0 0 760 900" preserveAspectRatio="xMidYMid slice" role="img" aria-hidden="true" focusable="false">
-  <defs>
-    <linearGradient id="t-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16294e"/><stop offset="1" stop-color="#0c1a33"/></linearGradient>
-    <linearGradient id="t-gap" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0f9488" stop-opacity="0"/><stop offset="1" stop-color="#0f9488" stop-opacity=".28"/></linearGradient>
-  </defs>
-  <rect width="760" height="900" fill="url(#t-bg)"/>
-  <g stroke="#9fb3d1" stroke-opacity=".13" stroke-width="1">
-    <path d="M0 150H760M0 250H760M0 350H760M0 450H760M0 550H760M0 650H760M0 750H760"/>
-    <path d="M95 0V900M190 0V900M285 0V900M380 0V900M475 0V900M570 0V900M665 0V900"/>
-  </g>
-  <circle cx="560" cy="330" r="170" fill="none" stroke="#3fcfbe" stroke-opacity=".5" stroke-width="2" stroke-dasharray="2 12"/>
-  <circle cx="560" cy="330" r="100" fill="none" stroke="#dfeaf6" stroke-opacity=".25"/>
-  <path d="M70 620C260 610 390 540 480 420S610 230 700 200V560H560V600H420V620Z" fill="url(#t-gap)"/>
-  <path d="M70 620C260 610 390 540 480 420S610 230 700 200" fill="none" stroke="#3fcfbe" stroke-width="5" stroke-linecap="round"/>
-  <path d="M70 640H280V620H420V600H560V560H700" fill="none" stroke="#f0b55d" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
-  <g fill="#f0b55d"><circle cx="280" cy="620" r="6"/><circle cx="420" cy="600" r="6"/><circle cx="560" cy="560" r="6"/></g>
-  <circle cx="700" cy="200" r="9" fill="#3fcfbe"/>
-  <circle cx="700" cy="200" r="22" fill="#3fcfbe" fill-opacity=".18"/>
-  <path d="M640 240V560" stroke="#dfeaf6" stroke-opacity=".55" stroke-width="1.5" stroke-dasharray="4 6"/>
-  <g font-family="Archivo, sans-serif" fill="#eef4fb">
-    <text x="70" y="300" font-size="96" font-weight="900" letter-spacing="-3" data-lang="de">TEMPO</text>
-    <text x="70" y="300" font-size="96" font-weight="900" letter-spacing="-3" data-lang="en">PACE</text>
-    <text x="70" y="400" font-size="96" font-weight="900" letter-spacing="-3" fill="none" stroke="#eef4fb" stroke-width="2" data-lang="de">REGELN</text>
-    <text x="70" y="400" font-size="96" font-weight="900" letter-spacing="-3" fill="none" stroke="#eef4fb" stroke-width="2" data-lang="en">RULES</text>
-    <text x="72" y="444" font-size="17" font-weight="700" letter-spacing="4" fill-opacity=".62" data-lang="de">FRONTIER-MODELLE / KONTROLLE</text>
-    <text x="72" y="444" font-size="17" font-weight="700" letter-spacing="4" fill-opacity=".62" data-lang="en">FRONTIER MODELS / CONTROL</text>
-  </g>
-</svg>
+      <svg viewBox="0 0 760 900" preserveAspectRatio="xMidYMid meet" role="img" aria-hidden="true" focusable="false"><defs><linearGradient id="tb-tempo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#18305a"/><stop offset="1" stop-color="#0f2040"/></linearGradient></defs><rect width="760" height="900" fill="url(#tb-tempo)"/><text x="80" y="96" font-family="Inter, sans-serif" font-size="28" font-weight="800" fill="#3fcfbe" text-anchor="start" letter-spacing="3" data-lang="de">LEISTUNGSABSTAND IM INDEX</text><text x="80" y="96" font-family="Inter, sans-serif" font-size="28" font-weight="800" fill="#3fcfbe" text-anchor="start" letter-spacing="3" data-lang="en">PERFORMANCE GAP IN THE INDEX</text><text x="72" y="262" font-family="Archivo, sans-serif" font-size="190" font-weight="900" fill="#eef4fb" text-anchor="start" letter-spacing="-8">13</text><text x="330" y="196" font-family="Archivo, sans-serif" font-size="52" font-weight="900" fill="#eef4fb" text-anchor="start" letter-spacing="-1" data-lang="de">PUNKTE</text><text x="330" y="196" font-family="Archivo, sans-serif" font-size="52" font-weight="900" fill="#eef4fb" text-anchor="start" letter-spacing="-1" data-lang="en">POINTS</text><text x="330" y="246" font-family="Inter, sans-serif" font-size="30" font-weight="500" fill="#b5c3d8" text-anchor="start" data-lang="de">zwischen US-Spitze</text><text x="330" y="246" font-family="Inter, sans-serif" font-size="30" font-weight="500" fill="#b5c3d8" text-anchor="start" data-lang="en">between the U.S. leader</text><text x="330" y="284" font-family="Inter, sans-serif" font-size="30" font-weight="500" fill="#b5c3d8" text-anchor="start" data-lang="de">und China-Spitze</text><text x="330" y="284" font-family="Inter, sans-serif" font-size="30" font-weight="500" fill="#b5c3d8" text-anchor="start" data-lang="en">and China’s best</text><line x1="90" y1="440" x2="670" y2="440" stroke="#3a5176" stroke-width="2"/><line x1="90" y1="432" x2="90" y2="448" stroke="#3a5176" stroke-width="2"/><text x="90" y="486" font-family="Inter, sans-serif" font-size="28" font-weight="600" fill="#b5c3d8" text-anchor="middle">40</text><line x1="235" y1="432" x2="235" y2="448" stroke="#3a5176" stroke-width="2"/><text x="235" y="486" font-family="Inter, sans-serif" font-size="28" font-weight="600" fill="#b5c3d8" text-anchor="middle">45</text><line x1="380" y1="432" x2="380" y2="448" stroke="#3a5176" stroke-width="2"/><text x="380" y="486" font-family="Inter, sans-serif" font-size="28" font-weight="600" fill="#b5c3d8" text-anchor="middle">50</text><line x1="525" y1="432" x2="525" y2="448" stroke="#3a5176" stroke-width="2"/><text x="525" y="486" font-family="Inter, sans-serif" font-size="28" font-weight="600" fill="#b5c3d8" text-anchor="middle">55</text><line x1="670" y1="432" x2="670" y2="448" stroke="#3a5176" stroke-width="2"/><text x="670" y="486" font-family="Inter, sans-serif" font-size="28" font-weight="600" fill="#b5c3d8" text-anchor="middle">60</text><line x1="235" y1="440" x2="612" y2="440" stroke="#f0b55d" stroke-width="10" stroke-linecap="round"/><circle cx="235" cy="440" r="17" fill="#16294e" stroke="#3fcfbe" stroke-width="5"/><circle cx="612" cy="440" r="17" fill="#eef4fb"/><text x="235" y="400" font-family="Archivo, sans-serif" font-size="30" font-weight="800" fill="#3fcfbe" text-anchor="middle">GLM-5.3 · 45</text><text x="612" y="400" font-family="Archivo, sans-serif" font-size="30" font-weight="800" fill="#eef4fb" text-anchor="end">Opus 5.5 · 58</text><text x="90" y="620" font-family="Archivo, sans-serif" font-size="30" font-weight="800" fill="#b5c3d8" text-anchor="start">17.09.</text><rect x="200" y="590" width="232" height="40" rx="6" fill="#3a5176"/><text x="444" y="621" font-family="Archivo, sans-serif" font-size="32" font-weight="900" fill="#b5c3d8" text-anchor="start">8</text><text x="90" y="694" font-family="Archivo, sans-serif" font-size="30" font-weight="800" fill="#eef4fb" text-anchor="start">25.09.</text><rect x="200" y="664" width="377" height="40" rx="6" fill="#f0b55d"/><text x="589" y="695" font-family="Archivo, sans-serif" font-size="32" font-weight="900" fill="#f0b55d" text-anchor="start">13</text><text x="90" y="758" font-family="Inter, sans-serif" font-size="28" font-weight="500" fill="#b5c3d8" text-anchor="start" data-lang="de">Abstand in Indexpunkten</text><text x="90" y="758" font-family="Inter, sans-serif" font-size="28" font-weight="500" fill="#b5c3d8" text-anchor="start" data-lang="en">Gap in index points</text></svg>
       <figcaption><span><b>01</b> · FRONTIER AI</span><span data-lang="de">Tempo / Kontrolle / Regeln</span><span data-lang="en" lang="en">Speed / control / rules</span></figcaption>
     </figure>
     <article class="karte">
@@ -392,41 +365,7 @@ html:has(.einblender:target){overflow:hidden}
   </div>
   <div class="fall-raster">
     <figure class="visual">
-      <svg viewBox="0 0 760 900" preserveAspectRatio="xMidYMid slice" role="img" aria-hidden="true" focusable="false">
-  <defs>
-    <linearGradient id="v-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16294e"/><stop offset="1" stop-color="#0b1830"/></linearGradient>
-  </defs>
-  <rect width="760" height="900" fill="url(#v-bg)"/>
-  <g stroke="#9fb3d1" stroke-opacity=".12"><path d="M0 180H760M0 270H760M0 360H760M0 450H760M0 540H760M0 630H760M0 720H760"/><path d="M76 0V900M152 0V900M228 0V900M304 0V900M380 0V900M456 0V900M532 0V900M608 0V900M684 0V900"/></g>
-  <rect x="70" y="180" width="420" height="360" rx="26" fill="#0f9488" fill-opacity=".08" stroke="#3fcfbe" stroke-width="2.5" stroke-dasharray="10 9"/>
-  <g stroke="#3fcfbe" stroke-width="2" stroke-opacity=".7" fill="none">
-    <path d="M150 260L260 330L380 260L420 420L300 480L170 440L150 260"/>
-    <path d="M260 330L300 480M260 330L170 440M380 260L300 480" stroke-opacity=".35"/>
-  </g>
-  <g stroke="#f0b55d" stroke-width="2.5" fill="none" stroke-linecap="round">
-    <path d="M380 260C480 210 560 190 640 210"/>
-    <path d="M420 420C520 440 590 470 640 520"/>
-    <path d="M300 480C320 540 380 590 470 610"/>
-  </g>
-  <g fill="#0c1a33" stroke="#3fcfbe" stroke-width="3">
-    <circle cx="150" cy="260" r="14"/><circle cx="260" cy="330" r="22"/><circle cx="380" cy="260" r="13"/>
-    <circle cx="420" cy="420" r="20"/><circle cx="300" cy="480" r="16"/><circle cx="170" cy="440" r="11"/>
-  </g>
-  <g fill="#0c1a33" stroke="#f0b55d" stroke-width="3">
-    <circle cx="640" cy="210" r="18"/><circle cx="640" cy="520" r="24"/><circle cx="470" cy="610" r="15"/>
-  </g>
-  <g fill="#f0b55d"><circle cx="640" cy="210" r="6"/><circle cx="640" cy="520" r="8"/><circle cx="470" cy="610" r="5"/></g>
-  <g font-family="Archivo, sans-serif" font-weight="800" letter-spacing="3" font-size="16">
-    <text x="92" y="212" fill="#3fcfbe" data-lang="de">TESTUMGEBUNG</text>
-    <text x="92" y="212" fill="#3fcfbe" data-lang="en">TEST ENVIRONMENT</text>
-    <text x="444" y="672" fill="#f0b55d" data-lang="de">REALE DRITTE</text>
-    <text x="444" y="672" fill="#f0b55d" data-lang="en">REAL THIRD PARTIES</text>
-  </g>
-  <g font-family="Archivo, sans-serif" fill="#eef4fb">
-    <text x="70" y="690" font-size="80" font-weight="900" letter-spacing="-2" data-lang="de">SPUREN</text>
-    <text x="70" y="690" font-size="80" font-weight="900" letter-spacing="-2" data-lang="en">TRACE</text>
-  </g>
-</svg>
+      <svg viewBox="0 0 760 900" preserveAspectRatio="xMidYMid meet" role="img" aria-hidden="true" focusable="false"><defs><linearGradient id="tb-vorfaelle" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#18305a"/><stop offset="1" stop-color="#0f2040"/></linearGradient></defs><rect width="760" height="900" fill="url(#tb-vorfaelle)"/><text x="80" y="96" font-family="Inter, sans-serif" font-size="28" font-weight="800" fill="#3fcfbe" text-anchor="start" letter-spacing="2" data-lang="de">16 FÄLLE · 01.06.–25.09.2026</text><text x="80" y="96" font-family="Inter, sans-serif" font-size="28" font-weight="800" fill="#3fcfbe" text-anchor="start" letter-spacing="2" data-lang="en">16 INCIDENTS · 01.06.–25.09.2026</text><rect x="80" y="136" width="100" height="100" rx="14" fill="#3fcfbe"/><text x="130" y="198" font-family="Archivo, sans-serif" font-size="34" font-weight="800" fill="#16294e" text-anchor="middle">06</text><rect x="194" y="136" width="100" height="100" rx="14" fill="#3fcfbe"/><text x="244" y="198" font-family="Archivo, sans-serif" font-size="34" font-weight="800" fill="#16294e" text-anchor="middle">07</text><rect x="308" y="136" width="100" height="100" rx="14" fill="#3fcfbe"/><text x="358" y="198" font-family="Archivo, sans-serif" font-size="34" font-weight="800" fill="#16294e" text-anchor="middle">08</text><rect x="422" y="136" width="100" height="100" rx="14" fill="#3fcfbe"/><text x="472" y="198" font-family="Archivo, sans-serif" font-size="34" font-weight="800" fill="#16294e" text-anchor="middle">09</text><rect x="80" y="250" width="100" height="100" rx="14" fill="#3fcfbe"/><text x="130" y="312" font-family="Archivo, sans-serif" font-size="34" font-weight="800" fill="#16294e" text-anchor="middle">10</text><rect x="194" y="250" width="100" height="100" rx="14" fill="#3fcfbe"/><text x="244" y="312" font-family="Archivo, sans-serif" font-size="34" font-weight="800" fill="#16294e" text-anchor="middle">11</text><rect x="308" y="250" width="100" height="100" rx="14" fill="#3fcfbe"/><text x="358" y="312" font-family="Archivo, sans-serif" font-size="34" font-weight="800" fill="#16294e" text-anchor="middle">12</text><rect x="422" y="250" width="100" height="100" rx="14" fill="#3fcfbe"/><text x="472" y="312" font-family="Archivo, sans-serif" font-size="34" font-weight="800" fill="#16294e" text-anchor="middle">13</text><rect x="80" y="364" width="100" height="100" rx="14" fill="#f0b55d"/><text x="130" y="426" font-family="Archivo, sans-serif" font-size="34" font-weight="800" fill="#16294e" text-anchor="middle">14</text><rect x="194" y="364" width="100" height="100" rx="14" fill="#f0b55d"/><text x="244" y="426" font-family="Archivo, sans-serif" font-size="34" font-weight="800" fill="#16294e" text-anchor="middle">15</text><rect x="308" y="364" width="100" height="100" rx="14" fill="#f0b55d"/><text x="358" y="426" font-family="Archivo, sans-serif" font-size="34" font-weight="800" fill="#16294e" text-anchor="middle">16</text><rect x="422" y="364" width="100" height="100" rx="14" fill="#f0b55d"/><text x="472" y="426" font-family="Archivo, sans-serif" font-size="34" font-weight="800" fill="#16294e" text-anchor="middle">17</text><rect x="80" y="478" width="100" height="100" rx="14" fill="none" stroke="#b5c3d8" stroke-width="3"/><text x="130" y="540" font-family="Archivo, sans-serif" font-size="34" font-weight="800" fill="#eef4fb" text-anchor="middle">18</text><rect x="194" y="478" width="100" height="100" rx="14" fill="none" stroke="#b5c3d8" stroke-width="3"/><text x="244" y="540" font-family="Archivo, sans-serif" font-size="34" font-weight="800" fill="#eef4fb" text-anchor="middle">19</text><rect x="308" y="478" width="100" height="100" rx="14" fill="none" stroke="#b5c3d8" stroke-width="3"/><text x="358" y="540" font-family="Archivo, sans-serif" font-size="34" font-weight="800" fill="#eef4fb" text-anchor="middle">20</text><rect x="422" y="478" width="100" height="100" rx="14" fill="none" stroke="#b5c3d8" stroke-width="3"/><text x="472" y="540" font-family="Archivo, sans-serif" font-size="34" font-weight="800" fill="#eef4fb" text-anchor="middle">21</text><rect x="566" y="136" width="134" height="134" rx="14" fill="none" stroke="#f0b55d" stroke-width="3" stroke-dasharray="10 8"/><text x="633" y="226" font-family="Archivo, sans-serif" font-size="72" font-weight="900" fill="#f0b55d" text-anchor="middle">0</text><text x="566" y="318" font-family="Inter, sans-serif" font-size="28" font-weight="700" fill="#eef4fb" text-anchor="start" data-lang="de">Ausbrüche</text><text x="566" y="318" font-family="Inter, sans-serif" font-size="28" font-weight="700" fill="#eef4fb" text-anchor="start" data-lang="en">escapes</text><text x="566" y="354" font-family="Inter, sans-serif" font-size="28" font-weight="700" fill="#eef4fb" text-anchor="start" data-lang="de">aus dem</text><text x="566" y="354" font-family="Inter, sans-serif" font-size="28" font-weight="700" fill="#eef4fb" text-anchor="start" data-lang="en">from</text><text x="566" y="390" font-family="Inter, sans-serif" font-size="28" font-weight="700" fill="#eef4fb" text-anchor="start" data-lang="de">Betrieb</text><text x="566" y="390" font-family="Inter, sans-serif" font-size="28" font-weight="700" fill="#eef4fb" text-anchor="start" data-lang="en">production</text><rect x="80" y="640" width="28" height="28" rx="6" fill="#3fcfbe"/><text x="124" y="664" font-family="Inter, sans-serif" font-size="28" font-weight="600" fill="#eef4fb" text-anchor="start" data-lang="de">8 Ausbruch aus Tests</text><text x="124" y="664" font-family="Inter, sans-serif" font-size="28" font-weight="600" fill="#eef4fb" text-anchor="start" data-lang="en">8 Escape from tests</text><rect x="80" y="686" width="28" height="28" rx="6" fill="#f0b55d"/><text x="124" y="710" font-family="Inter, sans-serif" font-size="28" font-weight="600" fill="#eef4fb" text-anchor="start" data-lang="de">4 Werkzeug und Waffe</text><text x="124" y="710" font-family="Inter, sans-serif" font-size="28" font-weight="600" fill="#eef4fb" text-anchor="start" data-lang="en">4 Tool and weapon</text><rect x="80" y="732" width="28" height="28" rx="6" fill="none" stroke="#b5c3d8" stroke-width="3"/><text x="124" y="756" font-family="Inter, sans-serif" font-size="28" font-weight="600" fill="#eef4fb" text-anchor="start" data-lang="de">4 Fehlurteil, Klage, Ausfall, Sperre</text><text x="124" y="756" font-family="Inter, sans-serif" font-size="28" font-weight="600" fill="#eef4fb" text-anchor="start" data-lang="en">4 Misjudgement, lawsuit, outage, block</text></svg>
       <figcaption><span><b>02</b> · INCIDENTS</span><span data-lang="de">Test / Betrieb / Beleg</span><span data-lang="en" lang="en">Test / production / evidence</span></figcaption>
     </figure>
     <article class="karte">
