@@ -52,24 +52,34 @@
 <meta name="application-name" content="AI Upload Cleaner 6.0.0" />
 <meta name="color-scheme" content="light dark" />
 <title>AI Upload Cleaner – lokal schwärzen vor dem Upload</title>
+<script nonce="aiuc6">try{var m=localStorage.getItem('aiuc-theme');if(m==='light'||m==='dark')document.documentElement.dataset.theme=m;}catch(e){}</script>
 <style>
   :root{
     --bg:#faf8f5; --surface-1:#f1ede7; --surface-2:#fff; --border:#e0d9cf;
     --border-strong:#cabfae; --border-accent:#185FA5; --text-primary:#2a2620;
-    --text-secondary:#6b6356; --text-muted:#9b9384; --text-accent:#185FA5; --bg-accent:#e3edf7;
+    --text-secondary:#6b6356; --text-muted:#736b5d; --text-accent:#185FA5; --bg-accent:#e3edf7;
     --bg-warning:#fbf0d9; --text-warning:#7a5c12; --radius:8px;
     --bg-danger:#fbe3e0; --text-danger:#9a2b20; --bg-success:#e2f3e4; --text-success:#1f6b2c;
     --ed-bg:#1c1a17; --ed-bar:#2a2620; --ed-btn:#3a352e; --ed-btn-border:#55504a;
     --accent:#185FA5;
   }
+  /* Darstellung: ohne Wahl folgt sie dem System, data-theme="light"/"dark" am <html> überschreibt das */
+  :root[data-theme="light"]{color-scheme:light;}
   @media (prefers-color-scheme: dark){
-    :root{
+    :root:not([data-theme="light"]){
       --bg:#1c1a17; --surface-1:#2a2620; --surface-2:#332e27; --border:#3f3932; --border-strong:#5a5248;
-      --text-primary:#ece7df; --text-secondary:#bdb5a9; --text-muted:#8f877b; --text-accent:#8ab7e8; --bg-accent:#1f3a57;
+      --text-primary:#ece7df; --text-secondary:#bdb5a9; --text-muted:#9c958a; --text-accent:#8ab7e8; --bg-accent:#1f3a57;
       --border-accent:#5b95d6; --bg-warning:#3a2f14; --text-warning:#e6c46a; --bg-danger:#4a1f1a; --text-danger:#f0a097;
-      --bg-success:#1e3a24; --text-success:#9fd8a8;
+      --bg-success:#1e3a24; --text-success:#9fd8a8; color-scheme:dark;
     }
   }
+  :root[data-theme="dark"]{
+      --bg:#1c1a17; --surface-1:#2a2620; --surface-2:#332e27; --border:#3f3932; --border-strong:#5a5248;
+      --text-primary:#ece7df; --text-secondary:#bdb5a9; --text-muted:#9c958a; --text-accent:#8ab7e8; --bg-accent:#1f3a57;
+      --border-accent:#5b95d6; --bg-warning:#3a2f14; --text-warning:#e6c46a; --bg-danger:#4a1f1a; --text-danger:#f0a097;
+      --bg-success:#1e3a24; --text-success:#9fd8a8; color-scheme:dark;
+  }
+  :focus-visible{outline:2px solid var(--border-accent);outline-offset:2px;}
   *{box-sizing:border-box;}
   body{margin:0;background:var(--bg);color:var(--text-primary);
     font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5;}
@@ -234,7 +244,8 @@
 </head>
 <body>
 <div class="wrap">
-  <div style="display:flex;justify-content:flex-end;margin-bottom:4px">
+  <div style="display:flex;justify-content:flex-end;gap:6px;margin-bottom:4px">
+    <button class="small" id="themeToggle" style="font-size:12px;visibility:hidden" data-t-aria="themeAria"></button>
     <button class="small" id="langToggle" style="font-size:12px;visibility:hidden" data-t-aria="langAria"></button>
   </div>
   <div class="kicker" data-t="kicker">AI Upload Cleaner 6.0 · lokal · alles in einer Datei</div>
@@ -770,6 +781,7 @@ const LABEL_KEYS=['name','address','birthdate','iban','account','customer','case
 const I18N={
   de:{
     langAria:'Sprache wechseln', toggle:'EN',
+    themeAria:'Darstellung wechseln: System, Hell, Dunkel', themeSystem:'◐ System', themeLight:'☀️ Hell', themeDark:'🌙 Dunkel',
     kicker:'AI Upload Cleaner 6.0 · lokal · alles in einer Datei',
     h1:'Schwärzen, bevor du es hochlädst',
     introShow:'Hinweise einblenden', introHide:'Hinweise ausblenden',
@@ -888,6 +900,7 @@ const I18N={
   },
   en:{
     langAria:'Switch language', toggle:'DE',
+    themeAria:'Switch appearance: system, light, dark', themeSystem:'◐ System', themeLight:'☀️ Light', themeDark:'🌙 Dark',
     kicker:'AI Upload Cleaner 6.0 · local · all in one file',
     h1:'Redact before you upload',
     introShow:'Show notes', introHide:'Hide notes',
@@ -1007,6 +1020,14 @@ const I18N={
 };
 let lang='de';
 const T=()=>I18N[lang];
+// Darstellung: 'system' folgt prefers-color-scheme, 'light'/'dark' wird lokal gespeichert
+let themeMode='system';
+try{const m=localStorage.getItem('aiuc-theme');if(m==='light'||m==='dark')themeMode=m;}catch(e){}
+function applyTheme(){
+  const r=document.documentElement;
+  if(themeMode==='system')delete r.dataset.theme;else r.dataset.theme=themeMode;
+  const b=$('themeToggle');b.textContent=T()[{system:'themeSystem',light:'themeLight',dark:'themeDark'}[themeMode]];b.style.visibility='visible';
+}
 function setLang(l){
   lang=l;const t=T();
   document.querySelectorAll('[data-t]').forEach(el=>{const v=t[el.dataset.t];if(typeof v==='string')el.textContent=v;});
@@ -1014,6 +1035,7 @@ function setLang(l){
   document.querySelectorAll('[data-t-aria]').forEach(el=>{const v=t[el.dataset.tAria];if(typeof v==='string'){el.setAttribute('aria-label',v);el.title=v;}});
   document.querySelectorAll('[data-t-ph]').forEach(el=>{const v=t[el.dataset.tPh];if(typeof v==='string')el.placeholder=v;});
   $('langToggle').textContent=t.toggle;$('langToggle').style.visibility='visible';
+  applyTheme();
   document.documentElement.lang=l;
   fillLabelSelect();updateToolUI();
   if(pages.length)updateInfos();
@@ -2695,6 +2717,11 @@ dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');if
 document.addEventListener('dragover',e=>{e.preventDefault();});
 document.addEventListener('drop',e=>{e.preventDefault();if(!ws.classList.contains('hidden'))return;if(e.dataTransfer.files.length)handleFiles(e.dataTransfer.files);});
 $('langToggle').onclick=()=>setLang(lang==='de'?'en':'de');
+$('themeToggle').onclick=()=>{
+  themeMode={system:'light',light:'dark',dark:'system'}[themeMode];
+  try{if(themeMode==='system')localStorage.removeItem('aiuc-theme');else localStorage.setItem('aiuc-theme',themeMode);}catch(e){}
+  applyTheme();
+};
 setLang((navigator.language||'de').toLowerCase().startsWith('de')?'de':'en');
 updateUndoUI();updateToolUI();updateOcrUI();
 </script>
