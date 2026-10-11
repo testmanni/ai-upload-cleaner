@@ -14,7 +14,7 @@ Ausgelöst wird nur, wenn sich eine öffentliche Datei, `deploy/` oder der Ablau
 
 ## Was das Skript tut
 
-- **Nur öffentliche Dateien:** `index.html`, `anleitung*.html`, `ai-upload-cleaner*.html`, `LICENSE`, `NOTICE`, `THIRD-PARTY-LICENSES.txt`, `licenses/`. Nie `tests/`, `build/`, `.github/`, `README.md`.
+- **Nur öffentliche Dateien:** `index.html`, `anleitung.html`, `anleitung6.0.html`, die Werkzeugdateien 1.0, 3.0 und 6.0, `LICENSE`, `NOTICE`, `THIRD-PARTY-LICENSES.txt`, `licenses/`. Nie `tests/`, `build/`, `.github/`, `README.md`. Die Versionen 2.0, 4.0 und 5.0 bleiben offline; neue Werkzeugdateien müssen in `PUBLIC` in `deploy.py` ergänzt werden.
 - **Nur Geändertes:** Auf dem Server liegt `.deploy-manifest.json` mit den SHA-256-Werten des letzten Uploads und dem Commit. Beim ersten Lauf fehlt es; dann wird nach Dateigröße verglichen.
 - **Nichts löschen:** Dateien auf dem Server, die nicht im Repository stehen, bleiben unangetastet und werden im Protokoll nur genannt.
 - **Keine halben Dateien:** Upload unter `<name>.uploading`, dann Umbenennen.
@@ -24,7 +24,7 @@ Ausgelöst wird nur, wenn sich eine öffentliche Datei, `deploy/` oder der Ablau
 
 1. **Host Europe (KIS):** eigener FTP-Benutzer, beschränkt auf `/www/ai-upload-cleaner`, langes Passwort nur für diesen Zweck.
 2. **GitHub → Settings → Secrets and variables → Actions → New repository secret:**
-   - `FTP_SERVER`: FTP-Servername aus dem KIS, keine IP-Adresse: Das TLS-Zertifikat wird geprüft und ist auf einen Namen ausgestellt. Passt der Name nicht, bricht das Skript vor der Anmeldung ab und nennt die Namen im Zertifikat.
+   - `FTP_SERVER`: Servername, für dieses Paket `vwp1575.webpack.hosteurope.de` (Rückwärts-DNS der FTP-IP, passt zum Zertifikat). Keine IP-Adresse: Das TLS-Zertifikat wird geprüft und ist auf einen Namen ausgestellt. Passt der Name nicht, bricht das Skript vor der Anmeldung ab und nennt die Namen im Zertifikat.
    - `FTP_USER`: Name des FTP-Benutzers
    - `FTP_PASSWORD`: sein Passwort
    - `FTP_DIR`: nur nötig, wenn der Benutzer nicht direkt im Webordner landet

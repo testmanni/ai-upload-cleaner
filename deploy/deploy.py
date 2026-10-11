@@ -1,6 +1,6 @@
 """Lädt die öffentlichen Dateien per FTPS (FTP mit TLS) zum Webhosting hoch.
 
-- Nur Dateien aus PUBLIC, nie tests/, build/, .github/ oder README.md.
+- Nur Dateien aus PUBLIC, nie tests/, build/, .github/, README.md oder die Versionen 2.0, 4.0, 5.0.
 - Nur Geändertes: Auf dem Server liegt .deploy-manifest.json mit den SHA-256-Werten des
   letzten Uploads. Fehlt es (erster Lauf), wird nach Dateigröße verglichen und im Zweifel
   hochgeladen.
@@ -31,8 +31,10 @@ import urllib.request
 from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parent.parent
-PUBLIC = ["index.html", "anleitung*.html", "ai-upload-cleaner*.html", "LICENSE", "NOTICE",
-          "THIRD-PARTY-LICENSES.txt", "licenses/*"]
+# Werkzeugdateien einzeln: 2.0, 4.0 und 5.0 bleiben offline (Entscheidung vom 11.10.2026).
+PUBLIC = ["index.html", "anleitung.html", "anleitung6.0.html",
+          "ai-upload-cleaner.html", "ai-upload-cleaner3.0.html", "ai-upload-cleaner6.0.html",
+          "LICENSE", "NOTICE", "THIRD-PARTY-LICENSES.txt", "licenses/*"]
 MANIFEST = ".deploy-manifest.json"
 
 
