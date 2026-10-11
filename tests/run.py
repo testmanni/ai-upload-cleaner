@@ -34,6 +34,7 @@ OUT = Path(__file__).resolve().parent / "out"
 class Tool:
     def __init__(self, browser, html):
         self.ctx = browser.new_context(locale="de-DE", viewport={"width": 1280, "height": 1000}, accept_downloads=True)
+        self.ctx.grant_permissions(["clipboard-read", "clipboard-write"])
         self.requests, self.errors = [], []
         self.ctx.on("request", lambda r: self.requests.append(r.url))
         self.page = self.ctx.new_page()
@@ -216,6 +217,58 @@ def scenario_scan(browser, html, fx, fxdir, outdir):
     return res, notes
 
 
+PASTE_JS = """async b64 => {
+  const bin = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  const dt = new DataTransfer(); dt.items.add(new File([bin], 'image.png', {type: 'image/png'}));
+  document.body.dispatchEvent(new ClipboardEvent('paste', {clipboardData: dt, bubbles: true, cancelable: true}));
+}"""
+READ_CLIPBOARD_PNG = """async () => {
+  const items = await navigator.clipboard.read();
+  const item = items.find(i => i.types.includes('image/png'));
+  if (!item) return null;
+  const a = new Uint8Array(await (await item.getType('image/png')).arrayBuffer());
+  let s = ''; for (const x of a) s += String.fromCharCode(x); return btoa(s);
+}"""
+
+
+def scenario_clipboard(browser, html, fx, fxdir, outdir):
+    """Screenshot mit Strg+V einfügen, Texterkennung und Fundstellen laufen von selbst,
+    „Alle schwärzen“, „In Zwischenablage kopieren“, kopiertes Bild unabhängig prüfen."""
+    import base64
+    t = Tool(browser, html)
+    res, notes = [], []
+    try:
+        if not t.has("#copyBtn"):
+            return [C.check("Zwischenablage vorhanden", None, "übersprungen: Funktion fehlt in dieser Version")], ["übersprungen"]
+        p = t.page
+        t0 = time.time()
+        p.evaluate(PASTE_JS, base64.b64encode((fxdir / "scan.png").read_bytes()).decode())
+        p.wait_for_selector("#workspace:not(.hidden)", timeout=30000)
+        p.wait_for_function("() => document.querySelectorAll('#hitList .hitrow').length > 0", timeout=120000)
+        notes.append(f"Einfügen bis Fundstellenliste: {time.time() - t0:.1f} s; {p.inner_text('#searchStatus').strip()}")
+        res.append(C.check("Strg+V öffnet den Screenshot, Fundstellen erscheinen von selbst", True, p.inner_text("#toast").strip()))
+        p.click("#hitAll")
+        p.wait_for_timeout(300)
+        t.close_search()
+        p.evaluate("async () => navigator.clipboard.writeText('VORHER')")
+        p.click("#copyBtn")
+        p.wait_for_function("() => /\\b(ok|err)\\b/.test(document.getElementById('exportMsg').className)", timeout=60000)
+        msg = p.inner_text("#exportMsg").strip()
+        res.append(C.check("Werkzeug meldet: geprüft und kopiert", "Zwischenablage kopiert" in msg, msg[:120]))
+        data = p.evaluate(READ_CLIPBOARD_PNG)
+        res.append(C.check("Bild liegt in der Zwischenablage", data is not None, "image/png" if data else "kein Bild"))
+        if data:
+            dest = outdir / "zwischenablage.png"
+            dest.write_bytes(base64.b64decode(data))
+            res += C.check_scan_export(dest, fx)
+            exif, keys = C.image_metadata(dest)
+            res.append(C.check("PNG ohne Metadaten", not exif and not keys, f"EXIF {exif}, Felder {keys}"))
+        res += network_and_console(t)
+    finally:
+        t.close()
+    return res, notes
+
+
 def network_and_console(t):
     foreign = [u for u in t.requests if not u.startswith(("file:", "data:", "blob:"))]
     return [
@@ -266,6 +319,7 @@ def main():
     ]
     if not args.nur_schnell:
         scenarios.append(("Scan: Texterkennung und IBAN-Suche", scenario_scan))
+        scenarios.append(("Zwischenablage: Strg+V, schwärzen, kopieren", scenario_clipboard))
     with sync_playwright() as pw:
         exe = os.environ.get("CHROMIUM_PATH")
         browser = pw.chromium.launch(executable_path=exe) if exe else pw.chromium.launch()

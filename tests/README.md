@@ -29,6 +29,7 @@ Ein Lauf gegen die 6.0 dauert in Chromium rund 16 Sekunden (gemessen am 11.10.20
 | Ausweis als Bild | Box über den Namen ziehen (die Seite darf dabei nicht verrutschen), Beschriftung [Name], Ausschnitt ziehen, PNG-Export | Seitenverhältnis wie der Ausschnitt, rote Nummer außerhalb fehlt, Name schwarz mit weißer Beschriftung, Kontrollzeile lesbar, keine PNG-Metadaten, Tesseract findet den Namen nicht |
 | Foto mit GPS | laden, ohne Box exportieren | keine EXIF-Daten, Kamera und GPS nicht in den Rohbytes |
 | Scan ohne Textebene | Texterkennung Deutsch, IBAN-Suche, PNG-Export | IBAN schwarz, Kontrollzeile lesbar, Tesseract findet die IBAN nicht |
+| Zwischenablage (ab 6.0) | Screenshot per Strg+V einfügen, Fundstellen erscheinen von selbst, „Alle schwärzen“, „In Zwischenablage kopieren“ | Bild liegt in der Zwischenablage, IBAN schwarz, Kontrollzeile lesbar, keine Metadaten, Tesseract findet die IBAN nicht |
 | alle | | keine Netzwerkanfragen, keine Fehler in der Konsole, Download erst nach bestandener Selbstprüfung |
 
 **Gegenprobe:** Vor den Szenarien laufen dieselben Prüfungen gegen die ungeschwärzten Originale und müssen dort anschlagen. Nur die Kontrollzeilen dürfen bestehen; sie sichern ab, dass nicht zu viel geschwärzt wird. Eine Prüfung, die am Original nicht anschlägt, beweist nichts.
