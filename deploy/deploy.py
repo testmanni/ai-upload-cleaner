@@ -34,7 +34,7 @@ ROOT = Path(__file__).resolve().parent.parent
 # Werkzeugdateien einzeln: 2.0, 4.0 und 5.0 bleiben offline (Entscheidung vom 11.10.2026).
 PUBLIC = ["index.html", "anleitung.html", "anleitung6.0.html",
           "ai-upload-cleaner.html", "ai-upload-cleaner3.0.html", "ai-upload-cleaner6.0.html",
-          "LICENSE", "NOTICE", "THIRD-PARTY-LICENSES.txt", "licenses/*"]
+          "og-image.png", "LICENSE", "NOTICE", "THIRD-PARTY-LICENSES.txt", "licenses/*"]
 MANIFEST = ".deploy-manifest.json"
 
 

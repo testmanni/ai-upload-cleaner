@@ -13,6 +13,7 @@ on:
       - "index.html"
       - "anleitung*.html"
       - "ai-upload-cleaner*.html"
+      - "og-image.png"
       - "LICENSE"
       - "NOTICE"
       - "THIRD-PARTY-LICENSES.txt"

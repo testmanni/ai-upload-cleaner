@@ -5,18 +5,28 @@
   AI Upload Cleaner – Startseite
   Copyright (c) 2026 Manfred Just
   Lizenziert unter der MIT-Lizenz. Siehe LICENSE.
-  Diese Seite lädt nichts nach und setzt keine Cookies. Das Werkzeug selbst liegt in ai-upload-cleaner3.0.html.
+  Diese Seite lädt nichts nach und setzt keine Cookies. Nur die Wahl Hell/Dunkel liegt, wenn gewählt, im
+  localStorage des Browsers. Das Werkzeug selbst liegt in ai-upload-cleaner3.0.html.
 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="referrer" content="no-referrer" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-aiucidx'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'" />
+<meta name="color-scheme" content="light dark" />
+<script nonce="aiucidx">try{var m=localStorage.getItem('aiuc-theme');if(m==='light'||m==='dark')document.documentElement.dataset.theme=m;}catch(e){}</script>
 <title>AI Upload Cleaner – weniger hochladen. Dokumente lokal schwärzen, kürzen, zusammenstellen.</title>
 <meta name="description" content="AI Upload Cleaner bereitet Dokumente lokal im Browser vor, bevor du sie in ChatGPT, Claude, Copilot oder ein Portal hochlädst: Text markieren und schwärzen, Namen und IBAN suchen, Seiten weglassen, Ausschnitt exportieren, Fotos zu einer PDF. Eine HTML-Datei, kostenlos, Open Source, kein Konto, kein Upload, kein Server." />
 <meta name="robots" content="index, follow" />
 <meta property="og:type" content="website" />
+<meta property="og:url" content="https://ai-upload-cleaner.com/" />
+<meta property="og:image" content="https://ai-upload-cleaner.com/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="AI Upload Cleaner: Dein schwarzer Balken ist keine Schwärzung." />
 <meta property="og:title" content="AI Upload Cleaner – weniger hochladen" />
 <meta property="og:description" content="Schwärze, kürze und bündle Dokumente lokal, bevor du sie in KI-Tools hochlädst. Der schwarze Balken aus Word oder Acrobat schützt nichts, beweis es dir selbst. Eine Datei, kostenlos, offline." />
 <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://ai-upload-cleaner.com/og-image.png" />
 <meta name="twitter:title" content="AI Upload Cleaner – weniger hochladen" />
 <meta name="twitter:description" content="Dokumente lokal schwärzen, kürzen und zusammenstellen, bevor du sie in KI-Tools hochlädst. Eine Datei, kein Konto, kein Server." />
 <script type="application/ld+json">
@@ -36,11 +46,29 @@
 </script>
 <style>
   :root{
-    --bg:#0f1419; --panel:#171d25; --panel-2:#1e2630; --line:#2b3440;
-    --ink:#e8edf2; --ink-soft:#9aa7b4; --ink-mut:#64727f;
-    --accent:#3b82d6; --accent-soft:#1d3a5c; --warn:#e0a341; --bad:#e0564a;
-    --good:#46b46e; --mono:'SFMono-Regular',ui-monospace,'Cascadia Code',Consolas,monospace;
+    --mono:'SFMono-Regular',ui-monospace,'Cascadia Code',Consolas,monospace;
+    --bg:#faf8f5; --panel:#ffffff; --panel-2:#f1ede7; --line:#e0d9cf;
+    --ink:#2a2620; --ink-soft:#6b6356; --ink-mut:#736b5d;
+    --accent:#185FA5; --accent-fill:#185FA5; --accent-hover:#1d6fbf; --accent-soft:#e3edf7;
+    --warn:#bb8725; --bad:#9a2b20; --good:#1f6b2c; color-scheme:light;
   }
+  /* Darstellung: ohne Wahl folgt sie dem System, data-theme="light"/"dark" am <html> überschreibt das.
+     Dunkel ist der bisherige Look; Kleintext, Rot und Knopffläche auf mindestens 4,5:1 angehoben. */
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0f1419; --panel:#171d25; --panel-2:#1e2630; --line:#2b3440;
+      --ink:#e8edf2; --ink-soft:#9aa7b4; --ink-mut:#808e9b;
+      --accent:#3b82d6; --accent-fill:#2f6fb8; --accent-hover:#2c77d1; --accent-soft:#1d3a5c;
+      --warn:#e0a341; --bad:#e36459; --good:#46b46e; color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0f1419; --panel:#171d25; --panel-2:#1e2630; --line:#2b3440;
+    --ink:#e8edf2; --ink-soft:#9aa7b4; --ink-mut:#808e9b;
+    --accent:#3b82d6; --accent-fill:#2f6fb8; --accent-hover:#2c77d1; --accent-soft:#1d3a5c;
+    --warn:#e0a341; --bad:#e36459; --good:#46b46e; color-scheme:dark;
+  }
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--bg);color:var(--ink);
     font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.55;
@@ -51,8 +79,9 @@
   .top{display:flex;justify-content:space-between;align-items:center;padding:18px 0;border-bottom:1px solid var(--line);}
   .brand{font-family:var(--mono);font-size:14px;letter-spacing:.02em;color:var(--ink);display:flex;gap:9px;align-items:center;}
   .brand .dot{width:9px;height:9px;border-radius:2px;background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+  .top-actions{display:flex;gap:6px;align-items:center;}
   .lang{font-family:var(--mono);font-size:12px;color:var(--ink-soft);border:1px solid var(--line);
-    background:transparent;padding:5px 9px;border-radius:6px;cursor:pointer;}
+    background:transparent;padding:5px 11px;min-height:34px;border-radius:6px;cursor:pointer;}
   .lang:hover{border-color:var(--accent);color:var(--ink);}
   .hero{padding:56px 0 36px;}
   .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
@@ -73,7 +102,9 @@
   .card.good h3{color:var(--good);}
   .doc-line{font-size:14px;color:var(--ink);margin-bottom:6px;}
   .label-mut{color:var(--ink-mut);font-size:12px;}
-  .fake{position:relative;display:inline-block;color:var(--ink);background:#000;border-radius:2px;padding:0 4px;user-select:text;cursor:text;}
+  .fake{position:relative;display:inline-block;color:#000;background:#000;border-radius:2px;padding:0 4px;user-select:text;cursor:text;}
+  /* Schwarz auf Schwarz wie ein Balken in Word: erst Markieren zeigt den Text */
+  .fake::selection{background:#3b82d6;color:#fff;}
   .fake.revealed{background:transparent;color:var(--bad);outline:1px dashed var(--bad);}
   .real{display:inline-block;background:#000;border-radius:2px;padding:0 4px;color:#000;user-select:none;width:84px;height:1.25em;vertical-align:middle;}
   .verdict{margin-top:12px;font-size:12.5px;min-height:1.4em;font-family:var(--mono);}
@@ -84,12 +115,16 @@
   .claim .no{color:var(--ink-mut);}
   .ctas{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:6px 0 8px;}
   .btn{display:inline-flex;align-items:center;gap:9px;font-size:15px;font-weight:560;padding:12px 20px;border-radius:9px;cursor:pointer;border:1px solid transparent;}
-  .btn.primary{background:var(--accent);color:#fff;}
-  .btn.primary:hover{background:#4a90e2;text-decoration:none;}
+  .btn.primary{background:var(--accent-fill);color:#fff;}
+  .btn.primary:hover{background:var(--accent-hover);text-decoration:none;}
   .btn.ghost{background:transparent;border-color:var(--line);color:var(--ink);}
   .btn.ghost:hover{border-color:var(--accent);text-decoration:none;}
-  .ghlink{font-size:13px;color:var(--ink-mut);text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s;}
-  .ghlink:hover{color:var(--accent);border-bottom-color:var(--accent);}
+  .ghlink{display:inline-block;padding:8px 0;font-size:13px;color:var(--ink-mut);text-decoration:none;transition:color .15s;}
+  .ghlink:hover{color:var(--accent);text-decoration:underline;}
+  .beta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;margin:4px 0 0;}
+  .beta .tag{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:1px 6px;}
+  .beta a{display:inline-block;padding:8px 0;color:var(--ink-soft);}
+  .beta a:hover{color:var(--accent);}
   .combo{font-family:var(--mono);font-size:12.5px;color:var(--ink-mut);margin-top:14px;line-height:1.8;}
   section{padding:40px 0;border-top:1px solid var(--line);}
   .sec-eye{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.05em;margin-bottom:14px;text-transform:uppercase;}
@@ -111,7 +146,7 @@
   .fact .v{font-size:14.5px;color:var(--ink-soft);}
   .fact .v b{color:var(--ink);font-weight:600;}
   .aside{margin-top:18px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:10px;padding:16px 18px;color:var(--ink);font-size:15px;max-width:64ch;}
-  .aside b{color:#fff;}
+  .aside b{color:var(--ink);}
   .trust-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0;}
   @media(max-width:720px){.trust-grid{grid-template-columns:1fr;}}
   .trust-card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px 18px 16px;}
@@ -126,7 +161,8 @@
   .faq .item{padding:18px 0;border-bottom:1px solid var(--line);}
   .faq .item:first-child{padding-top:0;}
   footer{padding:34px 0 60px;border-top:1px solid var(--line);color:var(--ink-mut);font-size:13px;}
-  footer .row{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  footer .row{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center;}
+  footer a{display:inline-block;padding:8px 0;}
   .hide{display:none !important;}
   .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;padding:20px;overflow:auto;}
   .overlay .box{max-width:720px;margin:40px auto;background:#ffffff;color:#1a1a1a;border:1px solid #ddd;border-radius:12px;padding:28px 30px;line-height:1.6;font-size:14px;}
@@ -138,7 +174,10 @@
 
   <div class="top">
     <div class="brand"><span class="dot"></span><span>AI Upload Cleaner</span></div>
-    <button class="lang" id="lang">DE / <b style="color:var(--ink)">EN</b></button>
+    <div class="top-actions">
+      <button class="lang" id="theme" type="button"></button>
+      <button class="lang" id="lang">DE / <b style="color:var(--ink)">EN</b></button>
+    </div>
   </div>
 
   <div class="hero">
@@ -170,7 +209,8 @@
       <a class="btn ghost" id="dl" href="ai-upload-cleaner3.0.html" download="ai-upload-cleaner3.0.html">⬇ <span data-t="dlBtn">Herunterladen</span> <span style="color:var(--ink-mut);font-weight:400">3,6 MB</span></a>
       <a class="btn ghost" href="anleitung.html">📖 <span data-t="guideBtn">Anleitung</span></a>
     </div>
-    <p style="font-size:13px;margin-top:6px"><a class="ghlink" id="gh" href="https://github.com/testmanni/ai-upload-cleaner" target="_blank" rel="noopener">↗ <span data-t="ghBtn">Quellcode auf GitHub</span></a></p>
+    <p class="beta"><span class="tag">Beta</span><a href="anleitung6.0.html"><span data-t="betaLink">Version 6.0: Texterkennung für Scans, Fundstellenliste und Prüftext</span> →</a></p>
+    <p style="font-size:13px;margin-top:0"><a class="ghlink" id="gh" href="https://github.com/testmanni/ai-upload-cleaner" target="_blank" rel="noopener">↗ <span data-t="ghBtn">Quellcode auf GitHub</span></a></p>
     <p class="combo" data-t="combo">eine HTML-Datei · kostenlos · Open Source · kein Konto · kein Upload · kein Server · keine Installation</p>
   </div>
 
@@ -281,7 +321,7 @@
   </div>
 </div>
 
-<script>
+<script nonce="aiucidx">
 // === Selbsttest-Interaktion ===
 const fakeBar=document.getElementById('fakeBar');
 const fakeVerdict=document.getElementById('fakeVerdict');
@@ -314,6 +354,8 @@ const TR={
     realNothing:'Nichts markierbar. Der Text ist wirklich weg.',
     claim:'Der AI Upload Cleaner hilft dir <span class="no">nicht, Daten sicher hochzuladen.</span><br>Er hilft dir, weniger Daten hochzuladen.',
     openBtn:'Tool jetzt öffnen', dlBtn:'Herunterladen', guideBtn:'Anleitung', ghBtn:'Quellcode auf GitHub',
+    betaLink:'Version 6.0: Texterkennung für Scans, Fundstellenliste und Prüftext',
+    themeSystem:'◐ System', themeLight:'☀️ Hell', themeDark:'🌙 Dunkel', themeAria:'Darstellung wechseln: System, Hell, Dunkel',
     combo:'eine HTML-Datei · kostenlos · Open Source · kein Konto · kein Upload · kein Server · keine Installation',
     plugH:'Du glaubst uns nicht, dass nichts hochgeladen wird?',
     plugP:'Zieh das Netzwerkkabel. Der Cleaner läuft weiter. Und falls du dem Kabel nicht traust: Die Datei verbietet sich jede Verbindung selbst, per Content-Security-Policy. Der Browser setzt das durch, egal was im Code steht.',
@@ -381,6 +423,8 @@ const TR={
     realNothing:'Nothing to select. The text is really gone.',
     claim:'AI Upload Cleaner doesn\'t help you <span class="no">upload data safely.</span><br>It helps you upload less data.',
     openBtn:'Open the tool now', dlBtn:'Download', guideBtn:'Guide', ghBtn:'Source on GitHub',
+    betaLink:'Version 6.0: text recognition for scans, list of matches and proof text',
+    themeSystem:'◐ System', themeLight:'☀️ Light', themeDark:'🌙 Dark', themeAria:'Switch appearance: system, light, dark',
     combo:'one HTML file · free · open source · no account · no upload · no server · no installation',
     plugH:'Don\'t believe that nothing is uploaded?',
     plugP:'Pull the network cable. The cleaner keeps running. And if you don\'t trust the cable: the file forbids itself any connection through a Content Security Policy. The browser enforces it, whatever the code says.',
@@ -439,13 +483,29 @@ const TR={
 };
 let lang='de';
 function L(){return TR[lang];}
+// Darstellung: 'system' folgt prefers-color-scheme, 'light'/'dark' wird lokal gespeichert (gleicher Schlüssel wie im Werkzeug)
+let themeMode=document.documentElement.dataset.theme||'system';
+function applyTheme(){
+  const r=document.documentElement,b=document.getElementById('theme'),t=L();
+  if(themeMode==='system')delete r.dataset.theme;else r.dataset.theme=themeMode;
+  b.textContent=t[{system:'themeSystem',light:'themeLight',dark:'themeDark'}[themeMode]];
+  b.setAttribute('aria-label',t.themeAria);b.title=t.themeAria;
+}
+document.getElementById('theme').addEventListener('click',()=>{
+  themeMode={system:'light',light:'dark',dark:'system'}[themeMode];
+  try{if(themeMode==='system')localStorage.removeItem('aiuc-theme');else localStorage.setItem('aiuc-theme',themeMode);}catch(e){}
+  applyTheme();
+});
 function apply(){
   const t=L();
   document.querySelectorAll('[data-t]').forEach(el=>{const k=el.getAttribute('data-t');if(t[k]!=null)el.textContent=t[k];});
   document.querySelectorAll('[data-t-html]').forEach(el=>{const k=el.getAttribute('data-t-html');if(t[k]!=null)el.innerHTML=t[k];});
   document.getElementById('lang').innerHTML=t.langBtn;
   document.documentElement.lang=lang;
-  fakeVerdict.textContent='';realVerdict.textContent='';fakeBar.classList.remove('revealed');
+  // Ergebnis des Selbsttests bleibt stehen und wird übersetzt
+  if(fakeBar.classList.contains('revealed'))fakeVerdict.textContent=t.fakeReveal;
+  if(realVerdict.textContent)realVerdict.textContent=t.realNothing;
+  applyTheme();
 }
 document.getElementById('lang').addEventListener('click',()=>{lang=lang==='de'?'en':'de';apply();});
 apply();
@@ -468,6 +528,7 @@ if(!(navigator.language||'de').toLowerCase().startsWith('de')){lang='en';apply()
         '<p><strong>Diese Website (Hosting).</strong> Diese Website wird bei der Host Europe GmbH, Hansestraße 111, 51149 Köln, gehostet. Beim Aufruf der Seite werden durch den Server automatisch Zugriffsdaten in sogenannten Server-Logfiles erfasst (u. a. anonymisierte IP-Adresse, Datum und Uhrzeit, abgerufene Datei, übertragene Datenmenge, Browsertyp). Diese Daten dienen ausschließlich dem sicheren Betrieb der Website und werden nach kurzer Zeit gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO.</p>'+
         '<p><strong>Auftragsverarbeitung.</strong> Mit dem Hoster besteht ein Vertrag zur Auftragsverarbeitung nach Art. 28 DSGVO.</p>'+
         '<p><strong>Keine Weitergabe, keine Cookies.</strong> Es werden keine personenbezogenen Daten an Dritte weitergegeben und keine Cookies gesetzt, die über das technisch Notwendige hinausgehen.</p>'+
+        '<p><strong>Darstellung Hell oder Dunkel.</strong> Wählen Sie oben rechts „Hell“ oder „Dunkel“, speichert Ihr Browser nur diese Einstellung lokal auf Ihrem Gerät (localStorage). Sie wird nicht übertragen und mit „System“ wieder entfernt.</p>'+
         '<p><strong>Ihre Rechte.</strong> Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch sowie ein Beschwerderecht bei einer Datenschutz-Aufsichtsbehörde.</p>'
     },
     en:{
@@ -483,6 +544,7 @@ if(!(navigator.language||'de').toLowerCase().startsWith('de')){lang='en';apply()
         '<p><strong>This website (hosting).</strong> This website is hosted by Host Europe GmbH, Hansestraße 111, 51149 Cologne, Germany. When the page is accessed, the server automatically records access data in server log files (including anonymised IP address, date and time, file requested, volume transferred, browser type). This data serves solely the secure operation of the website and is deleted after a short time. The legal basis is Art. 6 (1) (f) GDPR.</p>'+
         '<p><strong>Data processing agreement.</strong> A data processing agreement pursuant to Art. 28 GDPR exists with the host.</p>'+
         '<p><strong>No disclosure, no cookies.</strong> No personal data is passed to third parties, and no cookies beyond what is technically necessary are set.</p>'+
+        '<p><strong>Light or dark appearance.</strong> If you choose “Light” or “Dark” at the top right, your browser stores only this setting locally on your device (localStorage). It is not transmitted and is removed again by choosing “System”.</p>'+
         '<p><strong>Your rights.</strong> You have the right to access, rectification, erasure, restriction of processing, data portability and objection, as well as the right to lodge a complaint with a data protection authority.</p>'
     }
   };
