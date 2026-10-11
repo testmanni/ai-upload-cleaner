@@ -78,6 +78,8 @@ Nachprüfen der eingebetteten Bibliotheken: `python3 build/libs.py verify ai-upl
 
 Alles aus der 2.0, dazu:
 
+- **Hell und Dunkel umschaltbar** (nachgetragen am 11.10.2026, wie in der 6.0): Knopf oben rechts mit „System“, „Hell“ und „Dunkel“, Wahl lokal gespeichert, gilt auch für `anleitung.html`. Kleintexte mit mindestens 4,5:1 Kontrast, Startknopf der Anleitung im dunklen Modus dunkelblau, sichtbarer Fokusrahmen. In beiden Anleitungen zählen die Schrittnummern Unterpunkte nicht mehr mit.
+
 - **Text markieren statt zeichnen.** Bei PDFs mit Textebene liegt eine unsichtbare Textschicht über der Seite. Text mit der Maus überstreichen oder am Handy ein Wort gedrückt halten, dann „Auswahl schwärzen". Die Boxen entstehen zeilengenau aus den echten Schriftmaßen, mit Sicherheitsrand. Umschalter „Box / Text" oben, Tasten B und T.
 - **Suchen und schwärzen.** Begriff eingeben oder ein Muster wählen (IBAN, E-Mail-Adresse, Telefonnummer), Treffer über alle Seiten durchgehen, einzeln oder alle schwärzen. Muster sind Faustregeln, jeder Treffer wird bestätigt. Aus einer Textauswahl heraus: „Überall suchen". Strg+F öffnet die Suche.
 - **Beschriftete Boxen.** Optional steht in Weiß auf der Fläche, was entfernt wurde: [Name], [IBAN], [Adresse] oder Freitext. Wird ins Bild gerechnet, keine Textebene. Die Prüfung nach dem Export kennt die Beschriftung und verlangt, dass der Rest der Fläche schwarz ist.

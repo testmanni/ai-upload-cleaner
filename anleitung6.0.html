@@ -27,9 +27,9 @@
   .alt{font-size:14px;color:var(--ink2);text-align:center}
   .alt a{color:var(--acc)}
   ol.steps{list-style:none;padding:0;margin:0;counter-reset:s}
-  ol.steps li{position:relative;padding:14px 16px 14px 62px;margin:10px 0;background:var(--card);border:1px solid var(--line);border-radius:12px;counter-increment:s}
-  ol.steps li::before{content:counter(s);position:absolute;left:16px;top:14px;width:32px;height:32px;border-radius:50%;background:var(--acc-fill);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
-  ol.steps li b{display:block;margin-bottom:2px}
+  ol.steps>li{position:relative;padding:14px 16px 14px 62px;margin:10px 0;background:var(--card);border:1px solid var(--line);border-radius:12px;counter-increment:s}
+  ol.steps>li::before{content:counter(s);position:absolute;left:16px;top:14px;width:32px;height:32px;border-radius:50%;background:var(--acc-fill);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+  ol.steps>li>b{display:block;margin-bottom:2px}
   .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:10px 0}
   .warn{background:var(--warn-bg);color:var(--warn);border-color:transparent}
   .ok{background:var(--ok-bg);color:var(--ok);border-color:transparent}
