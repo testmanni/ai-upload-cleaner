@@ -15,7 +15,9 @@ Benutzers), FTP_PORT (21), SITE_URL. Aufruf: python3 deploy/deploy.py [--trocken
 Nur Python-Standardbibliothek.
 """
 import argparse
+import fnmatch
 import ftplib
+import ipaddress
 import hashlib
 import io
 import json
@@ -90,11 +92,22 @@ def connect():
         ftp.auth()  # TLS mit Zertifikatsprüfung, bevor Zugangsdaten gesendet werden
     except ssl.SSLCertVerificationError as e:
         print(f"Das TLS-Zertifikat passt nicht zu FTP_SERVER={host!r}: {e.verify_message}")
+        names = []
         try:
-            print("Das Zertifikat ist ausgestellt auf: " + ", ".join(certificate_names(host, port)))
+            names = certificate_names(host, port)
+            print("Das Zertifikat ist ausgestellt auf: " + ", ".join(names))
             print("Einen dieser Namen als FTP_SERVER eintragen (ein Name mit * steht für beliebige Vorsilben).")
         except Exception as diag:
             print(f"Namen im Zertifikat nicht lesbar: {diag}")
+        try:
+            ipaddress.ip_address(host)
+            rname = socket.gethostbyaddr(host)[0]
+            fits = any(fnmatch.fnmatch(rname, n) for n in names)
+            print(f"Name zur IP (Rückwärts-DNS): {rname} – passt {'zum' if fits else 'nicht zum'} Zertifikat.")
+        except ValueError:
+            pass  # FTP_SERVER ist keine IP
+        except OSError as dns:
+            print(f"Kein Name zur IP gefunden ({dns}).")
         print("Abgebrochen, ohne Anmeldung. Es wurden keine Zugangsdaten gesendet.")
         raise SystemExit(3)
     ftp.login(os.environ["FTP_USER"], os.environ["FTP_PASSWORD"])
