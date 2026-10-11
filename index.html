@@ -121,10 +121,13 @@
   .btn.ghost:hover{border-color:var(--accent);text-decoration:none;}
   .ghlink{display:inline-block;padding:8px 0;font-size:13px;color:var(--ink-mut);text-decoration:none;transition:color .15s;}
   .ghlink:hover{color:var(--accent);text-decoration:underline;}
-  .beta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;margin:4px 0 0;}
-  .beta .tag{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:1px 6px;}
-  .beta a{display:inline-block;padding:8px 0;color:var(--ink-soft);}
-  .beta a:hover{color:var(--accent);}
+  /* Beta 6.0: gleicher Aufbau wie die 3.0, aber kleiner und mit Hinweis */
+  .beta{margin:16px 0 4px;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:var(--panel);max-width:640px;}
+  .beta-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;color:var(--ink);font-weight:560;}
+  .beta .tag{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:1px 6px;}
+  .beta-note{font-size:13px;color:var(--ink-mut);margin:6px 0 10px;}
+  .beta .ctas{gap:8px;margin:0;}
+  .btn.sm{font-size:13.5px;padding:7px 13px;min-height:34px;gap:7px;border-radius:8px;}
   .combo{font-family:var(--mono);font-size:12.5px;color:var(--ink-mut);margin-top:14px;line-height:1.8;}
   section{padding:40px 0;border-top:1px solid var(--line);}
   .sec-eye{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.05em;margin-bottom:14px;text-transform:uppercase;}
@@ -209,7 +212,15 @@
       <a class="btn ghost" id="dl" href="ai-upload-cleaner3.0.html" download="ai-upload-cleaner3.0.html">⬇ <span data-t="dlBtn">Herunterladen</span> <span style="color:var(--ink-mut);font-weight:400">3,6 MB</span></a>
       <a class="btn ghost" href="anleitung.html">📖 <span data-t="guideBtn">Anleitung</span></a>
     </div>
-    <p class="beta"><span class="tag">Beta</span><a href="anleitung6.0.html"><span data-t="betaLink">Version 6.0: Texterkennung für Scans, Fundstellenliste und Prüftext</span> →</a></p>
+    <div class="beta">
+      <div class="beta-head"><span class="tag">Beta</span><span data-t="betaTitle">Version 6.0: Texterkennung für Scans, Fundstellenliste, Prüftext und Screenshots per Strg+V</span></div>
+      <p class="beta-note" data-t="betaNote">Noch nicht auf echten Handys und mit Scans aus der Praxis geprüft. Ergebnis nach dem Export immer selbst kontrollieren.</p>
+      <div class="ctas">
+        <a class="btn ghost sm" href="ai-upload-cleaner6.0.html" target="_blank" rel="noopener">→ <span data-t="betaOpen">Öffnen</span></a>
+        <a class="btn ghost sm" href="ai-upload-cleaner6.0.html" download="ai-upload-cleaner6.0.html">⬇ <span data-t="dlBtn">Herunterladen</span> <span style="color:var(--ink-mut);font-weight:400">15,3 MB</span></a>
+        <a class="btn ghost sm" href="anleitung6.0.html">📖 <span data-t="guideBtn">Anleitung</span></a>
+      </div>
+    </div>
     <p style="font-size:13px;margin-top:0"><a class="ghlink" id="gh" href="https://github.com/testmanni/ai-upload-cleaner" target="_blank" rel="noopener">↗ <span data-t="ghBtn">Quellcode auf GitHub</span></a></p>
     <p class="combo" data-t="combo">eine HTML-Datei · kostenlos · Open Source · kein Konto · kein Upload · kein Server · keine Installation</p>
   </div>
@@ -354,7 +365,9 @@ const TR={
     realNothing:'Nichts markierbar. Der Text ist wirklich weg.',
     claim:'Der AI Upload Cleaner hilft dir <span class="no">nicht, Daten sicher hochzuladen.</span><br>Er hilft dir, weniger Daten hochzuladen.',
     openBtn:'Tool jetzt öffnen', dlBtn:'Herunterladen', guideBtn:'Anleitung', ghBtn:'Quellcode auf GitHub',
-    betaLink:'Version 6.0: Texterkennung für Scans, Fundstellenliste und Prüftext',
+    betaTitle:'Version 6.0: Texterkennung für Scans, Fundstellenliste, Prüftext und Screenshots per Strg+V',
+    betaNote:'Noch nicht auf echten Handys und mit Scans aus der Praxis geprüft. Ergebnis nach dem Export immer selbst kontrollieren.',
+    betaOpen:'Öffnen',
     themeSystem:'◐ System', themeLight:'☀️ Hell', themeDark:'🌙 Dunkel', themeAria:'Darstellung wechseln: System, Hell, Dunkel',
     combo:'eine HTML-Datei · kostenlos · Open Source · kein Konto · kein Upload · kein Server · keine Installation',
     plugH:'Du glaubst uns nicht, dass nichts hochgeladen wird?',
@@ -423,7 +436,9 @@ const TR={
     realNothing:'Nothing to select. The text is really gone.',
     claim:'AI Upload Cleaner doesn\'t help you <span class="no">upload data safely.</span><br>It helps you upload less data.',
     openBtn:'Open the tool now', dlBtn:'Download', guideBtn:'Guide', ghBtn:'Source on GitHub',
-    betaLink:'Version 6.0: text recognition for scans, list of matches and proof text',
+    betaTitle:'Version 6.0: text recognition for scans, list of matches, proof text and screenshots via Ctrl+V',
+    betaNote:'Not yet tested on real phones or with real-world scans. Always check the result yourself after export.',
+    betaOpen:'Open',
     themeSystem:'◐ System', themeLight:'☀️ Light', themeDark:'🌙 Dark', themeAria:'Switch appearance: system, light, dark',
     combo:'one HTML file · free · open source · no account · no upload · no server · no installation',
     plugH:'Don\'t believe that nothing is uploaded?',
