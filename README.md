@@ -40,9 +40,13 @@ Alles aus der 5.0, dazu zwei Prüfhilfen. Nichts Neues ist eingebettet, die Date
 - **Fundstellenliste.** Im Suchfeld gibt es den Modus „Alle Muster“: IBAN, E-Mail, Telefon und SSN/NI in einem Durchgang über alle Seiten, als Liste mit Muster, Text und Seite und einem Knopf „schwärzen“ je Treffer. Treffer, die schon unter einer Box liegen, sind als „geschwärzt“ markiert und werden von „Alle schwärzen“ übersprungen. Das gilt auch für die einzelnen Muster und die Textsuche.
 - **Prüftext.** Der Knopf „🧾 Prüftext“ zeigt den Text aller Seiten, wie ihn das Werkzeug kennt: aus der PDF-Textebene oder aus der Texterkennung, je Seite mit Angabe der Quelle (bei OCR mit Sicherheit in Prozent). Wörter unter einer Box oder außerhalb des Ausschnitts stehen als ████, ausgeschlossene Seiten ohne Inhalt. So liest man das Dokument so, wie es ein Empfänger sähe. Ein Filterfeld sucht nach Namen, Nummern oder @; ein Schalter zeigt die geschwärzten Wörter auf Wunsch an. „Fundstellen prüfen“ springt in die Fundstellenliste.
 - **TXT nur auf ausdrücklichen Klick.** „Als TXT speichern“ fragt nach und warnt: Die Datei enthält Klartext, und Download-Ordner werden oft automatisch in eine Cloud gesichert. Der Dateiname lautet `pruefung_nicht_hochladen.txt`. Ohne Klick verlässt nichts den Browser.
+- **Hell und Dunkel umschaltbar.** Ein Knopf oben rechts wechselt zwischen „System“ (folgt der Einstellung des Geräts), „Hell“ und „Dunkel“. Die Wahl bleibt lokal im Browser gespeichert und gilt auch für `anleitung6.0.html`. Kleinst- und Hinweistexte sind dunkler bzw. heller gesetzt und erreichen jetzt 4,5:1 Kontrast; der Startknopf der Anleitung bleibt im dunklen Modus dunkelblau mit weißer Schrift. Tastaturbedienung zeigt einen deutlichen Fokusrahmen.
+- **Kein Springen beim ersten Zeichnen.** Das Feld „Beschriftung“ bleibt in der Seitenansicht stehen und ist gesperrt, solange keine Box ausgewählt ist. Vorher wurde es mit der ersten Box eingeblendet, und die Seite rutschte am Rechner mitten im Ziehen um eine Leistenzeile nach unten.
 - Grenzen, ehrlich: Die Reihenfolge des Textes folgt der PDF-Textebene, bei Tabellen und Spalten ist das nicht die Lesereihenfolge. Scans ohne Texterkennung liefern nichts. Ob ein Wort „unter einer Box“ liegt, wird über seine Position in der Textschicht geprüft; bei OCR ist die eine Näherung.
 
 Nachprüfen der eingebetteten Bibliotheken: `python3 build/libs.py verify ai-upload-cleaner6.0.html`.
+
+Export-Test: `python3 tests/run.py ai-upload-cleaner6.0.html` (siehe `tests/README.md`). Er läuft bei jedem Push auf GitHub mit, der Bericht steht in der Zusammenfassung des jeweiligen Laufs unter „Actions“.
 
 ## Version 5.0 (Datei `ai-upload-cleaner5.0.html`, Beta)
 
@@ -111,6 +115,8 @@ Unterstützte Browser laut PDF.js-Legacy-Build: Chrome ab 125, Firefox ESR, Safa
 | `ai-upload-cleaner6.0.html` | Beta: Version 6.0 mit Fundstellenliste und Prüftext (siehe oben) |
 | `build/libs.py` | prüft oder erneuert die ab 2.0 eingebetteten Bibliotheken |
 | `build/CHECKSUMS.txt` | Herkunft und SHA-256-Prüfsummen der eingebetteten Bibliotheken und der Werkzeugdateien |
+| `deploy/` | Upload der öffentlichen Dateien zu ai-upload-cleaner.com per FTPS, mit Prüfung über HTTPS (siehe `deploy/README.md`) |
+| `tests/` | Export-Test: bedient das Werkzeug im Browser und prüft die exportierten Dateien unabhängig nach (siehe `tests/README.md`) |
 | `index.html` | Startseite mit interaktivem Selbsttest, verlinkt Werkzeug 3.0 und Anleitung |
 | `anleitung.html` | kurze Bedienungsanleitung zur 3.0 |
 | `anleitung6.0.html` | Anleitung zur 6.0 (Beta) mit allen Funktionen seit der 3.0 |

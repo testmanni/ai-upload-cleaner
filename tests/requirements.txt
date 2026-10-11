@@ -1,0 +1,5 @@
+# Export-Test. Zusätzlich nötig: Poppler (pdftotext, pdftoppm), optional Tesseract mit deutschem Modell.
+playwright==1.63.0
+pypdf==6.17.0
+Pillow==12.3.0
+reportlab==5.0.1

@@ -4,10 +4,14 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="light dark" />
+<script>try{var m=localStorage.getItem('aiuc-theme');if(m==='light'||m==='dark')document.documentElement.dataset.theme=m;}catch(e){}</script>
 <title>AI Upload Cleaner 6.0 (Beta) – Anleitung: alle Funktionen erklärt</title>
 <style>
-  :root{--bg:#faf8f5;--card:#fff;--line:#e0d9cf;--ink:#2a2620;--ink2:#6b6356;--mut:#9b9384;--acc:#185FA5;--acc-bg:#e3edf7;--warn-bg:#fbf0d9;--warn:#7a5c12;--ok-bg:#e2f3e4;--ok:#1f6b2c;--beta-bg:#fbe3e0;--beta:#9a2b20;}
-  @media (prefers-color-scheme: dark){:root{--bg:#1c1a17;--card:#2a2620;--line:#3f3932;--ink:#ece7df;--ink2:#bdb5a9;--mut:#8f877b;--acc:#8ab7e8;--acc-bg:#1f3a57;--warn-bg:#3a2f14;--warn:#e6c46a;--ok-bg:#1e3a24;--ok:#9fd8a8;--beta-bg:#4a1f1a;--beta:#f0a097;}}
+  :root{--bg:#faf8f5;--card:#fff;--line:#e0d9cf;--ink:#2a2620;--ink2:#6b6356;--mut:#736b5d;--acc:#185FA5;--acc-fill:#185FA5;--acc-bg:#e3edf7;--warn-bg:#fbf0d9;--warn:#7a5c12;--ok-bg:#e2f3e4;--ok:#1f6b2c;--beta-bg:#fbe3e0;--beta:#9a2b20;}
+  /* Darstellung: ohne Wahl folgt sie dem System, data-theme="light"/"dark" am <html> überschreibt das */
+  :root[data-theme="light"]{color-scheme:light}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1c1a17;--card:#2a2620;--line:#3f3932;--ink:#ece7df;--ink2:#bdb5a9;--mut:#9c958a;--acc:#8ab7e8;--acc-bg:#1f3a57;--warn-bg:#3a2f14;--warn:#e6c46a;--ok-bg:#1e3a24;--ok:#9fd8a8;--beta-bg:#4a1f1a;--beta:#f0a097;color-scheme:dark}}
+  :root[data-theme="dark"]{--bg:#1c1a17;--card:#2a2620;--line:#3f3932;--ink:#ece7df;--ink2:#bdb5a9;--mut:#9c958a;--acc:#8ab7e8;--acc-bg:#1f3a57;--warn-bg:#3a2f14;--warn:#e6c46a;--ok-bg:#1e3a24;--ok:#9fd8a8;--beta-bg:#4a1f1a;--beta:#f0a097;color-scheme:dark}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.55;font-size:17px}
   .wrap{max-width:720px;margin:0 auto;padding:28px 18px 60px}
@@ -17,14 +21,14 @@
   p{margin:8px 0}
   .kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
   .lead{font-size:18px;color:var(--ink2)}
-  .btn{display:block;text-align:center;background:var(--acc);color:#fff;text-decoration:none;font-size:20px;font-weight:600;padding:16px 20px;border-radius:12px;margin:18px 0 6px}
+  .btn{display:block;text-align:center;background:var(--acc-fill);color:#fff;text-decoration:none;font-size:20px;font-weight:600;padding:16px 20px;border-radius:12px;margin:18px 0 6px}
   .btn:hover{filter:brightness(1.08)}
   .btn small{display:block;font-size:13px;font-weight:400;opacity:.9;margin-top:2px}
   .alt{font-size:14px;color:var(--ink2);text-align:center}
   .alt a{color:var(--acc)}
   ol.steps{list-style:none;padding:0;margin:0;counter-reset:s}
   ol.steps li{position:relative;padding:14px 16px 14px 62px;margin:10px 0;background:var(--card);border:1px solid var(--line);border-radius:12px;counter-increment:s}
-  ol.steps li::before{content:counter(s);position:absolute;left:16px;top:14px;width:32px;height:32px;border-radius:50%;background:var(--acc);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+  ol.steps li::before{content:counter(s);position:absolute;left:16px;top:14px;width:32px;height:32px;border-radius:50%;background:var(--acc-fill);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
   ol.steps li b{display:block;margin-bottom:2px}
   .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:10px 0}
   .warn{background:var(--warn-bg);color:var(--warn);border-color:transparent}
@@ -42,10 +46,15 @@
   .foot code{font-size:11px;word-break:break-all}
   a{color:var(--acc)}
   .blocks{background:#000;color:#000;border-radius:2px;padding:0 3px}
+  .topbar{display:flex;justify-content:flex-end;margin-bottom:6px}
+  .theme{font:inherit;font-size:13px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 11px;min-height:34px;cursor:pointer}
+  .theme:hover{border-color:var(--acc)}
+  :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="topbar"><button class="theme" id="themeToggle" type="button" aria-label="Darstellung wechseln: System, Hell, Dunkel" title="Darstellung wechseln: System, Hell, Dunkel" hidden></button></div>
   <div class="kicker">AI Upload Cleaner 6.0 · Beta · Anleitung</div>
   <h1>Schwärzen, Text erkennen, prüfen, hochladen. Alle Funktionen der 6.0 erklärt.</h1>
   <p class="lead">Ein Werkzeug, eine Datei, kein Konto, kein Internet nötig. Neu gegenüber der 3.0: Texterkennung für Scans und Fotos (Deutsch und Englisch), eine Fundstellenliste über alle Muster und ein Prüftext, der zeigt, was nach dem Schwärzen lesbar bleibt.</p>
@@ -135,5 +144,15 @@
     Hilfsmittel, keine Rechtsberatung. Sicher ist die Schwärzung erst, wenn du sie mit eigenen Augen geprüft hast.
   </div>
 </div>
+<script>
+// Darstellung: 'system' folgt prefers-color-scheme, 'light'/'dark' wird lokal gespeichert (gleicher Schlüssel wie im Werkzeug)
+(function(){
+  var b=document.getElementById('themeToggle'),r=document.documentElement,mode=r.dataset.theme||'system';
+  var label={system:'◐ System',light:'☀️ Hell',dark:'🌙 Dunkel'},next={system:'light',light:'dark',dark:'system'};
+  function apply(){if(mode==='system')delete r.dataset.theme;else r.dataset.theme=mode;b.textContent=label[mode];}
+  b.onclick=function(){mode=next[mode];try{if(mode==='system')localStorage.removeItem('aiuc-theme');else localStorage.setItem('aiuc-theme',mode);}catch(e){}apply();};
+  apply();b.hidden=false;
+})();
+</script>
 </body>
 </html>
