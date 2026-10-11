@@ -120,7 +120,8 @@ Unterstützte Browser laut PDF.js-Legacy-Build: Chrome ab 125, Firefox ESR, Safa
 | `build/CHECKSUMS.txt` | Herkunft und SHA-256-Prüfsummen der eingebetteten Bibliotheken und der Werkzeugdateien |
 | `deploy/` | Upload der öffentlichen Dateien zu ai-upload-cleaner.com per FTPS, mit Prüfung über HTTPS (siehe `deploy/README.md`) |
 | `tests/` | Export-Test: bedient das Werkzeug im Browser und prüft die exportierten Dateien unabhängig nach (siehe `tests/README.md`) |
-| `index.html` | Startseite mit interaktivem Selbsttest, verlinkt Werkzeug 3.0 und Anleitung |
+| `index.html` | Startseite mit interaktivem Selbsttest, verlinkt Werkzeug 3.0, Anleitung und die Beta 6.0; Hell/Dunkel umschaltbar |
+| `og-image.png` | Vorschaubild für geteilte Links (1200 × 630) |
 | `anleitung.html` | kurze Bedienungsanleitung zur 3.0 |
 | `anleitung6.0.html` | Anleitung zur 6.0 (Beta) mit allen Funktionen seit der 3.0 |
 | `LICENSE` | MIT-Lizenz dieses Projekts |
