@@ -21,7 +21,7 @@ lib-ocr-deu          tesseract-ocr/tessdata_fast, Tag 4.1.0, deu.traineddata sha
 lib-ocr-eng          tesseract-ocr/tessdata_fast, Tag 4.1.0, eng.traineddata sha256=7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2  Apache-2.0
 
 ai-upload-cleaner2.0.html  sha256=dd8e3c8e0089833644c5c005c8138a626931e6a1bc88cc1d0b4db5463379e7cc
-ai-upload-cleaner3.0.html  sha256=ae5b97e0215f8dbad944e0d10e2f9daa1d3bde6238013f43b48c9dcfa2dace0b
+ai-upload-cleaner3.0.html  sha256=72fd1c314b2880e7cc28d2e8f353dc5e725e6370b3798a6ac99bce9483bdbc1d
 ai-upload-cleaner4.0.html  sha256=01e6e151ffead97aa82cca9730b93fd8015e5e8bc887a798eb65519859fbf5b8
 ai-upload-cleaner5.0.html  sha256=ebd3598260dc3477dfd6b63a932f90414e783d2a0217f6c367c88d4640aaec53
-ai-upload-cleaner6.0.html  sha256=a03d8aecd14d45e8a23df410a732997c6fe93f8ec64d7fdd5082f5162ad4e492
+ai-upload-cleaner6.0.html  sha256=3708f09ffe1c67f86cc285d64a2059b39c9f69de581107ef2eb1056e46ac3627

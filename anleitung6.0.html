@@ -46,7 +46,10 @@
   .foot code{font-size:11px;word-break:break-all}
   a{color:var(--acc)}
   .blocks{background:#000;color:#000;border-radius:2px;padding:0 3px}
-  .topbar{display:flex;justify-content:flex-end;margin-bottom:6px}
+  .topbar{display:flex;justify-content:flex-end;align-items:center;margin-bottom:6px}
+  .home{display:inline-flex;align-items:center;gap:9px;margin-right:auto;min-height:34px;font-family:'SFMono-Regular',ui-monospace,'Cascadia Code',Consolas,monospace;font-size:14px;letter-spacing:.02em;color:var(--ink);text-decoration:none}
+  .home .dot{flex:none;width:9px;height:9px;border-radius:2px;background:var(--acc-fill);box-shadow:0 0 0 3px var(--acc-bg)}
+  .home:hover{color:var(--acc)}
   .theme{font:inherit;font-size:13px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 11px;min-height:34px;cursor:pointer}
   .theme:hover{border-color:var(--acc)}
   :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
@@ -54,7 +57,7 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="topbar"><button class="theme" id="themeToggle" type="button" aria-label="Darstellung wechseln: System, Hell, Dunkel" title="Darstellung wechseln: System, Hell, Dunkel" hidden></button></div>
+  <div class="topbar"><a class="home" href="https://ai-upload-cleaner.com/" target="_blank" rel="noopener noreferrer" aria-label="AI Upload Cleaner: Startseite (öffnet in neuem Tab)"><span class="dot"></span><span>AI Upload Cleaner</span></a><button class="theme" id="themeToggle" type="button" aria-label="Darstellung wechseln: System, Hell, Dunkel" title="Darstellung wechseln: System, Hell, Dunkel" hidden></button></div>
   <div class="kicker">AI Upload Cleaner 6.0 · Beta · Anleitung</div>
   <h1>Schwärzen, Text erkennen, prüfen, hochladen. Alle Funktionen der 6.0 erklärt.</h1>
   <p class="lead">Ein Werkzeug, eine Datei, kein Konto, kein Internet nötig. Neu gegenüber der 3.0: Texterkennung für Scans und Fotos (Deutsch und Englisch), eine Fundstellenliste über alle Muster und ein Prüftext, der zeigt, was nach dem Schwärzen lesbar bleibt.</p>
