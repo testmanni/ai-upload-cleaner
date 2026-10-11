@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<!--
+  AI Text Cleaner 0.1.0 (Prototyp)
+  Copyright (c) 2026 Manfred Just
+  Lizenziert unter der MIT-Lizenz. Siehe LICENSE.
+
+  Namen raus, Antwort zurück: Text vor dem Chat mit einer KI maskieren ([Person A], [IBAN 1] …),
+  die Zuordnung als Datei speichern und die Antwort der KI später zurückübersetzen.
+  Eine einzelne HTML-Datei, vollständig offline, ohne Bibliotheken.
+
+  Sicherheitsmaßnahmen:
+    - Content-Security-Policy: keine Netzwerkverbindungen (connect-src 'none'), keine externen Skripte.
+    - Die Zuordnung liegt nur im Arbeitsspeicher dieses Tabs und in der Datei, die Sie selbst speichern.
+      Das Werkzeug legt sie nicht im Browser ab.
+    - Vor dem Kopieren und Speichern des maskierten Texts prüft das Werkzeug, dass kein Wert aus der
+      Zuordnung mehr darin steht (Leck-Prüfung). Schlägt sie an, wird nichts kopiert.
+    - Beim Zurückübersetzen wird nur ersetzt, was genau einem Platzhalter der Liste entspricht.
+      Unbekannte und veränderte Platzhalter werden gemeldet, nicht geraten.
+-->
+<meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-aitc'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'" />
+<meta name="referrer" content="no-referrer" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="application-name" content="AI Text Cleaner 0.1.0" />
+<meta name="color-scheme" content="light dark" />
+<title>AI Text Cleaner – Namen raus, Antwort zurück</title>
+<script nonce="aitc">try{var m=localStorage.getItem('aiuc-theme');if(m==='light'||m==='dark')document.documentElement.dataset.theme=m;}catch(e){}</script>
+<style>
+  :root{--bg:#faf8f5;--card:#fff;--sunk:#f1ede7;--line:#e0d9cf;--line2:#cabfae;--ink:#2a2620;--ink2:#6b6356;--mut:#736b5d;--acc:#185FA5;--acc-fill:#185FA5;--acc-bg:#e3edf7;--warn-bg:#fbf0d9;--warn:#7a5c12;--ok-bg:#e2f3e4;--ok:#1f6b2c;--bad-bg:#fbe3e0;--bad:#9a2b20;--ph:#185FA5;}
+  /* Darstellung: ohne Wahl folgt sie dem System, data-theme="light"/"dark" am <html> überschreibt das */
+  :root[data-theme="light"]{color-scheme:light}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1c1a17;--card:#2a2620;--sunk:#221f1b;--line:#3f3932;--line2:#5a5248;--ink:#ece7df;--ink2:#bdb5a9;--mut:#9c958a;--acc:#8ab7e8;--acc-bg:#1f3a57;--warn-bg:#3a2f14;--warn:#e6c46a;--ok-bg:#1e3a24;--ok:#9fd8a8;--bad-bg:#4a1f1a;--bad:#f0a097;--ph:#8ab7e8;color-scheme:dark}}
+  :root[data-theme="dark"]{--bg:#1c1a17;--card:#2a2620;--sunk:#221f1b;--line:#3f3932;--line2:#5a5248;--ink:#ece7df;--ink2:#bdb5a9;--mut:#9c958a;--acc:#8ab7e8;--acc-bg:#1f3a57;--warn-bg:#3a2f14;--warn:#e6c46a;--ok-bg:#1e3a24;--ok:#9fd8a8;--bad-bg:#4a1f1a;--bad:#f0a097;--ph:#8ab7e8;color-scheme:dark}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5;font-size:15px}
+  .wrap{max-width:1180px;margin:0 auto;padding:18px 16px 50px}
+  h1{font-size:24px;margin:0;line-height:1.25}
+  h2{font-size:16px;margin:0 0 8px}
+  p{margin:6px 0}
+  a{color:var(--acc)}
+  .topbar{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .home{display:inline-flex;align-items:center;gap:9px;margin-right:auto;min-height:34px;font-family:'SFMono-Regular',ui-monospace,'Cascadia Code',Consolas,monospace;font-size:14px;letter-spacing:.02em;color:var(--ink);text-decoration:none}
+  .home .dot{flex:none;width:9px;height:9px;border-radius:2px;background:var(--acc-fill);box-shadow:0 0 0 3px var(--acc-bg)}
+  .home:hover{color:var(--acc)}
+  .sub{color:var(--ink2);margin:2px 0 10px}
+  .kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+  button,.btn{font:inherit;font-size:14px;color:var(--ink);background:var(--card);border:1px solid var(--line2);border-radius:8px;padding:6px 12px;min-height:34px;cursor:pointer}
+  button:hover{border-color:var(--acc)}
+  button:disabled{opacity:.45;cursor:not-allowed;border-color:var(--line2)}
+  button.primary{background:var(--acc-fill);border-color:var(--acc-fill);color:#fff;font-weight:600}
+  button.primary:hover{filter:brightness(1.08)}
+  button.danger{color:var(--bad)}
+  :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+  textarea,input,select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line2);border-radius:8px}
+  textarea{width:100%;min-height:260px;padding:10px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px;line-height:1.5}
+  textarea[readonly]{background:var(--sunk)}
+  input,select{padding:5px 8px;min-height:34px;max-width:100%}
+  .note{border-radius:8px;padding:9px 12px;margin:8px 0;font-size:14px}
+  .note.warn{background:var(--warn-bg);color:var(--warn)}
+  .note.ok{background:var(--ok-bg);color:var(--ok)}
+  .note.bad{background:var(--bad-bg);color:var(--bad)}
+  .note.info{background:var(--acc-bg)}
+  .note ul{margin:4px 0 0;padding-left:20px}
+  .tabs{display:flex;gap:6px;margin:14px 0 0;border-bottom:1px solid var(--line)}
+  .tab{border:1px solid var(--line);border-bottom:none;border-radius:8px 8px 0 0;background:var(--sunk);color:var(--ink2);padding:8px 14px;margin-bottom:-1px}
+  .tab[aria-selected="true"]{background:var(--card);color:var(--ink);font-weight:600;border-color:var(--line)}
+  .panel{background:var(--card);border:1px solid var(--line);border-top:none;border-radius:0 0 12px 12px;padding:14px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:820px){.grid{grid-template-columns:1fr}}
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+  .lbl{font-size:13px;color:var(--ink2);font-weight:600;margin:0 0 4px;display:flex;align-items:center;gap:8px;min-height:24px}
+  .lbl .grow{flex:1}
+  .chk{display:flex;align-items:center;gap:6px;font-size:14px}
+  .chk input{min-height:0;width:16px;height:16px}
+  .rest{list-style:none;padding:0;margin:6px 0 0}
+  .rest li{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
+  .rest .kind{font-size:12px;color:var(--mut);min-width:96px}
+  .rest code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;background:var(--sunk);padding:1px 6px;border-radius:5px}
+  .rest button{min-height:28px;padding:2px 8px;font-size:13px;margin-left:auto}
+  .map{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:14px}
+  .maphead{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+  .maphead h2{margin:0 auto 0 0}
+  .state{font-size:13px;color:var(--mut)}
+  .state.dirty{color:var(--warn)}
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;font-size:12px;color:var(--mut);font-weight:600;padding:4px 6px;border-bottom:1px solid var(--line)}
+  td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+  td input{width:100%}
+  td.ph input{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;color:var(--ph);font-weight:600}
+  td.n{width:1%;white-space:nowrap;text-align:right;color:var(--mut);font-size:13px;padding-top:11px}
+  td.x{width:1%}
+  td.x button{min-height:30px;padding:2px 9px}
+  input.err{border-color:var(--bad);background:var(--bad-bg)}
+  @media (max-width:640px){
+    table,tbody,tr,td{display:block;width:100%}
+    thead{display:none}
+    tr{border:1px solid var(--line);border-radius:8px;padding:6px;margin:8px 0}
+    td{border:none;padding:3px 0}
+    td.n,td.x{display:inline-block;width:auto;vertical-align:middle;padding:3px 8px 0 0}
+  }
+  .empty{color:var(--mut);font-size:14px;padding:10px 0}
+  .add{background:var(--sunk);border-radius:10px;padding:8px 10px;margin:0 0 12px}
+  .add input{flex:1;min-width:180px}
+  .hidden{display:none !important}
+  .foot{margin-top:28px;font-size:13px;color:var(--mut);border-top:1px solid var(--line);padding-top:12px}
+  .foot a{color:inherit}
+  dialog{max-width:640px;width:calc(100% - 32px);border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);padding:18px 20px}
+  dialog::backdrop{background:rgba(0,0,0,.45)}
+  dialog h2{font-size:18px}
+  .hl{font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <a class="home" href="https://ai-upload-cleaner.com/" target="_blank" rel="noopener noreferrer" aria-label="AI Upload Cleaner: Startseite (öffnet in neuem Tab)"><span class="dot"></span><span>AI Upload Cleaner</span></a>
+    <button class="theme" id="themeToggle" type="button" aria-label="Darstellung wechseln: System, Hell, Dunkel" title="Darstellung wechseln: System, Hell, Dunkel" hidden></button>
+  </div>
+  <div class="kicker">AI Text Cleaner 0.1 · Prototyp</div>
+  <h1>Namen raus, Antwort zurück.</h1>
+  <p class="sub">Text maskieren, an die KI schicken, Antwort zurückübersetzen. Alles bleibt auf diesem Gerät. Die Zuordnung speichern Sie als Datei und laden sie wieder, wann Sie wollen.</p>
+  <div class="note warn"><b>Prototyp:</b> nicht für den Ernstfall. Das Werkzeug ersetzt nur, was in der Liste steht oder einem Muster (IBAN, E-Mail, Telefon) entspricht. Namen findet es nicht von selbst. Lesen Sie den maskierten Text, bevor Sie ihn abschicken.</div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tabMask" aria-selected="true" aria-controls="panelMask">1 · Maskieren</button>
+    <button class="tab" role="tab" id="tabBack" aria-selected="false" aria-controls="panelBack">2 · Zurückübersetzen</button>
+  </div>
+
+  <!-- 1 · Maskieren -->
+  <section class="panel" id="panelMask" role="tabpanel" aria-labelledby="tabMask">
+    <div class="add">
+      <div class="row" style="margin:0">
+        <input id="addValue" type="text" placeholder="Name oder Begriff, der verschwinden soll" aria-label="Name oder Begriff" autocomplete="off" />
+        <select id="addType" aria-label="Art oder Variante von"></select>
+        <button id="addBtn" type="button" class="primary">Hinzufügen</button>
+        <button id="takeSel" type="button" title="Im Originaltext markierten Text übernehmen">Markierung übernehmen</button>
+        <button id="findPat" type="button" title="IBAN, E-Mail-Adressen und Telefonnummern im Originaltext suchen und in die Liste aufnehmen">IBAN, E-Mail, Telefon finden</button>
+      </div>
+      <div id="addMsg" class="note hidden" style="margin:8px 0 0"></div>
+    </div>
+    <div class="grid">
+      <div>
+        <div class="lbl"><span class="grow">Originaltext</span><button id="clearSrc" type="button" style="min-height:26px;padding:1px 8px;font-size:12px">Leeren</button></div>
+        <textarea id="src" spellcheck="false" placeholder="Text hier einfügen (Strg+V). Muster wie IBAN, E-Mail und Telefon werden beim Einfügen gesucht, Namen tragen Sie oben ein."></textarea>
+      </div>
+      <div>
+        <div class="lbl"><span class="grow">Maskierter Text, so geht er an die KI</span><label class="chk" style="font-weight:400"><input type="checkbox" id="prefix" checked /> Hinweis an die KI voranstellen</label></div>
+        <textarea id="masked" readonly spellcheck="false" aria-label="Maskierter Text"></textarea>
+      </div>
+    </div>
+    <div id="leak" class="note bad hidden" role="alert"></div>
+    <div id="restBox" class="note warn hidden">
+      <b>Restliste: Das sieht noch nach persönlichen Daten aus.</b> Prüfen Sie jeden Eintrag. Übernehmen Sie ihn in die Liste oder lassen Sie ihn stehen, wenn er harmlos ist.
+      <ul class="rest" id="rest"></ul>
+      <label class="chk" style="margin-top:8px"><input type="checkbox" id="restOk" /> Ich habe die Restliste geprüft, der Rest darf so bleiben.</label>
+    </div>
+    <div id="restNone" class="note ok hidden">Restliste leer: keine Muster, Anreden, Adressen, Daten oder langen Nummern mehr gefunden. Lesen Sie trotzdem selbst.</div>
+    <div class="row">
+      <button id="copyMasked" type="button" class="primary" disabled>📋 Maskierten Text kopieren</button>
+      <button id="saveMasked" type="button" disabled>Als TXT speichern</button>
+      <span id="maskMsg" class="state" role="status"></span>
+    </div>
+  </section>
+
+  <!-- 2 · Zurückübersetzen -->
+  <section class="panel hidden" id="panelBack" role="tabpanel" aria-labelledby="tabBack">
+    <div id="noList" class="note info">Für das Zurückübersetzen braucht das Werkzeug die Zuordnung. Laden Sie die gespeicherte Liste unten mit <b>Liste laden</b>, oder maskieren Sie vorher in Schritt 1.</div>
+    <div class="grid">
+      <div>
+        <div class="lbl"><span class="grow">Antwort der KI</span><button id="clearAns" type="button" style="min-height:26px;padding:1px 8px;font-size:12px">Leeren</button></div>
+        <textarea id="answer" spellcheck="false" placeholder="Antwort der KI hier einfügen (Strg+V)."></textarea>
+      </div>
+      <div>
+        <div class="lbl"><span class="grow">Zurückübersetzt</span></div>
+        <textarea id="restored" readonly spellcheck="false" aria-label="Zurückübersetzter Text"></textarea>
+      </div>
+    </div>
+    <div id="report"></div>
+    <div class="row">
+      <button id="copyRestored" type="button" class="primary" disabled>📋 Zurückübersetzten Text kopieren</button>
+      <span id="backMsg" class="state" role="status"></span>
+    </div>
+  </section>
+
+  <!-- Zuordnung, in beiden Schritten sichtbar -->
+  <section class="map" aria-labelledby="mapTitle">
+    <div class="maphead">
+      <h2 id="mapTitle">Zuordnung</h2>
+      <span id="mapState" class="state">leer</span>
+      <button id="saveList" type="button" class="primary" disabled>Liste speichern</button>
+      <button id="loadList" type="button">Liste laden</button>
+      <button id="clearList" type="button" class="danger" disabled>Liste leeren</button>
+      <input id="listFile" type="file" accept=".txt,text/plain" class="hidden" />
+    </div>
+    <div id="listMsg" class="note hidden" role="alert"></div>
+    <table id="mapTable" class="hidden">
+      <thead><tr><th style="width:18%">Platzhalter</th><th style="width:30%">Echter Wert</th><th>Varianten, mit ; getrennt</th><th>im Text</th><th></th></tr></thead>
+      <tbody id="mapBody"></tbody>
+    </table>
+    <div id="mapEmpty" class="empty">Noch keine Einträge. Tragen Sie in Schritt 1 Namen ein, suchen Sie Muster, oder laden Sie eine gespeicherte Liste.</div>
+    <p class="state">Die Datei <code>zuordnung_NICHT_HOCHLADEN.txt</code> enthält die echten Namen im Klartext. Sie gehört nicht in den Chat und nicht in eine Cloud. Ohne gespeicherte Datei ist die Liste weg, sobald Sie diesen Tab schließen.</p>
+  </section>
+
+  <div class="foot">
+    AI Text Cleaner 0.1.0 (Prototyp) · MIT-Lizenz · <a href="https://github.com/testmanni/ai-upload-cleaner">github.com/testmanni/ai-upload-cleaner</a> · <a href="#" id="lnkImpressum">Impressum</a> · <a href="#" id="lnkDatenschutz">Datenschutz</a><br>
+    Hilfsmittel, keine Rechtsberatung. Maskiert heißt nicht anonym: Ein seltener Befund mit Ort und Datum bleibt auch ohne Namen zuordenbar.
+  </div>
+</div>
+
+<dialog id="legal"><div id="legalContent"></div><div class="row" style="justify-content:flex-end"><button id="legalClose" type="button">Schließen</button></div></dialog>
+
+<script nonce="aitc">
+'use strict';
+const VERSION='0.1.0';
+const HEADER='# AI Text Cleaner · Zuordnung v1 · NICHT HOCHLADEN';
+const LIST_FILE='zuordnung_NICHT_HOCHLADEN.txt';
+const $=id=>document.getElementById(id);
+
+// ============================================================================
+// Zuordnung: eine Liste von {ph, value, variants[]}. Sie ist die einzige Quelle,
+// der maskierte Text wird bei jeder Änderung neu daraus erzeugt.
+// ============================================================================
+let entries=[];
+let dirty=false;        // geändert seit dem letzten Speichern oder Laden
+let savedAt=null;
+
+const TYPES=['Person','Firma','Ort','Adresse','IBAN','E-Mail','Telefon','Nummer','Datum','Sonstiges'];
+const LETTER_TYPES=new Set(['Person','Firma','Ort']);
+const PH_RE=/^\[([A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß-]*) ([A-Z]{1,2}|[1-9]\d{0,2})\]$/;
+
+function letters(n){let s='';n++;while(n>0){const r=(n-1)%26;s=String.fromCharCode(65+r)+s;n=Math.floor((n-1)/26);}return s;}
+function nextPh(type){
+  const used=new Set(entries.map(e=>e.ph));
+  for(let i=0;i<10000;i++){const ph='['+type+' '+(LETTER_TYPES.has(type)?letters(i):String(i+1))+']';if(!used.has(ph))return ph;}
+  throw new Error('Zu viele Einträge');
+}
+function phType(ph){const m=PH_RE.exec(ph);return m?m[1]:'Sonstiges';}
+
+// Vergleichsform: Groß/klein und Leerraum spielen keine Rolle
+function norm(s){return s.normalize('NFC').toLowerCase().replace(/\s+/g,'');}
+function allValues(e){return [e.value,...e.variants];}
+function findValue(v){const n=norm(v);for(const e of entries){for(const x of allValues(e)){if(norm(x)===n)return e;}}return null;}
+
+function cleanValue(v){return v.replace(/\s+/g,' ').trim();}
+function valueProblem(v){
+  if(!v)return 'Der Wert ist leer.';
+  if(v.includes(';'))return 'Ein Semikolon trennt Varianten und darf im Wert nicht vorkommen.';
+  if(/[\[\]]/.test(v))return 'Eckige Klammern sind den Platzhaltern vorbehalten.';
+  return '';
+}
+
+function addEntry(value,type,silent){
+  value=cleanValue(value);
+  const p=valueProblem(value);if(p){if(!silent)addMsg(p,'bad');return null;}
+  const ex=findValue(value);if(ex){if(!silent)addMsg('„'+value+'“ steht schon in der Liste: '+ex.ph+'.','warn');return null;}
+  const e={ph:nextPh(type),value,variants:[]};
+  entries.push(e);changed();
+  if(!silent)addMsg('„'+value+'“ wird zu '+e.ph+'.','ok');
+  return e;
+}
+function addVariant(e,value){
+  value=cleanValue(value);
+  const p=valueProblem(value);if(p){addMsg(p,'bad');return false;}
+  const ex=findValue(value);if(ex){addMsg('„'+value+'“ steht schon in der Liste: '+ex.ph+'.','warn');return false;}
+  e.variants.push(value);changed();
+  addMsg('„'+value+'“ ist jetzt eine Variante von '+e.ph+'.','ok');
+  return true;
+}
+
+// ============================================================================
+// Maskieren: alle Werte und Varianten in einem Durchgang, längste zuerst,
+// damit „Max Mustermann“ vor „Mustermann“ greift und nichts doppelt ersetzt wird.
+// Wortgrenzen: kein Buchstabe und keine Ziffer direkt davor oder danach.
+// ============================================================================
+function esc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+function valuePattern(v,type){
+  const glue=(type==='IBAN'||type==='Telefon'||type==='Nummer')?'\\s*':'\\s+';
+  return v.split(/\s+/).map(esc).join(glue);
+}
+function buildMasker(){
+  const items=[];
+  for(const e of entries){const t=phType(e.ph);for(const v of allValues(e))items.push({v,ph:e.ph,t});}
+  if(!items.length)return null;
+  items.sort((a,b)=>b.v.length-a.v.length);
+  const re=new RegExp('(?<![\\p{L}\\p{N}])(?:'+items.map((it,i)=>'(?<g'+i+'>'+valuePattern(it.v,it.t)+')').join('|')+')(?![\\p{L}\\p{N}])','giu');
+  return {re,items};
+}
+function mask(text){
+  const m=buildMasker();
+  const counts=new Map();
+  if(!m)return {out:text,counts};
+  const out=text.replace(m.re,(...args)=>{
+    const groups=args[args.length-1];
+    for(let i=0;i<m.items.length;i++){if(groups['g'+i]!==undefined){const ph=m.items[i].ph;counts.set(ph,(counts.get(ph)||0)+1);return ph;}}
+    return args[0];
+  });
+  return {out,counts};
+}
+
+// Leck-Prüfung: Steht ein Wert aus der Liste noch im maskierten Text?
+// Verglichen wird ohne Leerraum und ohne Groß/klein, also auch „DE8937…“ ohne Leerzeichen
+// oder „Mustermanns“. Platzhalter selbst werden vorher entfernt.
+function leaks(maskedText){
+  const hay=norm(maskedText.replace(/\[[^\]\n]{1,40}\]/g,'\u0000'));
+  const found=[];
+  for(const e of entries){
+    for(const v of allValues(e)){
+      const n=norm(v);
+      if(n.length>=3){if(hay.includes(n))found.push({e,v,at:leakContext(maskedText,n)});}
+      else{const re=new RegExp('(?<![\\p{L}\\p{N}])'+valuePattern(v,phType(e.ph))+'(?![\\p{L}\\p{N}])','iu');if(re.test(maskedText.replace(/\[[^\]\n]{1,40}\]/g,' ')))found.push({e,v,at:v});}
+    }
+  }
+  return found;
+}
+
+// Die Stelle im Text, an der der Wert steht, auf ganze Wörter erweitert („Max Mustermanns“)
+function leakContext(text,n){
+  const re=new RegExp('[\\p{L}\\p{N}]*'+[...n].map(esc).join('\\s*')+'[\\p{L}\\p{N}]*','iu');
+  const m=re.exec(text);return m?m[0]:n;
+}
+
+// ============================================================================
+// Muster wie im AI Upload Cleaner 6.0, hier ohne Kleinschreibung des Texts (Flag i)
+// ============================================================================
+const PATTERNS={
+  iban:/\b[a-z]{2}\d{2}(?:[ ]?[a-z0-9]{4}){2,7}(?:[ ]?[a-z0-9]{1,4})?\b/gi,
+  email:/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi,
+  phone:/(?:\+\d{1,3}[\d \/()-]{6,}\d|\b0[\d \/()-]{7,}\d|\(\d{3}\) ?\d{3}[-. ]\d{4}\b|\b\d{3}[-.]\d{3}[-.]\d{4}\b)/g,
+  ssn:/(?:\b\d{3}-\d{2}-\d{4}\b|\b[a-z]{2} ?\d{2} ?\d{2} ?\d{2} ?[a-d]\b)/gi
+};
+const PAT_TYPE={iban:'IBAN',email:'E-Mail',phone:'Telefon',ssn:'Nummer'};
+const PAT_NAME={iban:'IBAN',email:'E-Mail',phone:'Telefon',ssn:'SSN/NI'};
+function matches(re,text){const out=[];const r=new RegExp(re.source,re.flags);let m;while((m=r.exec(text))){if(m[0].length)out.push({s:m.index,e:m.index+m[0].length,t:m[0]});if(r.lastIndex===m.index)r.lastIndex++;}return out;}
+// Fundstellen der Muster; Telefon-Treffer innerhalb einer IBAN zählen nicht
+function patternHits(text){
+  const hits=[];
+  for(const k of ['iban','email','ssn','phone']){
+    for(const h of matches(PATTERNS[k],text)){
+      if(k==='iban'&&!/\d/.test(h.t.slice(2)))continue;
+      if(hits.some(x=>h.s<x.e&&x.s<h.e))continue;
+      hits.push({...h,k});
+    }
+  }
+  return hits.sort((a,b)=>a.s-b.s);
+}
+function findPatterns(){
+  const hits=patternHits($('src').value);
+  let added=0;
+  for(const h of hits){
+    let v=h.t.trim();
+    if(h.k==='iban'||h.k==='ssn')v=v.toUpperCase();
+    if(findValue(v))continue;
+    if(addEntry(v,PAT_TYPE[h.k],true))added++;
+  }
+  addMsg(added?added+(added===1?' Muster':' Muster')+' in die Liste aufgenommen.':(hits.length?'Alle gefundenen Muster stehen schon in der Liste.':'Keine IBAN, E-Mail oder Telefonnummer gefunden.'),added?'ok':'info');
+}
+
+// ============================================================================
+// Restliste: Was im maskierten Text noch nach persönlichen Daten aussieht.
+// Faustregeln, keine Namenserkennung. Sie zeigt Kandidaten, entscheiden muss der Mensch.
+// ============================================================================
+const REST_RULES=[
+  {kind:'Anrede mit Name',type:'Person',re:/\b(?:Herrn?|Frau|Dr\.|Prof\.|Mr\.?|Mrs\.?|Ms\.?)(?:\s+(?:Dr\.|Prof\.))?\s+[A-ZÄÖÜ][\p{L}'-]+(?:\s+[A-ZÄÖÜ][\p{L}'-]+)?/gu},
+  {kind:'Straße und Nummer',type:'Adresse',re:/\b[\p{L}.-]*(?:straße|strasse|str\.|weg|platz|allee|gasse|ring|damm|ufer|chaussee|kamp)\s+\d+\s?[a-z]?\b/giu},
+  {kind:'Postleitzahl und Ort',type:'Ort',re:/\b\d{5}\s+[A-ZÄÖÜ][\p{L}-]+(?:\s(?:am|an der|im|ob der)\s[A-ZÄÖÜ][\p{L}-]+)?/gu},
+  {kind:'Datum',type:'Datum',re:/\b\d{1,2}\.\s?\d{1,2}\.\s?(?:19|20)?\d{2}\b/g},
+  {kind:'Lange Nummer',type:'Nummer',minDigits:6,re:/(?<![\p{L}\p{N}])\d[\d .\/-]{4,}\d(?![\p{L}\p{N}])/gu},
+  {kind:'Internetadresse',type:'Sonstiges',re:/\b(?:https?:\/\/|www\.)[^\s<>"]+/gi},
+  {kind:'Platzhalter-ähnlich',type:null,re:/\[[A-Za-zÄÖÜäöüß-]+ (?:[A-Z]{1,2}|\d{1,3})\]/g}
+];
+function restList(srcText,maskedText){
+  const out=[];const seen=new Set();
+  for(const h of patternHits(maskedText)){
+    const key=norm(h.t);if(seen.has(key))continue;seen.add(key);
+    out.push({kind:PAT_NAME[h.k],type:PAT_TYPE[h.k],text:(h.k==='iban'||h.k==='ssn')?h.t.toUpperCase():h.t,s:h.s,e:h.e});
+  }
+  const usedPh=new Set(entries.map(e=>e.ph));
+  for(const r of REST_RULES){
+    if(r.type===null){
+      // Steht im Original schon etwas wie „[Person A]“, wäre die Rückübersetzung mehrdeutig
+      for(const h of matches(r.re,srcText)){
+        const key='ph:'+h.t;if(seen.has(key))continue;seen.add(key);
+        out.push({kind:usedPh.has(h.t)?'Platzhalter schon im Original':'Klammer wie ein Platzhalter',type:null,text:h.t,s:-1,e:-1});
+      }
+      continue;
+    }
+    for(const h of matches(r.re,maskedText)){
+      if(r.minDigits&&h.t.replace(/\D/g,'').length<r.minDigits)continue;
+      if(out.some(x=>x.s>=0&&h.s<x.e&&x.s<h.e))continue;
+      const key=norm(h.t);if(seen.has(key))continue;seen.add(key);
+      out.push({kind:r.kind,type:r.type,text:h.t.trim(),s:h.s,e:h.e});
+    }
+  }
+  return out;
+}
+
+// ============================================================================
+// Zurückübersetzen: nur exakte Platzhalter der Liste werden ersetzt.
+// Verändert (andere Schreibweise, ohne Klammern) und unbekannt wird gemeldet.
+// ============================================================================
+function restore(text){
+  const map=new Map(entries.map(e=>[e.ph,e.value]));
+  const counts=new Map(),unknown=new Map(),altered=new Map();
+  const out=text.replace(/\[[^\[\]\n]{1,40}\]/g,t=>{
+    if(map.has(t)){counts.set(t,(counts.get(t)||0)+1);return map.get(t);}
+    if(PH_RE.test(t))unknown.set(t,(unknown.get(t)||0)+1);
+    return t;
+  });
+  // Platzhalter-ähnliches, das nicht exakt passt: [person a], [Person  A], Person A ohne Klammern, [Person-A]
+  const types=[...new Set([...TYPES,...entries.map(e=>phType(e.ph))])].map(esc).join('|');
+  const loose=new RegExp('\\[?\\s*(?<![\\p{L}])('+types+')[\\s_-]*([A-Z]{1,2}|\\d{1,3})(?![\\p{L}\\p{N}])\\s*\\]?','giu');
+  for(const m of text.matchAll(loose)){
+    const t=m[0];
+    if(map.has(t)||PH_RE.test(t))continue;
+    const typ=TYPES.find(x=>x.toLowerCase()===m[1].toLowerCase())||m[1];
+    const guess='['+typ+' '+m[2].toUpperCase()+']';
+    // Nur melden, was nach einem gemeinten Platzhalter aussieht: Klammer dabei, oder der Platzhalter existiert
+    if(!/[\[\]]/.test(t)&&!map.has(guess))continue;
+    const k=t.trim();
+    if(!altered.has(k))altered.set(k,{n:0,guess:map.has(guess)?guess:null});
+    altered.get(k).n++;
+  }
+  const missing=entries.filter(e=>!counts.has(e.ph)).map(e=>e.ph);
+  return {out,counts,unknown,altered,missing};
+}
+
+// ============================================================================
+// Datei: eine Zeile je Eintrag, „[Platzhalter] = Wert; Variante; Variante“
+// ============================================================================
+function serialize(){
+  const lines=[HEADER,
+    '# Diese Datei enthält die echten Namen im Klartext. Nicht an eine KI schicken, nicht in eine Cloud legen.',
+    '# Format: [Platzhalter] = Wert; Variante; Variante',
+    '# Gespeichert: '+new Date().toLocaleString('de-DE')+' · AI Text Cleaner '+VERSION,''];
+  for(const e of entries)lines.push(e.ph+' = '+allValues(e).join('; '));
+  return lines.join('\n')+'\n';
+}
+function parse(txt){
+  const errors=[];
+  txt=txt.replace(/^﻿/,'');
+  const lines=txt.split(/\r\n|\r|\n/);
+  const first=lines.findIndex(l=>l.trim()!=='');
+  if(first<0)return {errors:['Die Datei ist leer.']};
+  if(!/^#\s*AI Text Cleaner\b.*\bZuordnung v1\b/.test(lines[first].trim()))
+    return {errors:['Zeile '+(first+1)+': Kopfzeile „'+HEADER+'“ fehlt. Ist das eine Zuordnung des AI Text Cleaners?']};
+  const out=[];const phs=new Map();const vals=new Map();
+  for(let i=first+1;i<lines.length;i++){
+    const raw=lines[i].trim();const ln='Zeile '+(i+1)+': ';
+    if(!raw||raw.startsWith('#'))continue;
+    const m=/^(\[[^\]]*\])\s*=\s*(.*)$/.exec(raw);
+    if(!m){errors.push(ln+'erwartet „[Platzhalter] = Wert“.');continue;}
+    const ph=m[1];
+    if(!PH_RE.test(ph)){errors.push(ln+ph+' ist kein gültiger Platzhalter. Form: [Typ Kennung], etwa [Person A] oder [IBAN 1].');continue;}
+    if(phs.has(ph)){errors.push(ln+ph+' kommt doppelt vor (auch in Zeile '+phs.get(ph)+').');continue;}
+    phs.set(ph,i+1);
+    const parts=m[2].split(';').map(cleanValue);
+    if(parts.some(p=>!p)){errors.push(ln+(parts.every(p=>!p)?'kein Wert für '+ph+'.':'leere Variante bei '+ph+' (zwei Semikolons hintereinander oder eins am Ende).'));continue;}
+    let bad=false;
+    for(const p of parts){
+      if(/[\[\]]/.test(p)){errors.push(ln+'„'+p+'“ enthält eckige Klammern.');bad=true;continue;}
+      const n=norm(p);
+      if(vals.has(n)){const o=vals.get(n);errors.push(ln+'„'+p+'“ gehört schon zu '+o.ph+' (Zeile '+o.line+'). Ein Wert darf nur einen Platzhalter haben.');bad=true;}
+      else vals.set(n,{ph,line:i+1});
+    }
+    if(bad)continue;
+    out.push({ph,value:parts[0],variants:parts.slice(1)});
+  }
+  if(!errors.length&&!out.length)errors.push('Die Datei enthält keine Einträge.');
+  return {errors,entries:out};
+}
+function looksLikeListFile(t){return /#\s*AI Text Cleaner\b[^\n]*Zuordnung v\d/.test(t);}
+
+// ============================================================================
+// Oberfläche
+// ============================================================================
+function show(el,on){el.classList.toggle('hidden',!on);}
+function note(el,text,kind){if(!text){show(el,false);return;}el.className='note '+kind;el.textContent=text;}
+let addMsgTimer=0;
+function addMsg(text,kind){const el=$('addMsg');note(el,text,kind);clearTimeout(addMsgTimer);if(kind==='ok'||kind==='info')addMsgTimer=setTimeout(()=>show(el,false),6000);}
+
+function fillTypeSelect(){
+  const s=$('addType');const keep=s.value;
+  s.textContent='';
+  const g1=document.createElement('optgroup');g1.label='Neuer Eintrag';
+  for(const t of TYPES){const o=document.createElement('option');o.value='new:'+t;o.textContent=t;g1.appendChild(o);}
+  s.appendChild(g1);
+  if(entries.length){
+    const g2=document.createElement('optgroup');g2.label='Variante von';
+    for(const e of entries){const o=document.createElement('option');o.value='var:'+e.ph;o.textContent=e.ph+' '+e.value;g2.appendChild(o);}
+    s.appendChild(g2);
+  }
+  if([...s.options].some(o=>o.value===keep))s.value=keep;
+}
+
+function renderTable(counts){
+  const body=$('mapBody');body.textContent='';
+  show($('mapTable'),entries.length>0);show($('mapEmpty'),entries.length===0);
+  entries.forEach((e,idx)=>{
+    const tr=document.createElement('tr');
+    const mk=(cls,val,label,on)=>{const td=document.createElement('td');td.className=cls;const i=document.createElement('input');i.type='text';i.value=val;i.setAttribute('aria-label',label);i.autocomplete='off';i.spellcheck=false;i.addEventListener('change',()=>on(i));td.appendChild(i);tr.appendChild(td);return i;};
+    mk('ph',e.ph,'Platzhalter',i=>{
+      const v=i.value.trim();
+      if(!PH_RE.test(v)){i.classList.add('err');listMsg(v+' ist kein gültiger Platzhalter. Form: [Typ Kennung], etwa [Person A].','bad');return;}
+      if(entries.some((x,j)=>j!==idx&&x.ph===v)){i.classList.add('err');listMsg(v+' gibt es schon.','bad');return;}
+      i.classList.remove('err');listMsg('');e.ph=v;changed();
+    });
+    mk('',e.value,'Echter Wert für '+e.ph,i=>{
+      const v=cleanValue(i.value);const p=valueProblem(v);const ex=findValue(v);
+      if(p||(ex&&ex!==e)){i.classList.add('err');listMsg(p||'„'+v+'“ gehört schon zu '+ex.ph+'.','bad');return;}
+      i.classList.remove('err');listMsg('');e.value=v;changed();
+    });
+    mk('',e.variants.join('; '),'Varianten für '+e.ph,i=>{
+      const parts=i.value.split(';').map(cleanValue).filter(Boolean);
+      for(const p of parts){
+        const pr=valueProblem(p);const ex=findValue(p);
+        if(pr||(ex&&ex!==e)||norm(p)===norm(e.value)){i.classList.add('err');listMsg(pr||'„'+p+'“ gehört schon zu '+(ex?ex.ph:e.ph)+'.','bad');return;}
+      }
+      const dup=parts.find((p,k)=>parts.findIndex(q=>norm(q)===norm(p))!==k);
+      if(dup){i.classList.add('err');listMsg('„'+dup+'“ steht zweimal in den Varianten.','bad');return;}
+      i.classList.remove('err');listMsg('');e.variants=parts;changed();
+    });
+    const n=document.createElement('td');n.className='n';const c=counts.get(e.ph)||0;n.textContent=c?c+'×':'–';n.title=c?'kommt '+c+'-mal im Originaltext vor':'kommt im Originaltext nicht vor';tr.appendChild(n);
+    const x=document.createElement('td');x.className='x';const b=document.createElement('button');b.type='button';b.textContent='×';b.title='Eintrag entfernen';b.setAttribute('aria-label','Eintrag '+e.ph+' entfernen');
+    b.onclick=()=>{entries.splice(idx,1);changed();};x.appendChild(b);tr.appendChild(x);
+    body.appendChild(tr);
+  });
+}
+function listMsg(text,kind){note($('listMsg'),text,kind);}
+
+function renderState(){
+  const el=$('mapState');
+  if(!entries.length){el.textContent='leer';el.className='state';}
+  else{
+    const n=entries.length+(entries.length===1?' Eintrag':' Einträge');
+    el.textContent=dirty?n+' · nicht gespeichert':n+(savedAt?' · gespeichert '+savedAt:' · geladen');
+    el.className='state'+(dirty?' dirty':'');
+  }
+  $('saveList').disabled=!entries.length;$('clearList').disabled=!entries.length;
+}
+
+const PREFIX='Hinweis: Wörter in eckigen Klammern wie [Person A] oder [IBAN 1] sind Platzhalter für echte Daten. Bitte übernimm sie in deiner Antwort genau so, mit Klammern, und erfinde keine neuen.\n\n';
+let maskedPlain='';      // maskierter Text ohne Hinweis
+let restKey='';
+let gate={leak:true,rest:false};
+
+function renderMask(){
+  const src=$('src').value;
+  const {out,counts}=mask(src);
+  maskedPlain=out;
+  const shown=src.trim()?(($('prefix').checked?PREFIX:'')+out):'';
+  $('masked').value=shown;
+  renderTable(counts);
+
+  const lk=src.trim()?leaks(out):[];
+  const leakEl=$('leak');
+  if(lk.length){
+    leakEl.textContent='';
+    const b=document.createElement('b');b.textContent='Leck-Prüfung: Kopieren gesperrt. ';leakEl.appendChild(b);
+    leakEl.appendChild(document.createTextNode('Diese Werte aus der Liste stehen noch im maskierten Text, vermutlich in anderer Form (angehängte Endung, anderes Format). Ergänzen Sie die Form als Variante oder ändern Sie den Originaltext:'));
+    const ul=document.createElement('ul');
+    for(const {e,v,at} of lk){const li=document.createElement('li');li.textContent='„'+at+'“ im Text enthält '+e.ph+' „'+v+'“';ul.appendChild(li);}
+    leakEl.appendChild(ul);show(leakEl,true);
+  }else show(leakEl,false);
+
+  const rest=src.trim()?restList(src,out):[];
+  const key=rest.map(r=>r.kind+'\u0001'+r.text).join('\u0002');
+  if(key!==restKey){restKey=key;$('restOk').checked=false;}
+  const ul=$('rest');ul.textContent='';
+  for(const r of rest){
+    const li=document.createElement('li');
+    const k=document.createElement('span');k.className='kind';k.textContent=r.kind;li.appendChild(k);
+    const c=document.createElement('code');c.textContent=r.text;li.appendChild(c);
+    if(r.type){
+      const b=document.createElement('button');b.type='button';b.textContent='als '+r.type+' übernehmen';
+      b.onclick=()=>{addEntry(r.text,r.type,false);};li.appendChild(b);
+      if(r.s>=0){const j=document.createElement('button');j.type='button';j.textContent='zeigen';j.style.marginLeft='0';j.onclick=()=>locate(r.text);li.appendChild(j);}
+    }
+    ul.appendChild(li);
+  }
+  show($('restBox'),rest.length>0);show($('restNone'),!!src.trim()&&rest.length===0&&!lk.length);
+
+  gate={leak:lk.length>0,rest:rest.length>0&&!$('restOk').checked};
+  const ok=!!src.trim()&&!gate.leak&&!gate.rest;
+  $('copyMasked').disabled=!ok;$('saveMasked').disabled=!ok;
+  $('maskMsg').textContent=!src.trim()?'':gate.leak?'Gesperrt: Leck-Prüfung':gate.rest?'Erst die Restliste prüfen':(counts.size?[...counts.values()].reduce((a,b)=>a+b,0)+' Stellen ersetzt':'Nichts ersetzt');
+}
+// Markiert im Originaltext die erste Stelle, die zum Fund der Restliste passt
+function locate(t){
+  const src=$('src');const i=src.value.indexOf(t);
+  if(i<0)return;
+  src.focus();src.setSelectionRange(i,i+t.length);
+}
+
+function renderBack(){
+  const ans=$('answer').value;
+  show($('noList'),entries.length===0);
+  const rep=$('report');rep.textContent='';
+  $('restored').value='';$('copyRestored').disabled=true;$('backMsg').textContent='';
+  if(!ans.trim())return;
+  if(looksLikeListFile(ans)){
+    const n=document.createElement('div');n.className='note bad';n.setAttribute('role','alert');
+    n.textContent='Das ist die Zuordnungsdatei, nicht die Antwort der KI. Sie enthält die echten Namen. Schicken Sie sie nicht an die KI. Laden Sie die Datei unten mit „Liste laden“.';
+    rep.appendChild(n);return;
+  }
+  if(!entries.length)return;
+  const r=restore(ans);
+  $('restored').value=r.out;
+  const total=[...r.counts.values()].reduce((a,b)=>a+b,0);
+  const problems=r.unknown.size+r.altered.size;
+  const box=document.createElement('div');box.className='note '+(problems?'warn':'ok');
+  const h=document.createElement('b');
+  h.textContent=total+(total===1?' Platzhalter':' Platzhalter')+' zurückübersetzt'+(problems?', '+problems+(problems===1?' Stelle':' Stellen')+' bitte prüfen.':', keine Auffälligkeiten.');
+  box.appendChild(h);
+  const ul=document.createElement('ul');
+  const li=t=>{const x=document.createElement('li');x.textContent=t;ul.appendChild(x);};
+  if(r.counts.size)li('Ersetzt: '+[...r.counts].map(([p,n])=>p+(n>1?' ×'+n:'')).join(', '));
+  for(const [t,n] of r.unknown)li('Unbekannt, nicht ersetzt: '+t+(n>1?' ×'+n:'')+'. Diesen Platzhalter gibt es in der Liste nicht; die KI hat ihn vermutlich erfunden.');
+  for(const [t,a] of r.altered)li('Verändert, nicht ersetzt: „'+t+'“'+(a.n>1?' ×'+a.n:'')+(a.guess?'. Gemeint ist vermutlich '+a.guess+'. Korrigieren Sie die Stelle links in der Antwort.':'. Kein passender Platzhalter in der Liste.'));
+  if(r.missing.length)li('Nicht in der Antwort (nur zur Info): '+r.missing.join(', '));
+  box.appendChild(ul);rep.appendChild(box);
+  $('copyRestored').disabled=false;
+  $('backMsg').textContent='Der zurückübersetzte Text enthält wieder die echten Namen.';
+}
+
+function changed(){
+  dirty=entries.length>0;
+  fillTypeSelect();renderState();renderMask();renderBack();
+}
+
+// ---------- Kopieren und Speichern ----------
+async function copyText(t){
+  try{await navigator.clipboard.writeText(t);return true;}
+  catch(e){
+    const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+    let ok=false;try{ok=document.execCommand('copy');}catch(e2){}
+    ta.remove();return ok;
+  }
+}
+function download(name,text){
+  const url=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));
+  const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),10000);
+}
+// Unmittelbar vor der Ausgabe noch einmal prüfen, nicht nur dem Zustand der Knöpfe trauen
+function maskedForOutput(){
+  renderMask();
+  if(gate.leak||gate.rest)return null;
+  const t=$('masked').value;
+  if(leaks(maskedPlain).length)return null;
+  return t;
+}
+
+// ---------- Ereignisse ----------
+$('src').addEventListener('input',renderMask);
+$('src').addEventListener('paste',()=>setTimeout(()=>{if(patternHits($('src').value).length)findPatterns();else renderMask();},0));
+$('prefix').addEventListener('change',renderMask);
+$('restOk').addEventListener('change',renderMask);
+$('clearSrc').onclick=()=>{$('src').value='';renderMask();$('src').focus();};
+$('addBtn').onclick=()=>{
+  const v=$('addValue').value;const sel=$('addType').value;
+  if(!v.trim()){addMsg('Bitte erst einen Namen oder Begriff eintragen.','warn');$('addValue').focus();return;}
+  let ok;
+  if(sel.startsWith('var:')){const e=entries.find(x=>x.ph===sel.slice(4));ok=e&&addVariant(e,v);}
+  else ok=addEntry(v,sel.slice(4),false);
+  if(ok){$('addValue').value='';}
+  $('addValue').focus();
+};
+$('addValue').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('addBtn').click();}});
+$('takeSel').onclick=()=>{
+  const s=$('src');const t=s.value.slice(s.selectionStart,s.selectionEnd).trim();
+  if(!t){addMsg('Markieren Sie zuerst im Originaltext einen Namen.','warn');return;}
+  $('addValue').value=t;$('addValue').focus();
+};
+$('findPat').onclick=findPatterns;
+$('copyMasked').onclick=async()=>{
+  const t=maskedForOutput();if(t===null)return;
+  const ok=await copyText(t);
+  $('maskMsg').textContent=ok?'Kopiert. Im Chat mit Strg+V einfügen.':'Kopieren nicht möglich. Text rechts markieren und mit Strg+C kopieren.';
+  if(ok&&dirty)$('maskMsg').textContent+=' Liste noch nicht gespeichert.';
+};
+$('saveMasked').onclick=()=>{const t=maskedForOutput();if(t===null)return;download('maskiert.txt',t);$('maskMsg').textContent='maskiert.txt gespeichert.';};
+
+$('answer').addEventListener('input',renderBack);
+$('clearAns').onclick=()=>{$('answer').value='';renderBack();$('answer').focus();};
+$('copyRestored').onclick=async()=>{const ok=await copyText($('restored').value);$('backMsg').textContent=ok?'Kopiert.':'Kopieren nicht möglich. Text markieren und mit Strg+C kopieren.';};
+
+$('saveList').onclick=()=>{
+  if(!entries.length)return;
+  if(!confirm('Die Liste enthält die echten Namen im Klartext.\n\nSpeichern Sie sie nur auf diesem Gerät, nicht in einem Cloud-Ordner, und schicken Sie sie nie an die KI.\n\nJetzt als '+LIST_FILE+' speichern?'))return;
+  download(LIST_FILE,serialize());
+  dirty=false;savedAt=new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  renderState();listMsg('');
+};
+$('loadList').onclick=()=>{$('listFile').value='';$('listFile').click();};
+$('listFile').addEventListener('change',async()=>{
+  const f=$('listFile').files[0];if(!f)return;
+  if(f.size>1e6){listMsg('Die Datei ist größer als 1 MB. Eine Zuordnung ist viel kleiner; vermutlich die falsche Datei.','bad');return;}
+  const r=parse(await f.text());
+  if(r.errors.length){
+    const el=$('listMsg');el.className='note bad';el.textContent='';
+    const b=document.createElement('b');b.textContent='Liste nicht geladen, „'+f.name+'“ hat Fehler. Die bisherige Liste bleibt unverändert.';el.appendChild(b);
+    const ul=document.createElement('ul');for(const e of r.errors.slice(0,20)){const li=document.createElement('li');li.textContent=e;ul.appendChild(li);}
+    if(r.errors.length>20){const li=document.createElement('li');li.textContent='… und '+(r.errors.length-20)+' weitere';ul.appendChild(li);}
+    el.appendChild(ul);return;
+  }
+  if(entries.length&&dirty&&!confirm('Die aktuelle Liste ist nicht gespeichert und wird ersetzt. Fortfahren?'))return;
+  entries=r.entries;
+  changed();dirty=false;savedAt=null;renderState();
+  listMsg(r.entries.length+(r.entries.length===1?' Eintrag':' Einträge')+' aus „'+f.name+'“ geladen.','ok');
+});
+$('clearList').onclick=()=>{
+  if(!entries.length)return;
+  if(!confirm(dirty?'Die Liste ist nicht gespeichert. Wirklich leeren?':'Liste leeren?'))return;
+  entries=[];changed();dirty=false;savedAt=null;renderState();listMsg('');
+};
+window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
+
+function selectTab(back){
+  $('tabMask').setAttribute('aria-selected',String(!back));$('tabBack').setAttribute('aria-selected',String(back));
+  show($('panelMask'),!back);show($('panelBack'),back);
+  if(back)renderBack();
+}
+$('tabMask').onclick=()=>selectTab(false);
+$('tabBack').onclick=()=>selectTab(true);
+
+// ---------- Impressum und Datenschutz ----------
+const LEGAL={
+  impressum:'<h2>Impressum</h2>'+
+    '<p>Angaben gemäß § 5 DDG</p>'+
+    '<p>Manfred Just<br>Am Ritterskamp 21<br>40489 Düsseldorf<br>Deutschland</p>'+
+    '<p><strong>Kontakt</strong><br>E-Mail: info@just-support.de</p>'+
+    '<p><strong>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</strong><br>Manfred Just, Anschrift wie oben</p>'+
+    '<p><strong>Haftung für Inhalte</strong><br>Die Inhalte dieses Werkzeugs wurden mit Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität wird keine Gewähr übernommen. Dieses Werkzeug ist ein Hilfsmittel und ersetzt keine eigene Prüfung der maskierten Texte.</p>',
+  datenschutz:'<h2>Datenschutzerklärung</h2>'+
+    '<p>Dieses Werkzeug ist eine einzelne HTML-Datei, die vollständig lokal in Ihrem Browser läuft.</p>'+
+    '<p><strong>Keine Datenübertragung.</strong> Die Texte, die Sie einfügen, und die Zuordnung werden ausschließlich auf Ihrem Gerät verarbeitet. Das Werkzeug stellt keine Netzwerkverbindungen her und untersagt sie sich zusätzlich selbst über eine Content-Security-Policy, die der Browser durchsetzt. Es enthält kein Tracking, keine Cookies und keine Analyse-Werkzeuge.</p>'+
+    '<p><strong>Keine Speicherung im Browser.</strong> Die Zuordnung liegt nur im Arbeitsspeicher dieses Tabs und in der Datei, die Sie selbst speichern. Wählen Sie oben rechts „Hell“ oder „Dunkel“, speichert Ihr Browser nur diese Einstellung lokal (localStorage); sie wird nicht übertragen und mit „System“ wieder entfernt.</p>'+
+    '<p><strong>Was Sie an eine KI schicken,</strong> unterliegt den Bedingungen dieses Anbieters. Das Werkzeug ersetzt die Namen, die Sie eintragen, und die Muster, die es kennt. Was Sie nicht eintragen, geht im Klartext mit.</p>'+
+    '<p><strong>Keine Speicherung durch uns.</strong> Da keine Daten uns erreichen, werden durch den Anbieter keinerlei personenbezogene Daten erhoben, gespeichert oder verarbeitet.</p>'+
+    '<p><strong>Verantwortlicher</strong><br>Manfred Just, Am Ritterskamp 21, 40489 Düsseldorf, info@just-support.de</p>'
+};
+function openLegal(w){$('legalContent').innerHTML=LEGAL[w];$('legal').showModal();}
+$('lnkImpressum').addEventListener('click',e=>{e.preventDefault();openLegal('impressum');});
+$('lnkDatenschutz').addEventListener('click',e=>{e.preventDefault();openLegal('datenschutz');});
+$('legalClose').onclick=()=>$('legal').close();
+
+// ---------- Darstellung: 'system' folgt prefers-color-scheme, 'light'/'dark' wird lokal gespeichert ----------
+(function(){
+  var b=$('themeToggle'),r=document.documentElement,mode=r.dataset.theme||'system';
+  var label={system:'◐ System',light:'☀️ Hell',dark:'🌙 Dunkel'},next={system:'light',light:'dark',dark:'system'};
+  function apply(){if(mode==='system')delete r.dataset.theme;else r.dataset.theme=mode;b.textContent=label[mode];}
+  b.onclick=function(){mode=next[mode];try{if(mode==='system')localStorage.removeItem('aiuc-theme');else localStorage.setItem('aiuc-theme',mode);}catch(e){}apply();};
+  apply();b.hidden=false;
+})();
+
+fillTypeSelect();renderState();renderMask();
+</script>
+</body>
+</html>

@@ -36,6 +36,19 @@ Ein Lauf gegen die 6.0 dauert in Chromium rund 16 Sekunden (gemessen am 11.10.20
 
 **Nachweis der Wirksamkeit:** In einer Kopie der 6.0 wurden die Boxen auf Seite 2 beim Export weggelassen. Die Selbstprüfung des Werkzeugs meldete „Fertig und geprüft · 5 von 5 Boxflächen schwarz“, der Test schlug dreimal an (Name und IBAN auf Seite 2 lesbar, Tesseract fand beide).
 
+## AI Text Cleaner (Prototyp)
+
+`python3 tests/text_cleaner.py` prüft `ai-text-cleaner.html` im Browser, ohne Code aus dem Werkzeug: Den kopierten Text und die gespeicherten Dateien liest der Test selbst und vergleicht sie mit bekannten, erfundenen Geheimnissen. Bericht in `tests/out/text_cleaner.md`, rund 10 Sekunden.
+
+| Bereich | Was passiert | Geprüft |
+| --- | --- | --- |
+| Tag 1: maskieren | Brief einfügen, Namen eintragen, Restliste abarbeiten, kopieren, Liste speichern | Muster beim Einfügen gefunden, Leck-Prüfung sperrt bei „Mustermanns“, Restliste zeigt Anrede, Adresse, PLZ, Datum, Nummer, kein Geheimnis in der Zwischenablage, Rückfrage vor dem Speichern, Dateiname und Kopfzeile |
+| Tag 2: zurückübersetzen | Liste von Hand ergänzt (Windows-Zeilenenden), in frischem Browser geladen, Antwort einer „bösen KI“ eingefügt | exakte Platzhalter ersetzt, `[person a]` und `Person B` als verändert gemeldet, `[Person D]` als unbekannt, nichts davon ersetzt, Variante aus der Datei wirkt, Listendatei im Antwortfeld erkannt |
+| Rundreise | maskieren, speichern, neuer Browser, laden, zurückübersetzen | Ergebnis Zeichen für Zeichen gleich dem Original, auch mit Umlauten, ß, Akzenten, Apostroph; Laden und erneut Speichern ergibt dieselbe Datei |
+| Kaputte Listendateien | acht fehlerhafte Dateien laden | jede abgelehnt mit Zeilenangabe, die vorherige Liste bleibt unverändert |
+
+**Nachweis der Wirksamkeit** (11.10.2026): Fünf absichtlich beschädigte Kopien des Werkzeugs, jede wurde erkannt: Maskierung abgeschaltet (9 Fehler), Leck-Prüfung abgeschaltet (1), Rückübersetzung ohne Unterscheidung von Groß- und Kleinschreibung (1), Prüfung auf doppelte Platzhalter abgeschaltet (7), Restliste abgeschaltet (5).
+
 ## Grenzen
 
 - Der Test deckt die Fälle ab, die er kennt. Er beweist nicht, dass es keine anderen Fehler gibt.
@@ -50,4 +63,5 @@ Ein Lauf gegen die 6.0 dauert in Chromium rund 16 Sekunden (gemessen am 11.10.20
 | `make_fixtures.py` | erzeugt die Testdokumente und hält die Lage jedes Geheimnisses in `fixtures.json` fest |
 | `checks.py` | die unabhängigen Prüfungen |
 | `run.py` | Bedienung im Browser, Gegenprobe, Bericht |
+| `text_cleaner.py` | Test für den AI Text Cleaner |
 | `requirements.txt` | Python-Abhängigkeiten in den getesteten Versionen |

@@ -6,11 +6,13 @@ on:
   push:
     paths:
       - "ai-upload-cleaner*.html"
+      - "ai-text-cleaner.html"
       - "tests/**"
       - ".github/workflows/export-test.yml"
   pull_request:
     paths:
       - "ai-upload-cleaner*.html"
+      - "ai-text-cleaner.html"
       - "tests/**"
       - ".github/workflows/export-test.yml"
   workflow_dispatch:
@@ -63,3 +65,27 @@ jobs:
             tests/out/bericht.md
             tests/out/exporte/
           retention-days: 30
+
+  # AI Text Cleaner (Prototyp): maskieren, Liste speichern und laden, zurückübersetzen
+  text-cleaner:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Python-Pakete und Chromium installieren
+        run: |
+          pip install -r tests/requirements.txt
+          python -m playwright install --with-deps chromium
+
+      - name: Test ausführen
+        run: python tests/text_cleaner.py ai-text-cleaner.html
+
+      - name: Bericht in die Zusammenfassung schreiben
+        if: always()
+        run: |
+          if [ -f tests/out/text_cleaner.md ]; then cat tests/out/text_cleaner.md >> "$GITHUB_STEP_SUMMARY"; fi
