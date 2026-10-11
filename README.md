@@ -115,6 +115,7 @@ Unterstützte Browser laut PDF.js-Legacy-Build: Chrome ab 125, Firefox ESR, Safa
 | `ai-upload-cleaner6.0.html` | Beta: Version 6.0 mit Fundstellenliste und Prüftext (siehe oben) |
 | `build/libs.py` | prüft oder erneuert die ab 2.0 eingebetteten Bibliotheken |
 | `build/CHECKSUMS.txt` | Herkunft und SHA-256-Prüfsummen der eingebetteten Bibliotheken und der Werkzeugdateien |
+| `deploy/` | Upload der öffentlichen Dateien zu ai-upload-cleaner.com per FTPS, mit Prüfung über HTTPS (siehe `deploy/README.md`) |
 | `tests/` | Export-Test: bedient das Werkzeug im Browser und prüft die exportierten Dateien unabhängig nach (siehe `tests/README.md`) |
 | `index.html` | Startseite mit interaktivem Selbsttest, verlinkt Werkzeug 3.0 und Anleitung |
 | `anleitung.html` | kurze Bedienungsanleitung zur 3.0 |

@@ -1,0 +1,83 @@
+# Upload zu Host Europe (ai-upload-cleaner.com) per FTPS, siehe deploy/README.md.
+#
+# - Push auf main: Export-Test, dann Freigabe in der Umgebung „Produktion“, dann Upload.
+# - Push auf einen claude/-Branch: nur Trockenlauf (zeigt, was hochgeladen würde).
+# - Von Hand (Actions → Upload → Run workflow): Trockenlauf, oder auf main echter Upload.
+# Zugangsdaten als Repository-Secrets: FTP_SERVER, FTP_USER, FTP_PASSWORD, optional FTP_DIR.
+name: Upload
+
+on:
+  push:
+    branches: [main, "claude/**"]
+    paths:
+      - "index.html"
+      - "anleitung*.html"
+      - "ai-upload-cleaner*.html"
+      - "LICENSE"
+      - "NOTICE"
+      - "THIRD-PARTY-LICENSES.txt"
+      - "licenses/**"
+      - "deploy/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+    inputs:
+      trocken:
+        description: "Nur Trockenlauf (nichts hochladen)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: upload-produktion
+  cancel-in-progress: false
+
+env:
+  SITE_URL: https://ai-upload-cleaner.com
+
+jobs:
+  trockenlauf:
+    if: github.ref != 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && inputs.trocken)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trockenlauf gegen den Server
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_DIR: ${{ secrets.FTP_DIR }}
+        run: |
+          if [ -z "$FTP_SERVER" ]; then
+            echo "::notice::Secrets FTP_SERVER, FTP_USER, FTP_PASSWORD sind noch nicht eingetragen. Trockenlauf übersprungen."
+            exit 0
+          fi
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          python3 deploy/deploy.py --trocken | tee -a "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+  test:
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || !inputs.trocken)
+    uses: ./.github/workflows/export-test.yml
+
+  upload:
+    needs: test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment:
+      name: Produktion
+      url: https://ai-upload-cleaner.com
+    steps:
+      - uses: actions/checkout@v4
+      - name: Upload und Prüfung über HTTPS
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_DIR: ${{ secrets.FTP_DIR }}
+        run: |
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          python3 deploy/deploy.py | tee -a "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
