@@ -24,4 +24,4 @@ ai-upload-cleaner2.0.html  sha256=dd8e3c8e0089833644c5c005c8138a626931e6a1bc88cc
 ai-upload-cleaner3.0.html  sha256=a7de5d4fef4f1c8303834ee634963f9fdc11d97b6300becaed1b1bd12c0f230e
 ai-upload-cleaner4.0.html  sha256=01e6e151ffead97aa82cca9730b93fd8015e5e8bc887a798eb65519859fbf5b8
 ai-upload-cleaner5.0.html  sha256=ebd3598260dc3477dfd6b63a932f90414e783d2a0217f6c367c88d4640aaec53
-ai-upload-cleaner6.0.html  sha256=1487f2a4f84fa6688b78183188ed7cea95030099860897b8e82ad554d5eae9db
+ai-upload-cleaner6.0.html  sha256=c925ac9df41890ce667d16f4872a44f22489ff3a6e5767319f5ff309ba205670

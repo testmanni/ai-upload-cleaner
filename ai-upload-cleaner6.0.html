@@ -366,6 +366,7 @@
 
     <div class="actions">
       <button class="primary" id="downloadBtn" data-t="download">⬇️ Geschwärzte Kopie herunterladen</button>
+      <button class="primary hidden" id="copyBtn" data-t="copy">📋 In Zwischenablage kopieren</button>
       <button id="delBtn" data-t="del">🗑️ Markierung löschen</button>
       <button id="resetBtn" data-t="reset">✕ Neue Datei</button>
     </div>
@@ -795,7 +796,13 @@ const I18N={
     tip1:'🔒 Alles bleibt in deinem Browser. Nichts wird hochgeladen, keine Internetverbindung nötig. Diese Datei verbietet sich Netzwerkverbindungen selbst (Content-Security-Policy), der Browser setzt das durch. Auch die Texterkennung für Scans läuft nur auf deinem Gerät. Beim Export wird die Schwärzung fest ins Bild gerechnet; bei PDFs wird jede Seite zu einem Bild, sodass Text unter den schwarzen Flächen physisch verschwindet.',
     tip2:'💡 Häufig vergessene sensible Stellen: Name, Adresse, Geburtsdatum · Telefon und E-Mail · IBAN, Kontonummer · Ausweis-, Kunden- und Aktenzeichen · Unterschrift · Lichtbild · Seriennummern, Lizenzschlüssel, interne Links. Geh die Datei einmal in Ruhe durch, bevor du sie weitergibst. Das Werkzeug schwärzt nur, was du markierst oder per Suche bestätigst. Sicher ist die Schwärzung erst, wenn du sie mit eigenen Augen kontrolliert hast. Hilfsmittel, keine Rechtsberatung.',
     drop1:'Bilder oder PDFs wählen oder hierher ziehen',
-    drop2:'JPG, PNG oder PDF · mehrere Dateien werden zu einem Export',
+    drop2:'JPG, PNG oder PDF · mehrere Dateien werden zu einem Export · Screenshot mit Strg+V einfügen',
+    copy:'📋 In Zwischenablage kopieren',
+    doneCopied:'✓ Geprüft und in die Zwischenablage kopiert: ', doneCopiedTail:' Mit Strg+V einfügen, etwa in einen Chat, und dort einmal ansehen, ob alles Sensible schwarz ist.',
+    copyFail:'Kopieren in die Zwischenablage hat der Browser abgelehnt. Nutze stattdessen „Geschwärzte Kopie herunterladen“.',
+    pasteReplace:'Das aktuelle Dokument verwerfen und den Screenshot aus der Zwischenablage öffnen? Nicht exportierte Markierungen gehen verloren.', pasteReplaceYes:'Screenshot öffnen', pasteReplaceNo:'Abbrechen',
+    pasteBusy:'Bitte warten, bis Export oder Texterkennung fertig ist.',
+    pasteFound:n=>n?('Texterkennung fertig: '+n+(n===1?' Fundstelle':' Fundstellen')+'. Prüfen, dann „Alle schwärzen“. Namen und Gesichter selbst markieren.'):'Texterkennung fertig, keine Muster gefunden. Namen, Gesichter und anderes selbst markieren.',
     hint:'Box: auf leere Fläche ziehen = neue Box · anklicken = auswählen · Ecken/Kanten = Größe · Mitte = verschieben · Entf = löschen · Pfeiltasten = feinjustieren · Strg+Z = rückgängig. Text: Text wie im PDF-Viewer markieren, dann „Auswahl schwärzen". Scans und Fotos: erst „Texterkennung“, dann geht Markieren und Suchen auch dort. Am Handy: Seite antippen öffnet den Vollbild-Editor. Jede Seite hat eigene Boxen.',
     download:'⬇️ Geschwärzte Kopie herunterladen', del:'🗑️ Markierung löschen', reset:'✕ Neue Datei',
     addBox:'+ Bereich schwärzen', fsBtn:'⛶ Vollbild bearbeiten', searchBtn:'🔍 Suchen und schwärzen',
@@ -914,7 +921,13 @@ const I18N={
     tip1:'🔒 Everything stays in your browser. Nothing is uploaded, no internet connection needed. This file forbids itself any network connection (Content Security Policy) and the browser enforces it. Text recognition for scans also runs only on your device. On export the redaction is burned into the image; for PDFs each page becomes an image, so text under the black areas physically disappears.',
     tip2:'💡 Commonly forgotten sensitive items: name, address, date of birth · phone and email · IBAN, account number · ID, customer and case numbers · signature · photo · serial numbers, license keys, internal links. Go through the file carefully before sharing it. The tool only redacts what you mark or confirm via search. The redaction is safe only once you have checked it with your own eyes. A helper, not legal advice.',
     drop1:'Choose images or PDFs, or drag them here',
-    drop2:'JPG, PNG or PDF · several files become one export',
+    drop2:'JPG, PNG or PDF · several files become one export · paste a screenshot with Ctrl+V',
+    copy:'📋 Copy to clipboard',
+    doneCopied:'✓ Checked and copied to the clipboard: ', doneCopiedTail:' Paste it with Ctrl+V, for example into a chat, and take one look there that everything sensitive is black.',
+    copyFail:'The browser refused to copy to the clipboard. Use “Download redacted copy” instead.',
+    pasteReplace:'Discard the current document and open the screenshot from the clipboard? Marks that were not exported will be lost.', pasteReplaceYes:'Open screenshot', pasteReplaceNo:'Cancel',
+    pasteBusy:'Please wait until the export or text recognition has finished.',
+    pasteFound:n=>n?('Text recognition done: '+n+(n===1?' match':' matches')+'. Check them, then “Redact all”. Mark names and faces yourself.'):'Text recognition done, no patterns found. Mark names, faces and anything else yourself.',
     hint:'Box: drag on empty space = new box · click = select · corners/edges = resize · middle = move · Delete = remove · arrow keys = nudge · Ctrl+Z = undo. Text: select text like in a PDF viewer, then "Redact selection". Scans and photos: run "Text recognition" first, then selecting and searching work there too. On a phone: tap the page to open the full-screen editor. Each page has its own boxes.',
     download:'⬇️ Download redacted copy', del:'🗑️ Delete selection', reset:'✕ New file',
     addBox:'+ Redact area', fsBtn:'⛶ Edit full screen', searchBtn:'🔍 Search and redact',
@@ -2300,8 +2313,10 @@ window.addEventListener('beforeunload',e=>{
 // Export mit eingebauter Prüfung
 // ============================================================================
 function willPdf(){return kind==='pdf'||pages.length>1||exportFmt==='pdf';}
+const canCopyImage=!!(window.isSecureContext&&navigator.clipboard&&navigator.clipboard.write&&window.ClipboardItem);
 function updateExportUI(){
   const single=(kind==='image'&&pages.length===1),pdf=willPdf();
+  $('copyBtn').classList.toggle('hidden',pdf||!canCopyImage);
   $('fmtRow').style.display=single?'flex':'none';
   $('qualRow').style.display=pdf?'flex':'none';
   $('qualHint').style.display=pdf?'block':'none';
@@ -2410,6 +2425,16 @@ function downloadBlob(blob,name){
   setTimeout(()=>URL.revokeObjectURL(url),60000);
 }
 function setExportMsg(cls,text){exportMsg.className='note '+cls;exportMsg.textContent=text;}
+function exportReport(rep,blob,isPdf,plan){
+  const t=T();
+  const ok=rep.chars===0&&rep.boxesDark===rep.boxesChecked&&rep.pagesOk;
+  const parts=[isPdf?t.repPages(rep.pages):t.repPng,t.repChars(rep.chars)];
+  if(rep.boxesChecked)parts.push(t.repBoxes(rep.boxesDark,rep.boxesChecked));
+  const excl=pages.length-plan.length;if(excl)parts.push(t.repExcluded(excl));
+  const crops=plan.filter(e=>e.hasCrop).length;if(crops)parts.push(t.repCrop(crops));
+  parts.push(fmtBytes(blob.size));
+  return {ok,parts};
+}
 function finishExport(rep,blob,name,isPdf,plan){
   const t=T();
   const ok=rep.chars===0&&rep.boxesDark===rep.boxesChecked&&rep.pagesOk;
@@ -2440,15 +2465,37 @@ async function exportPDF(plan){
   const rep=await verifyPdfBlob(blob,plan);
   finishExport(rep,blob,exportBaseName(true)+'.pdf',true,plan);
 }
-async function exportPNG(plan){
+async function verifiedPng(plan){
   const t=T();const entry=plan[0];const cv=await renderExport(entry,null);
   const blob=await new Promise((res,rej)=>cv.toBlob(b=>b?res(b):rej(new Error('PNG')),'image/png'));
   cv.width=cv.height=0;
   setExportMsg('info',t.verifying);
   const rep=await verifyPngBlob(blob,entry);
+  return {rep,blob};
+}
+async function exportPNG(plan){
+  const {rep,blob}=await verifiedPng(plan);
   finishExport(rep,blob,exportBaseName(false)+'.png',false,plan);
 }
 let exporting=false;
+$('copyBtn').onclick=async()=>{
+  if(exporting||!P()||willPdf())return;
+  const t=T();const plan=exportPlan();
+  if(!plan.length){alertMsg(t.allExcluded);return;}
+  if(!plan.some(e=>e.boxes.length)){const ok=await askConfirm(t.noBoxes,t.noBoxesYes,t.noBoxesNo);if(!ok)return;}
+  if(ed.open)closeEditor();
+  exporting=true;$('downloadBtn').disabled=$('copyBtn').disabled=true;
+  let report=null;
+  const pngP=verifiedPng(plan).then(({rep,blob})=>{report=exportReport(rep,blob,false,plan);if(!report.ok)throw new Error('verify');return blob;});
+  try{
+    await navigator.clipboard.write([new ClipboardItem({'image/png':pngP})]);
+    setExportMsg('ok',t.doneCopied+report.parts.join(' · ')+'.'+t.doneCopiedTail);
+  }catch(err){
+    if(report&&!report.ok)setExportMsg('err',t.failed+report.parts.join(' · ')+'.'+t.failedTail);
+    else if(report)setExportMsg('err',t.copyFail);
+    else setExportMsg('err',t.exportFail+((err&&err.message)||String(err)));
+  }finally{exporting=false;$('downloadBtn').disabled=$('copyBtn').disabled=false;}
+};
 $('downloadBtn').onclick=async()=>{
   if(exporting||!P())return;
   const t=T();const plan=exportPlan();
@@ -2726,6 +2773,27 @@ dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');if
 document.addEventListener('dragover',e=>{e.preventDefault();});
 document.addEventListener('drop',e=>{e.preventDefault();if(!ws.classList.contains('hidden'))return;if(e.dataTransfer.files.length)handleFiles(e.dataTransfer.files);});
 $('langToggle').onclick=()=>setLang(lang==='de'?'en':'de');
+// Zwischenablage: Screenshot mit Strg+V öffnen, Texterkennung starten, Fundstellen zeigen. Geschwärzt wird erst nach Bestätigung.
+document.addEventListener('paste',async e=>{
+  const tg=e.target;if(tg&&(tg.tagName==='INPUT'||tg.tagName==='TEXTAREA'||tg.isContentEditable))return;
+  const item=[...((e.clipboardData&&e.clipboardData.items)||[])].find(it=>it.kind==='file'&&it.type.startsWith('image/'));
+  if(!item)return;
+  e.preventDefault();
+  const blob=item.getAsFile();if(!blob)return;
+  if(exporting||ocr.running){toast(T().pasteBusy);return;}
+  if(pages.length){const ok=await askConfirm(T().pasteReplace,T().pasteReplaceYes,T().pasteReplaceNo);if(!ok)return;reset();}
+  const d=new Date(),z=n=>String(n).padStart(2,'0');
+  const name='screenshot_'+d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())+'_'+z(d.getHours())+'-'+z(d.getMinutes());
+  await loadFiles([new File([blob],name+'.png',{type:blob.type||'image/png'})]);
+  if(!pages.length)return;
+  $('fileName').value=name+'_geschwaerzt';
+  if(!ocrSupported)return;
+  const ok=await ocrRun([0]);
+  if(!ok||!canText(P()))return;
+  $('searchMode').value='all';$('searchMode').dispatchEvent(new Event('change'));
+  openSearch();await runSearch();
+  toast(T().pasteFound(search.hits.length));
+});
 $('themeToggle').onclick=()=>{
   themeMode={system:'light',light:'dark',dark:'system'}[themeMode];
   try{if(themeMode==='system')localStorage.removeItem('aiuc-theme');else localStorage.setItem('aiuc-theme',themeMode);}catch(e){}
