@@ -117,8 +117,11 @@ def region_stats(img, r, inset=0.15):
 def is_redacted(img, r, label_allowed=False):
     dark, white = region_stats(img, r)
     if label_allowed:
-        # Beschriftete Box: Schwarz mit weißer Schrift, keine Grautöne des Originals
-        return dark >= 0.6 and dark + white >= 0.97, f"dunkel {dark:.0%}, weiß {white:.0%}"
+        # Beschriftete Box: überwiegend Schwarz mit weißer Schrift. Graustufen nur an den
+        # geglätteten Rändern der Schrift; deren Anteil hängt von der Systemschrift ab (lokal 3 %,
+        # auf GitHub 3 bis 4 %). Das ungeschwärzte Original liegt bei rund 20 % Schwarz.
+        gray = 1 - dark - white
+        return dark >= 0.6 and gray <= 0.08, f"dunkel {dark:.0%}, weiß {white:.0%}, grau {gray:.0%}"
     return dark >= 0.98, f"dunkel {dark:.0%}"
 
 
