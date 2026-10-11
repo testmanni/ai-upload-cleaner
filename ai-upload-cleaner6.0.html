@@ -81,6 +81,10 @@
   }
   :focus-visible{outline:2px solid var(--border-accent);outline-offset:2px;}
   *{box-sizing:border-box;}
+  /* Marke oben links: Link zur Startseite, neuer Tab, damit ein geladenes Dokument offen bleibt */
+  .home{display:inline-flex;align-items:center;gap:9px;margin-right:auto;min-height:34px;font-family:'SFMono-Regular',ui-monospace,'Cascadia Code',Consolas,monospace;font-size:13px;letter-spacing:.02em;color:var(--text-primary);text-decoration:none;}
+  .home .dot{flex:none;width:9px;height:9px;border-radius:2px;background:var(--accent);box-shadow:0 0 0 3px var(--bg-accent);}
+  .home:hover{color:var(--text-accent);}
   body{margin:0;background:var(--bg);color:var(--text-primary);
     font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5;}
   body.ed-open{overflow:hidden;}
@@ -245,7 +249,8 @@
 </head>
 <body>
 <div class="wrap">
-  <div style="display:flex;justify-content:flex-end;gap:6px;margin-bottom:4px">
+  <div style="display:flex;justify-content:flex-end;align-items:center;gap:6px;margin-bottom:4px">
+    <a class="home" href="https://ai-upload-cleaner.com/" target="_blank" rel="noopener noreferrer" data-t-aria="homeAria"><span class="dot"></span><span>AI Upload Cleaner</span></a>
     <button class="small" id="themeToggle" style="font-size:12px;visibility:hidden" data-t-aria="themeAria"></button>
     <button class="small" id="langToggle" style="font-size:12px;visibility:hidden" data-t-aria="langAria"></button>
   </div>
@@ -781,7 +786,7 @@ let exportFmt='auto'; // 'png' | 'pdf' | 'auto'
 const LABEL_KEYS=['name','address','birthdate','iban','account','customer','caseno','phone','email','signature','photo','amount','date','company'];
 const I18N={
   de:{
-    langAria:'Sprache wechseln', toggle:'EN',
+    langAria:'Sprache wechseln', toggle:'EN', homeAria:'AI Upload Cleaner: Startseite (öffnet in neuem Tab)',
     themeAria:'Darstellung wechseln: System, Hell, Dunkel', themeSystem:'◐ System', themeLight:'☀️ Hell', themeDark:'🌙 Dunkel',
     kicker:'AI Upload Cleaner 6.0 · lokal · alles in einer Datei',
     h1:'Schwärzen, bevor du es hochlädst',
@@ -900,7 +905,7 @@ const I18N={
     tapToEdit:'Tippe auf die Seite, um sie im Vollbild zu bearbeiten.'
   },
   en:{
-    langAria:'Switch language', toggle:'DE',
+    langAria:'Switch language', toggle:'DE', homeAria:'AI Upload Cleaner: home page (opens in a new tab)',
     themeAria:'Switch appearance: system, light, dark', themeSystem:'◐ System', themeLight:'☀️ Light', themeDark:'🌙 Dark',
     kicker:'AI Upload Cleaner 6.0 · local · all in one file',
     h1:'Redact before you upload',
