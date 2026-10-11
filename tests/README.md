@@ -19,12 +19,14 @@ python3 tests/run.py ai-upload-cleaner6.0.html
 
 Ein Lauf gegen die 6.0 dauert in Chromium rund 16 Sekunden (gemessen am 11.10.2026).
 
+**Auf GitHub:** `.github/workflows/export-test.yml` führt den Test bei jeder Änderung an einer Werkzeugdatei oder an `tests/` aus, für die 6.0 und die 3.0. Der Bericht steht in der Zusammenfassung des Laufs (Reiter „Actions“), Bericht und Exporte hängen 30 Tage als Anhang am Lauf. Starten lässt er sich dort auch von Hand („Run workflow“).
+
 ## Was geprüft wird
 
 | Szenario | Bedienung | Prüfungen am Export |
 | --- | --- | --- |
 | PDF mit Textebene, 3 Seiten | Suche „Alle Muster“ (in 3.0: IBAN, E-Mail, Telefon einzeln), Textsuche nach dem Namen, „Alle schwärzen“, Seite 3 ausschließen, PDF-Export | kein Text (pypdf, pdftotext), keine Textbefehle, keine eingebetteten Schriften, keine Geheimnisse in den Rohbytes, Metadaten ohne Namen, keine Anhänge, 2 Seiten, jedes Geheimnis zu mindestens 98 % schwarz, Kontrollzeile lesbar, Tesseract findet kein Geheimnis |
-| Ausweis als Bild | Box über den Namen ziehen, Beschriftung [Name], Ausschnitt ziehen, PNG-Export | Seitenverhältnis wie der Ausschnitt, rote Nummer außerhalb fehlt, Name schwarz mit weißer Beschriftung, Kontrollzeile lesbar, keine PNG-Metadaten, Tesseract findet den Namen nicht |
+| Ausweis als Bild | Box über den Namen ziehen (die Seite darf dabei nicht verrutschen), Beschriftung [Name], Ausschnitt ziehen, PNG-Export | Seitenverhältnis wie der Ausschnitt, rote Nummer außerhalb fehlt, Name schwarz mit weißer Beschriftung, Kontrollzeile lesbar, keine PNG-Metadaten, Tesseract findet den Namen nicht |
 | Foto mit GPS | laden, ohne Box exportieren | keine EXIF-Daten, Kamera und GPS nicht in den Rohbytes |
 | Scan ohne Textebene | Texterkennung Deutsch, IBAN-Suche, PNG-Export | IBAN schwarz, Kontrollzeile lesbar, Tesseract findet die IBAN nicht |
 | alle | | keine Netzwerkanfragen, keine Fehler in der Konsole, Download erst nach bestandener Selbstprüfung |

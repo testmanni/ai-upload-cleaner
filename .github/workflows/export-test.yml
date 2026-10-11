@@ -1,0 +1,64 @@
+# Export-Test bei jeder Änderung an einer Werkzeugdatei oder am Test.
+# Der Bericht erscheint in der Zusammenfassung des Laufs (Actions → Lauf), die Exporte als Anhang.
+name: Export-Test
+
+on:
+  push:
+    paths:
+      - "ai-upload-cleaner*.html"
+      - "tests/**"
+      - ".github/workflows/export-test.yml"
+  pull_request:
+    paths:
+      - "ai-upload-cleaner*.html"
+      - "tests/**"
+      - ".github/workflows/export-test.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        datei:
+          - ai-upload-cleaner6.0.html
+          - ai-upload-cleaner3.0.html
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Poppler und Tesseract installieren
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q poppler-utils tesseract-ocr tesseract-ocr-deu
+
+      - name: Python-Pakete und Chromium installieren
+        run: |
+          pip install -r tests/requirements.txt
+          python -m playwright install --with-deps chromium
+
+      - name: Test ausführen
+        run: python tests/run.py ${{ matrix.datei }}
+
+      - name: Bericht in die Zusammenfassung schreiben
+        if: always()
+        run: |
+          if [ -f tests/out/bericht.md ]; then cat tests/out/bericht.md >> "$GITHUB_STEP_SUMMARY"; fi
+
+      - name: Bericht und Exporte anhängen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: export-test-${{ matrix.datei }}
+          path: |
+            tests/out/bericht.md
+            tests/out/exporte/
+          retention-days: 30

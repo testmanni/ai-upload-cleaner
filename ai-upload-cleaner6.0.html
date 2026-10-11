@@ -106,6 +106,7 @@
   button:hover{border-color:var(--border-accent);}
   button:disabled{opacity:.45;cursor:default;}
   button.primary{border-color:var(--border-accent);color:var(--text-accent);}
+  select:disabled{opacity:.45;cursor:default;}
   select,input[type=text]{padding:5px 8px;border:1px solid var(--border-strong);background:var(--surface-2);border-radius:var(--radius);min-height:34px;}
   .small{font-size:13px;padding:5px 11px;min-height:34px;}
   .small.on{border-color:var(--border-accent);background:var(--bg-accent);color:var(--text-accent);}
@@ -1566,9 +1567,12 @@ function fillLabelSelect(){
   s.value=[...s.options].some(o=>o.value===cur)?cur:'';
 }
 function updateLabelUI(){
-  const b=boxesOf()[sel];const grp=$('labelGrp');
-  grp.classList.toggle('hidden',!b);if(!b)return;
-  const s=$('labelSel'),inp=$('labelCustom');const label=b.label||'';
+  const b=boxesOf()[sel];const grp=$('labelGrp');const s=$('labelSel'),inp=$('labelCustom');
+  // Seitenansicht: Feld bleibt stehen und ist nur gesperrt. Ein- und Ausblenden verschob die Seite
+  // beim Ansetzen der ersten Box um eine Leistenzeile. Im Editor-Menü verschwindet es wie bisher.
+  grp.classList.toggle('hidden',!b&&ed.open);s.disabled=!b;
+  if(!b){s.value='';inp.classList.add('hidden');return;}
+  const label=b.label||'';
   const known=[...s.options].some(o=>o.value===label&&o.value!=='__custom');
   if(known){s.value=label;inp.classList.add('hidden');}
   else{s.value='__custom';inp.classList.remove('hidden');inp.value=label;}
@@ -1752,7 +1756,7 @@ function openEditor(){
   editor.classList.remove('hidden');document.body.classList.add('ed-open');
   edView.appendChild(stage);
   stage.style.width=bc.width+'px';stage.style.height=bc.height+'px';
-  edMenu.appendChild($('bar2'));
+  edMenu.appendChild($('bar2'));updateLabelUI();
   edHint.textContent=touchUI?T().edHintTouch:T().edHintMouse;edHint.style.transition='';edHint.style.opacity='1';
   clearTimeout(openEditor._t);openEditor._t=setTimeout(()=>{edHint.style.transition='opacity .6s';edHint.style.opacity='0';},4500);
   try{history.pushState({aiucEditor:true},'');ed.pushed=true;}catch(e){ed.pushed=false;}
@@ -1769,7 +1773,7 @@ function closeEditor(fromPop){
   stage.style.transform='';stage.style.width='';stage.style.height='';
   stageWrap.appendChild(stage);
   thumbsEl.parentElement!==ws&&ws.insertBefore(thumbsEl,resInfo);
-  $('bar2').parentElement!==ws&&ws.insertBefore($('bar2'),thumbsEl);
+  $('bar2').parentElement!==ws&&ws.insertBefore($('bar2'),thumbsEl);updateLabelUI();
   if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(()=>{});
   if(ed.pushed&&!fromPop){ed.pushed=false;try{history.back();}catch(e){}}
   else ed.pushed=false;

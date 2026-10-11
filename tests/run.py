@@ -85,17 +85,22 @@ class Tool:
                 bb["x"] + (r["x"] + r["w"]) * bb["width"] + margin, bb["y"] + (r["y"] + r["h"]) * bb["height"] + margin)
 
     def drag(self, r, margin=0):
-        """Rechteck ziehen. Nach dem Ansetzen wird die Lage neu gemessen: In 6.0 blendet
-        die erste Box das Beschriftungsfeld ein und die Seite rutscht (am Rechner 42 px)."""
+        """Rechteck ziehen. Gibt zurück, wie weit die Zeichenfläche beim Ansetzen verrutscht ist.
+        Danach wird die Lage neu gemessen, wie ein Mensch, der der Seite mit der Maus folgt:
+        Bis 6.0.0 blendete die erste Box das Beschriftungsfeld ein und die Seite rutschte."""
+        top = lambda: self.page.locator("#boxCanvas").bounding_box()["y"]
+        before = top()
         x0, y0, _, _ = self.canvas_rect(r, margin)
         m = self.page.mouse
         m.move(x0, y0)
         m.down()
         self.page.wait_for_timeout(100)
+        shift = top() - before
         _, _, x1, y1 = self.canvas_rect(r, margin)
         m.move(x1, y1, steps=10)
         m.up()
         self.page.wait_for_timeout(200)
+        return shift
 
     def export(self, dest, confirm_no_boxes=False):
         """Export auslösen. Der Download startet nur, wenn die Selbstprüfung bestanden ist."""
@@ -149,7 +154,8 @@ def scenario_ausweis(browser, html, fx, fxdir, outdir):
     a = fx["ausweis"]
     try:
         t.load(fxdir / "ausweis.png")
-        t.drag(a["name"], margin=8)
+        shift = t.drag(a["name"], margin=8)
+        res.append(C.check("Seite verrutscht nicht beim Ansetzen der ersten Box", abs(shift) < 1, f"{shift:.0f} px"))
         t.page.select_option("#labelSel", "[Name]")
         t.page.click("#cropToolBtn")
         t.drag(a["crop"])
