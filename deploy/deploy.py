@@ -23,6 +23,7 @@ import os
 import socket
 import ssl
 import sys
+import tempfile
 import time
 import urllib.request
 from pathlib import Path, PurePosixPath
@@ -54,14 +55,48 @@ def local_files():
     return files
 
 
+def certificate_names(host, port):
+    """Nur zur Diagnose bei unpassendem Zertifikat: Namen im Zertifikat auslesen, ohne Anmeldung.
+    Es wird kein Benutzername und kein Passwort gesendet."""
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    probe = ftplib.FTP_TLS(context=ctx, timeout=60)
+    probe.connect(host, port)
+    probe.auth()
+    der = probe.sock.getpeercert(binary_form=True)
+    probe.close()
+    with tempfile.NamedTemporaryFile("w", suffix=".pem", delete=False) as fh:
+        fh.write(ssl.DER_cert_to_PEM_cert(der))
+    try:
+        info = ssl._ssl._test_decode_cert(fh.name)  # CPython, liest das Zertifikat ohne Zusatzpakete
+    finally:
+        os.unlink(fh.name)
+    names = [v for k, v in info.get("subjectAltName", ()) if k == "DNS"]
+    cn = [v for rdn in info.get("subject", ()) for k, v in rdn if k == "commonName"]
+    return names or cn
+
+
 def connect():
     host = os.environ["FTP_SERVER"]
     ctx = ssl.create_default_context()
     if os.environ.get("FTP_INSECURE_TLS") == "1":  # nur für den lokalen Test mit eigenem Zertifikat
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
+    port = int(os.environ.get("FTP_PORT", "21"))
     ftp = ReusingFTP_TLS(context=ctx, timeout=120)
-    ftp.connect(host, int(os.environ.get("FTP_PORT", "21")))
+    ftp.connect(host, port)
+    try:
+        ftp.auth()  # TLS mit Zertifikatsprüfung, bevor Zugangsdaten gesendet werden
+    except ssl.SSLCertVerificationError as e:
+        print(f"Das TLS-Zertifikat passt nicht zu FTP_SERVER={host!r}: {e.verify_message}")
+        try:
+            print("Das Zertifikat ist ausgestellt auf: " + ", ".join(certificate_names(host, port)))
+            print("Einen dieser Namen als FTP_SERVER eintragen (ein Name mit * steht für beliebige Vorsilben).")
+        except Exception as diag:
+            print(f"Namen im Zertifikat nicht lesbar: {diag}")
+        print("Abgebrochen, ohne Anmeldung. Es wurden keine Zugangsdaten gesendet.")
+        raise SystemExit(3)
     ftp.login(os.environ["FTP_USER"], os.environ["FTP_PASSWORD"])
     ftp.prot_p()
     ftp.set_pasv(True)

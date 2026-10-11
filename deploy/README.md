@@ -24,7 +24,7 @@ Ausgelöst wird nur, wenn sich eine öffentliche Datei, `deploy/` oder der Ablau
 
 1. **Host Europe (KIS):** eigener FTP-Benutzer, beschränkt auf `/www/ai-upload-cleaner`, langes Passwort nur für diesen Zweck.
 2. **GitHub → Settings → Secrets and variables → Actions → New repository secret:**
-   - `FTP_SERVER`: FTP-Servername aus dem KIS
+   - `FTP_SERVER`: FTP-Servername aus dem KIS, keine IP-Adresse: Das TLS-Zertifikat wird geprüft und ist auf einen Namen ausgestellt. Passt der Name nicht, bricht das Skript vor der Anmeldung ab und nennt die Namen im Zertifikat.
    - `FTP_USER`: Name des FTP-Benutzers
    - `FTP_PASSWORD`: sein Passwort
    - `FTP_DIR`: nur nötig, wenn der Benutzer nicht direkt im Webordner landet
