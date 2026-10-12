@@ -267,6 +267,154 @@ def roundtrip(browser, html, r):
     t.close()
 
 
+# Text ohne Namen für die Gegenprobe der Vornamen-Regel: viele großgeschriebene Nomen, kein Name
+NEUTRAL = """Der Vertrag beginnt mit dem ersten Werktag des Folgemonats. Die Kündigung bedarf der Schriftform.
+Kosten und Gebühren trägt der Auftraggeber, sofern nichts anderes vereinbart ist. Ernst gemeinte Einwände
+sind innerhalb einer Frist von zwei Wochen vorzubringen. Die Haftung ist auf Vorsatz und grobe Fahrlässigkeit
+beschränkt. Sollte eine Bestimmung unwirksam sein, bleibt der Vertrag im Übrigen wirksam. Änderungen und
+Ergänzungen bedürfen der Textform. Gerichtsstand ist der Sitz des Auftragnehmers. Die Rechnung ist innerhalb
+von 14 Tagen ohne Abzug zahlbar. Mit freundlichen Grüßen
+Ihre Kanzlei
+"""
+NAMES_TEXT = "Gestern rief Lena Schmidt an. Die Akte Yilmaz, Ahmet liegt vor. Termin mit Anna Maria Krause und Ursula von der Leyen.\n"
+
+
+def row_button(p, value, sel):
+    """Knopf in der Zeile der Zuordnung, deren Wert-Feld value enthält (Feldinhalt, nicht Attribut)."""
+    i = p.evaluate("""v => [...document.querySelectorAll('#mapBody tr')].findIndex(tr => tr.querySelectorAll('input')[1].value === v)""", value)
+    return p.query_selector_all("#mapBody tr")[i].query_selector(sel) if i >= 0 else None
+
+
+def names_tests(browser, html, r):
+    g = "Namensliste"
+    t = Tool(browser, html)
+    p = t.page
+    # Vornamen-Regel
+    p.fill("#src", NAMES_TEXT)
+    rest = p.inner_text("#rest") if p.is_visible("#restBox") else ""
+    for frag in ["Lena Schmidt", "Yilmaz, Ahmet", "Anna Maria Krause", "Ursula von der Leyen"]:
+        r.check(g, f"Restliste zeigt „{frag}“ (eingebaute Vornamen)", frag in rest, rest.replace("\n", " ")[:160])
+    p.fill("#src", NEUTRAL)
+    rest = p.inner_text("#rest") if p.is_visible("#restBox") else ""
+    r.check(g, "Gegenprobe: Text ohne Namen ergibt keinen Vornamen-Hinweis", "Vorname mit Name" not in rest, rest.replace("\n", " ")[:160] or "keine Hinweise")
+
+    # Eigener Vorname ergänzt die eingebaute Liste
+    p.fill("#src", "Bitte Jolanthe Beispielfrau anrufen.")
+    before = "Jolanthe Beispielfrau" in (p.inner_text("#rest") if p.is_visible("#restBox") else "")
+    p.fill("#namesValue", "Jolanthe")
+    p.select_option("#namesType", "Vorname")
+    p.click("#namesAdd")
+    after = "Jolanthe Beispielfrau" in (p.inner_text("#rest") if p.is_visible("#restBox") else "")
+    r.check(g, "Eigener Vorname erzeugt Hinweis (vorher nicht)", (not before) and after, f"vorher {before}, nachher {after}")
+    r.check(g, "Vorname wird nicht automatisch maskiert", "Jolanthe" in p.input_value("#masked"))
+
+    # Mandanten eintragen, Namensliste speichern
+    for v, k in [("Gerda Beispielfrau", "Person"), ("Am Ritterweg 7", "Adresse"), ("Otto Unbekannt", "Person"), ("AZ 12/345-B", "Nummer")]:
+        p.fill("#namesValue", v)
+        p.select_option("#namesType", k)
+        p.click("#namesAdd")
+    nf = OUT / "namensliste.txt"
+    with p.expect_download() as dl:
+        p.click("#saveNames")
+    d = dl.value
+    d.save_as(nf)
+    txt = nf.read_text(encoding="utf-8")
+    r.check(g, "Dateiname namensliste_NICHT_HOCHLADEN.txt", d.suggested_filename == "namensliste_NICHT_HOCHLADEN.txt", d.suggested_filename)
+    r.check(g, "Speichern fragt vorher nach", any("Mandanten" in x for x in t.dialogs))
+    r.check(g, "Datei mit Kopfzeile und Einträgen", txt.startswith("# AI Text Cleaner · Namensliste v1 · NICHT HOCHLADEN")
+            and "Person = Gerda Beispielfrau" in txt and "Vorname = Jolanthe" in txt and "Nummer = AZ 12/345-B" in txt)
+    net_console(r, g, t)
+    t.close()
+
+    # Neuer Browser: Namensliste laden, Text einfügen, Treffer werden automatisch maskiert
+    t = Tool(browser, html)
+    p = t.page
+    t.load_list_names = lambda path: p.set_input_files("#namesFile", str(path))
+    t.load_list_names(nf)
+    p.wait_for_timeout(150)
+    r.check(g, "Namensliste geladen", "geladen" in p.inner_text("#namesMsg"), p.inner_text("#namesMsg"))
+    # Nur die abgewandelte Form im Text: nichts wird übernommen, die Leck-Prüfung der Namensliste muss sperren
+    p.fill("#src", "Der Antrag von Gerda Beispielfraus ist eingegangen.")
+    leak = p.inner_text("#leak") if p.is_visible("#leak") else ""
+    r.check(g, "Leck-Prüfung der Namensliste: nur „Gerda Beispielfraus“ im Text", "Namensliste (Person)" in leak and p.is_disabled("#copyMasked"), leak[:140] or "nicht angeschlagen")
+    letter = "Sehr geehrte Frau Gerda Beispielfrau,\nzu Ihrem Schreiben (AZ 12/345-B) an die Anschrift Am Ritterweg 7 teile ich mit: Gerda Beispielfraus Antrag ist eingegangen.\n"
+    t.paste_into("#src", letter)
+    m = p.input_value("#masked")
+    ph = p.eval_on_selector_all("#mapBody td.ph input", "els => els.map(e => e.value)")
+    vals = p.eval_on_selector_all("#mapBody tr td:nth-child(2) input", "els => els.map(e => e.value)")
+    r.check(g, "Treffer automatisch in der Zuordnung", {"Gerda Beispielfrau", "Am Ritterweg 7", "AZ 12/345-B"} <= set(vals), ", ".join(f"{a}={b}" for a, b in zip(ph, vals)))
+    r.check(g, "Nicht im Text: „Otto Unbekannt“ nicht in der Zuordnung", "Otto Unbekannt" not in vals)
+    r.check(g, "Maskiert: Name, Adresse, Aktenzeichen", "Frau [Person A]" in m and "[Adresse 1]" in m and "[Nummer 1]" in m, m[-200:])
+    leak = p.inner_text("#leak") if p.is_visible("#leak") else ""
+    r.check(g, "Leck-Prüfung erkennt „Gerda Beispielfraus“", "Gerda Beispielfraus" in leak, leak[:140] or "nicht angeschlagen")
+
+    # Variante ergänzen über ☆-freie Bearbeitung: Variante in der Zuordnung, dann ☆ zeigt ★
+    stars = p.eval_on_selector_all("#mapBody button.star", "els => els.map(e => e.textContent)")
+    r.check(g, "★ bei Einträgen aus der Namensliste", stars.count("★") >= 3, " ".join(stars))
+
+    # Zuordnungseintrag löschen: bleibt für dieses Dokument draußen, keine Leck-Sperre dafür
+    p.fill("#src", "Termin mit Gerda Beispielfrau am Montag.")
+    p.dispatch_event("#src", "input")
+    btn = row_button(p, "Gerda Beispielfrau", "button:not(.star)")
+    if r.check(g, "Treffer steht vor dem Löschen in der Zuordnung", btn is not None):
+        btn.click()
+    p.wait_for_timeout(100)
+    p.type("#src", " Bitte bestätigen.")  # weitertippen: die Namensliste wird erneut durchsucht
+    vals = p.eval_on_selector_all("#mapBody tr td:nth-child(2) input", "els => els.map(e => e.value)")
+    r.check(g, "Gelöschter Treffer kommt nicht zurück", "Gerda Beispielfrau" not in vals and "nicht mehr automatisch" in p.inner_text("#listMsg"))
+    r.check(g, "Bewusst ausgenommen: keine Leck-Sperre", not p.is_visible("#leak"))
+
+    # ☆ übernimmt einen Eintrag aus der Zuordnung in die Namensliste
+    p.fill("#src", "Brief an Kunigunde Neufrau.")
+    p.dispatch_event("#src", "input")
+    t.add("Kunigunde Neufrau", "Person")
+    n_before = p.inner_text("#namesState")
+    btn = row_button(p, "Kunigunde Neufrau", "button.star")
+    if btn:
+        btn.click()
+    r.check(g, "☆ übernimmt in die Namensliste", "Kunigunde Neufrau" in p.eval_on_selector_all("#namesBody input", "els => els.map(e => e.value)")
+            and n_before != p.inner_text("#namesState"), p.inner_text("#namesState"))
+
+    # Verwechslungen
+    t.load_list(nf)
+    r.check(g, "Namensliste als Zuordnung geladen: abgelehnt", "keine Zuordnung" in p.inner_text("#listMsg"), p.inner_text("#listMsg")[:120])
+    zf = OUT / "zuordnung.txt"
+    p.set_input_files("#namesFile", str(zf))
+    p.wait_for_timeout(150)
+    r.check(g, "Zuordnung als Namensliste geladen: abgelehnt", "keine Namensliste" in p.inner_text("#namesMsg"), p.inner_text("#namesMsg")[:120])
+    bad = OUT / "namensliste_kaputt.txt"
+    bad.write_text("# AI Text Cleaner · Namensliste v1 · NICHT HOCHLADEN\nPerson = Max\nFirma = max\n[Person A] = Moritz\n", encoding="utf-8")
+    p.set_input_files("#namesFile", str(bad))
+    p.wait_for_timeout(150)
+    msg = p.inner_text("#namesMsg")
+    r.check(g, "Kaputte Namensliste abgelehnt, mit Zeilenangabe", "nicht geladen" in msg and "Zeile 3" in msg and "Zeile 4" in msg, msg.replace("\n", " ")[:160])
+    p.click("#tabBack")
+    t.paste_into("#answer", txt)
+    r.check(g, "Namensliste im Antwortfeld wird erkannt", "Namensliste, nicht die Antwort" in p.inner_text("#report"))
+    net_console(r, g, t)
+    t.close()
+
+    # Große Namensliste: 5.000 Einträge
+    t = Tool(browser, html)
+    p = t.page
+    big = OUT / "namensliste_gross.txt"
+    lines = ["# AI Text Cleaner · Namensliste v1 · NICHT HOCHLADEN"] + [f"Person = Testperson{i:05d} Nachname{i:05d}" for i in range(5000)]
+    big.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    p.set_input_files("#namesFile", str(big))
+    p.wait_for_timeout(300)
+    text = (NEUTRAL + "Akte Testperson04711 Nachname04711 und Testperson00042 Nachname00042.\n") * 6
+    ms = p.evaluate("""t => { const el = document.getElementById('src'); const t0 = performance.now();
+        el.value = t; el.dispatchEvent(new Event('input')); return performance.now() - t0; }""", text)
+    ms2 = p.evaluate("""() => { const el = document.getElementById('src'); const t0 = performance.now();
+        el.value += ' x'; el.dispatchEvent(new Event('input')); return performance.now() - t0; }""")
+    m = p.input_value("#masked")
+    r.check(g, "5.000 Einträge: Treffer gefunden und maskiert", "Testperson04711" not in m and "Testperson00042" not in m and "[Person B]" in m)
+    r.check(g, "5.000 Einträge: erste Maskierung unter 1 s", ms < 1000, f"{ms:.0f} ms")
+    r.check(g, "5.000 Einträge: jeder weitere Tastendruck unter 300 ms", ms2 < 300, f"{ms2:.0f} ms")
+    net_console(r, g, t)
+    t.close()
+
+
 BAD_FILES = {
     "ohne Kopfzeile": "[Person A] = Max\n",
     "doppelter Platzhalter": "# AI Text Cleaner · Zuordnung v1 · NICHT HOCHLADEN\n[Person A] = Max\n[Person A] = Moritz\n",
@@ -312,6 +460,7 @@ def main():
         day2(browser, html, r, listfile)
         roundtrip(browser, html, r)
         bad_files(browser, html, r)
+        names_tests(browser, html, r)
         browser.close()
 
     passed = sum(1 for x in r.rows if x[2])
