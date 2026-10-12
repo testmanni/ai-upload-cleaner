@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <!--
-  AI Text Cleaner 0.1.0 (Prototyp)
+  AI Text Cleaner 0.2.0 (ungetestete Version im Entwicklungsprozess)
   Copyright (c) 2026 Manfred Just
   Lizenziert unter der MIT-Lizenz. Siehe LICENSE.
 
@@ -10,12 +10,20 @@
   die Zuordnung als Datei speichern und die Antwort der KI später zurückübersetzen.
   Eine einzelne HTML-Datei, vollständig offline, ohne Bibliotheken.
 
+  Zwei Listen:
+    - Zuordnung (je Dokument): Platzhalter und echter Wert, zum Zurückübersetzen.
+    - Namensliste (dauerhaft, selbst gepflegt): Mandanten, Adressen, Nummern ohne Platzhalter. Was davon im
+      Text steht, kommt automatisch mit neuem Platzhalter in die Zuordnung. Einträge der Art „Vorname“
+      ergänzen die eingebaute Vornamenliste; sie erzeugen nur Hinweise in der Restliste.
+    Die eingebaute Vornamenliste ist selbst zusammengestellt (häufige Vornamen in Deutschland), keine
+    übernommene Datenbank.
+
   Sicherheitsmaßnahmen:
     - Content-Security-Policy: keine Netzwerkverbindungen (connect-src 'none'), keine externen Skripte.
-    - Die Zuordnung liegt nur im Arbeitsspeicher dieses Tabs und in der Datei, die Sie selbst speichern.
+    - Beide Listen liegen nur im Arbeitsspeicher dieses Tabs und in den Dateien, die Sie selbst speichern.
       Das Werkzeug legt sie nicht im Browser ab.
     - Vor dem Kopieren und Speichern des maskierten Texts prüft das Werkzeug, dass kein Wert aus der
-      Zuordnung mehr darin steht (Leck-Prüfung). Schlägt sie an, wird nichts kopiert.
+      Zuordnung oder der Namensliste mehr darin steht (Leck-Prüfung). Schlägt sie an, wird nichts kopiert.
     - Beim Zurückübersetzen wird nur ersetzt, was genau einem Platzhalter der Liste entspricht.
       Unbekannte und veränderte Platzhalter werden gemeldet, nicht geraten.
 -->
@@ -23,7 +31,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-aitc'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="application-name" content="AI Text Cleaner 0.1.0" />
+<meta name="application-name" content="AI Text Cleaner 0.2.0" />
 <meta name="color-scheme" content="light dark" />
 <title>AI Text Cleaner – Namen raus, Antwort zurück</title>
 <script nonce="aitc">try{var m=localStorage.getItem('aiuc-theme');if(m==='light'||m==='dark')document.documentElement.dataset.theme=m;}catch(e){}</script>
@@ -87,7 +95,9 @@
   table{width:100%;border-collapse:collapse}
   th{text-align:left;font-size:12px;color:var(--mut);font-weight:600;padding:4px 6px;border-bottom:1px solid var(--line)}
   td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:top}
-  td input{width:100%}
+  td input,td select{width:100%}
+  td.x{white-space:nowrap}
+  td.x button+button{margin-left:4px}
   td.ph input{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;color:var(--ph);font-weight:600}
   td.n{width:1%;white-space:nowrap;text-align:right;color:var(--mut);font-size:13px;padding-top:11px}
   td.x{width:1%}
@@ -118,10 +128,10 @@
     <a class="home" href="https://ai-upload-cleaner.com/" target="_blank" rel="noopener noreferrer" aria-label="AI Upload Cleaner: Startseite (öffnet in neuem Tab)"><span class="dot"></span><span>AI Upload Cleaner</span></a>
     <button class="theme" id="themeToggle" type="button" aria-label="Darstellung wechseln: System, Hell, Dunkel" title="Darstellung wechseln: System, Hell, Dunkel" hidden></button>
   </div>
-  <div class="kicker">AI Text Cleaner 0.1 · ungetestete Entwicklungsversion</div>
+  <div class="kicker">AI Text Cleaner 0.2 · ungetestete Entwicklungsversion</div>
   <h1>Namen raus, Antwort zurück.</h1>
   <p class="sub">Text maskieren, an die KI schicken, Antwort zurückübersetzen. Alles bleibt auf diesem Gerät. Die Zuordnung speichern Sie als Datei und laden sie wieder, wann Sie wollen.</p>
-  <div class="note bad" role="note"><b>Nur ungetestete Version im Entwicklungsprozess.</b> Nicht für den Ernstfall. Das Werkzeug ersetzt nur, was in der Liste steht oder einem Muster (IBAN, E-Mail, Telefon) entspricht. Namen findet es nicht von selbst. Lesen Sie den maskierten Text, bevor Sie ihn abschicken.</div>
+  <div class="note bad" role="note"><b>Nur ungetestete Version im Entwicklungsprozess.</b> Nicht für den Ernstfall. Das Werkzeug ersetzt nur, was in der Liste steht oder einem Muster (IBAN, E-Mail, Telefon) entspricht. Namen findet es nur, wenn sie in einer der Listen stehen; Vornamen erscheinen als Hinweis in der Restliste. Lesen Sie den maskierten Text, bevor Sie ihn abschicken.</div>
 
   <div class="tabs" role="tablist">
     <button class="tab" role="tab" id="tabMask" aria-selected="true" aria-controls="panelMask">1 · Maskieren</button>
@@ -200,11 +210,40 @@
       <tbody id="mapBody"></tbody>
     </table>
     <div id="mapEmpty" class="empty">Noch keine Einträge. Tragen Sie in Schritt 1 Namen ein, suchen Sie Muster, oder laden Sie eine gespeicherte Liste.</div>
-    <p class="state">Die Datei <code>zuordnung_NICHT_HOCHLADEN.txt</code> enthält die echten Namen im Klartext. Sie gehört nicht in den Chat und nicht in eine Cloud. Ohne gespeicherte Datei ist die Liste weg, sobald Sie diesen Tab schließen.</p>
+    <p class="state">Die Datei <code>zuordnung_NICHT_HOCHLADEN.txt</code> enthält die echten Namen im Klartext. Sie gehört nicht in den Chat und nicht in eine Cloud. Ohne gespeicherte Datei ist die Liste weg, sobald Sie diesen Tab schließen. ☆ übernimmt einen Eintrag in die Namensliste.</p>
+  </section>
+
+  <!-- Namensliste: dauerhaft, selbst gepflegt -->
+  <section class="map" aria-labelledby="namesTitle">
+    <div class="maphead">
+      <h2 id="namesTitle">Namensliste</h2>
+      <span id="namesState" class="state">keine eigenen Einträge</span>
+      <button id="saveNames" type="button" class="primary" disabled>Namensliste speichern</button>
+      <button id="loadNames" type="button">Namensliste laden</button>
+      <button id="clearNames" type="button" class="danger" disabled>Leeren</button>
+      <input id="namesFile" type="file" accept=".txt,text/plain" class="hidden" />
+    </div>
+    <p class="state" style="margin-top:0">Ihre dauerhafte Liste, etwa Mandanten, Firmen, Adressen und Aktenzeichen. Was hier steht, sucht das Werkzeug in jedem Text und maskiert es automatisch, jedes Mal mit neuen Platzhaltern. Einträge der Art „Vorname“ ergänzen die eingebaute Vornamenliste (<span id="fnCount"></span> Vornamen): Sie erscheinen nur als Hinweis in der Restliste.</p>
+    <div class="add">
+      <div class="row" style="margin:0">
+        <input id="namesValue" type="text" placeholder="Mandant, Adresse, Aktenzeichen …" aria-label="Neuer Eintrag für die Namensliste" autocomplete="off" />
+        <select id="namesType" aria-label="Art des Eintrags"></select>
+        <button id="namesAdd" type="button" class="primary">Hinzufügen</button>
+      </div>
+    </div>
+    <div id="namesMsg" class="note hidden" role="alert"></div>
+    <div class="row hidden" id="namesFilterRow"><input id="namesFilter" type="search" placeholder="In der Namensliste suchen" aria-label="In der Namensliste suchen" style="flex:1" /></div>
+    <table id="namesTable" class="hidden">
+      <thead><tr><th style="width:16%">Art</th><th style="width:34%">Wert</th><th>Varianten, mit ; getrennt</th><th></th></tr></thead>
+      <tbody id="namesBody"></tbody>
+    </table>
+    <div id="namesMore" class="state hidden"></div>
+    <div id="namesEmpty" class="empty">Noch keine eigenen Einträge. Tragen Sie Mandanten oben ein oder übernehmen Sie Einträge aus der Zuordnung mit ☆.</div>
+    <p class="state">Die Datei <code>namensliste_NICHT_HOCHLADEN.txt</code> verzeichnet Ihre Mandanten im Klartext und ist damit die heikelste Datei. Nur auf diesem Gerät oder einem verschlüsselten Datenträger ablegen, nie in eine Cloud, nie in einen Chat. Einen Passwortschutz gibt es noch nicht.</p>
   </section>
 
   <div class="foot">
-    AI Text Cleaner 0.1.0 · ungetestete Version im Entwicklungsprozess · MIT-Lizenz · <a href="https://github.com/testmanni/ai-upload-cleaner">github.com/testmanni/ai-upload-cleaner</a> · <a href="#" id="lnkImpressum">Impressum</a> · <a href="#" id="lnkDatenschutz">Datenschutz</a><br>
+    AI Text Cleaner 0.2.0 · ungetestete Version im Entwicklungsprozess · MIT-Lizenz · <a href="https://github.com/testmanni/ai-upload-cleaner">github.com/testmanni/ai-upload-cleaner</a> · <a href="#" id="lnkImpressum">Impressum</a> · <a href="#" id="lnkDatenschutz">Datenschutz</a><br>
     Hilfsmittel, keine Rechtsberatung. Maskiert heißt nicht anonym: Ein seltener Befund mit Ort und Datum bleibt auch ohne Namen zuordenbar.
   </div>
 </div>
@@ -213,9 +252,11 @@
 
 <script nonce="aitc">
 'use strict';
-const VERSION='0.1.0';
+const VERSION='0.2.0';
 const HEADER='# AI Text Cleaner · Zuordnung v1 · NICHT HOCHLADEN';
 const LIST_FILE='zuordnung_NICHT_HOCHLADEN.txt';
+const NAMES_HEADER='# AI Text Cleaner · Namensliste v1 · NICHT HOCHLADEN';
+const NAMES_FILE='namensliste_NICHT_HOCHLADEN.txt';
 const $=id=>document.getElementById(id);
 
 // ============================================================================
@@ -225,6 +266,18 @@ const $=id=>document.getElementById(id);
 let entries=[];
 let dirty=false;        // geändert seit dem letzten Speichern oder Laden
 let savedAt=null;
+let listVersion=0;      // zählt jede Änderung der Zuordnung, für den Zwischenspeicher der Maske
+
+// Namensliste: {type, value, variants[]}, ohne Platzhalter
+let names=[];
+let namesDirty=false,namesSavedAt=null,namesVersion=0;
+const ignored=new Set(); // Einträge der Namensliste, die in diesem Dokument bewusst nicht maskiert werden
+const TYPE_RE=/^[A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß-]*$/;
+
+// Häufige Vornamen in Deutschland, selbst zusammengestellt. Vornamen, die zugleich gewöhnliche
+// Wörter sind (Mai, August, Rose, Wolf, Mark), fehlen absichtlich.
+const FIRST_NAMES='Anna Maria Emma Mia Hannah Hanna Sophia Sofia Sophie Lena Lea Leonie Marie Laura Lara Lina Luisa Louisa Clara Klara Charlotte Johanna Emilia Amelie Ella Ida Lia Lisa Julia Sarah Sara Katharina Kathrin Katrin Christina Kristina Christine Andrea Sabine Petra Claudia Susanne Monika Stefanie Stephanie Nicole Birgit Martina Karin Gabriele Ute Ursula Renate Helga Brigitte Ingrid Gisela Erika Elisabeth Margarete Margret Hildegard Gertrud Irmgard Inge Ingeborg Christa Barbara Angelika Doris Heike Silke Anja Tanja Sandra Melanie Daniela Manuela Simone Kerstin Jutta Elke Bettina Carina Corinna Franziska Jessica Jennifer Vanessa Nadine Nina Jana Jasmin Yasmin Michelle Janina Svenja Sina Annika Anke Antje Dagmar Edith Elfriede Emmi Frieda Greta Helene Henriette Hedwig Irene Isabel Isabell Isabella Jacqueline Josephine Judith Juliane Karla Carla Karolina Caroline Carolin Kira Larissa Lilli Lilly Lotta Luise Magdalena Maja Marion Marlene Mathilda Mila Miriam Natalie Nathalie Nele Paula Pauline Ronja Rosemarie Ruth Selina Sigrid Tamara Theresa Teresa Tina Valentina Valerie Vera Verena Viktoria Victoria Waltraud Yvonne Zoe Alina Aylin Amira Angela Anette Annette Antonia Beate Bianca Britta Cornelia Diana Elena Eva Evelyn Fabienne Felicitas Gudrun Hannelore Heidi Hilde Ilse Ivonne Jule Klaudia Lieselotte Liselotte Lucia Luzia Marianne Marina Mareike Martha Melina Mira Nora Olga Patricia Patrizia Rebecca Rebekka Regina Rita Sabrina Sonja Stella Ulrike Ulla Wiebke Xenia Gerda Gesine Hertha Hermine Lydia Marga Marta Meike Merle Nadja Pia Romy Saskia Thea Uta Wilma Agathe Alexandra Astrid Bärbel Carmen Dorothea Elsa Emilie Erna Friederike Gabi Grete Hella Ines Ina Irma Jette Kathi Kati Leni Lotte Luzie Madeleine Mechthild Nicola Ottilie Rosa Roswitha Sieglinde Sylvia Silvia Tatjana Trude Wanda Alexander Andreas Anton Armin Arne Axel Bastian Benedikt Benjamin Bernd Bernhard Björn Bodo Burkhard Carl Karl Carsten Karsten Christian Christoph Christopher Claus Klaus Constantin Konstantin Daniel David Detlef Dennis Dieter Dirk Dominik Edgar Egon Elias Emil Erich Erik Eric Ernst Erwin Fabian Felix Finn Florian Frank Franz Friedrich Fritz Georg Gerd Gerhard Gregor Günter Günther Gustav Hans Harald Hartmut Heiko Heinrich Heinz Helmut Hendrik Henrik Henning Henry Herbert Hermann Holger Horst Hubert Hugo Ingo Jakob Jacob Jan Jannik Jens Joachim Jochen Johann Johannes Jonas Jonathan Jörg Josef Joseph Julian Julius Jürgen Kai Kay Kevin Kilian Konrad Kurt Lars Leon Leonard Lennard Lennart Linus Lothar Louis Luca Lukas Lucas Ludwig Lutz Malte Manfred Manuel Marc Marcel Marco Marcus Markus Mario Martin Matthias Mathias Max Maximilian Michael Moritz Nico Niko Niklas Nicolas Nikolas Nils Noah Norbert Olaf Oliver Oskar Otto Pascal Patrick Paul Peter Philipp Rainer Ralf Ralph Reinhard Reinhold René Richard Robert Roland Rolf Rudolf Rüdiger Sascha Sebastian Siegfried Simon Stefan Stephan Steffen Sven Theo Theodor Thomas Thorsten Torsten Tilo Timo Tim Tobias Udo Ulrich Uwe Valentin Viktor Volker Walter Werner Wilhelm Willi Wolfgang Yannick Jannis Ben Bruno Carlo Dietmar Eckhard Elmar Erhard Ewald Ferdinand Frederik Friedhelm Gottfried Gunnar Hannes Harry Heino Helge Henri Jasper Joel Karlheinz Klemens Clemens Knut Leopold Lorenz Magnus Marius Mats Mattis Nikolai Ole Raphael Rafael Reiner Robin Ruben Samuel Silas Sönke Till Ulf Vincent Waldemar Wilfried Willy Achim Adrian Albert Alfred Alois Arnold Arthur August-Wilhelm Benno Berthold Christof Conrad Dietrich Eberhard Eduard Emanuel Engelbert Eugen Gerald Gernot Gisbert Guido Hagen Hans-Peter Hans-Jürgen Heiner Hinrich Ivo Jost Karl-Heinz Lambert Lasse Leander Marten Matthäus Meinhard Nikolaus Norman Oswald Ottmar Quirin Reimund Roman Sigmund Thilo Tino Toni Wenzel Wolfram Ahmet Ahmed Ali Ayşe Ayse Aysel Burak Cem Deniz Elif Emine Emre Esra Fatma Fatih Gökhan Hakan Hasan Hatice Hüseyin Ibrahim İbrahim Kemal Leyla Mehmet Melek Merve Murat Mustafa Ömer Orhan Özlem Recep Selin Serkan Sevgi Tuncay Yasemin Yusuf Zeynep Abdul Abdullah Amir Fatima Hamza Hassan Karim Khaled Layla Mahmoud Mariam Mohamed Mohammed Muhammad Nour Omar Rania Samir Tarek Yasin Youssef Zainab Ayla Berk Cansu Derya Ebru Erkan Ercan Gül Gülay Halil Ilker Kader Kerem Levent Metin Nihat Osman Sibel Songül Tolga Ufuk Volkan Yavuz Yunus Zehra Ahmad Bilal Hadi Hussein Jamal Malik Mona Nabil Rami Said Salma Walid Agnieszka Aleksandra Andrzej Anastasia Dmitri Dmitrij Ewa Grzegorz Irina Iwona Jacek Jakub Katarzyna Krzysztof Malgorzata Małgorzata Marek Natalia Oksana Pawel Paweł Piotr Sergej Sergei Tomasz Wladimir Witold Zofia Jelena Milena Ivan Iwan Igor Oleg Pavel Juri Yuri Ludmila Galina Bogdan Dariusz Janusz Jerzy Joanna Kamil Lukasz Łukasz Mariusz Michal Michał Slawomir Wojciech Alexej Alexei Andrej Artur Boris Denis Jewgeni Maxim Nikita Pjotr Tatiana Walentina Dragan Goran Milan Nikola Zoran Snezana Branka Mirela Vesna Alessandro Antonio Chiara Dimitrios Francesca Francesco Giorgio Giovanni Giuseppe Javier José Jose Juan Luigi Matteo Nikos Paolo Pedro Roberto Salvatore Stavros Vincenzo Ana Lucía Miguel Carlos Diego Joana João Kostas Eleni Georgios Alberto Angelo Antonella Domenico Fabio Federica Gianluca Lorenzo Luciano Marcello Massimo Pietro Raffaele Sergio Silvana Stefano Valeria Alejandro Fernando Jorge Pablo Ricardo Rosario Ioannis Konstantinos Panagiotis Vasilis Rui Tiago Inês James John William Charles George Edward Emily Olivia Amy Chloe Lucy Jack Liam Ethan Mason Logan Pierre Jean Jacques Michel François Camille Julien Mathieu Sébastien Aurélie Céline Chantal Isabelle Sylvie Valérie Dominique Brian Jason Kenneth Mary Susan Andrew Matthew Steven Timothy Elizabeth Margaret Catherine Kate Rachel Grace Alice Anne Antoine Benoît Claire Guillaume Hélène Laurent Philippe Stéphane Thierry Yves';
+const BUILTIN_FIRST=new Set(FIRST_NAMES.split(' ').map(x=>x.toLowerCase()));
 
 const TYPES=['Person','Firma','Ort','Adresse','IBAN','E-Mail','Telefon','Nummer','Datum','Sonstiges'];
 const LETTER_TYPES=new Set(['Person','Firma','Ort']);
@@ -279,38 +332,87 @@ function valuePattern(v,type){
   const glue=(type==='IBAN'||type==='Telefon'||type==='Nummer')?'\\s*':'\\s+';
   return v.split(/\s+/).map(esc).join(glue);
 }
-function buildMasker(){
-  const items=[];
-  for(const e of entries){const t=phType(e.ph);for(const v of allValues(e))items.push({v,ph:e.ph,t});}
+// Ein regulärer Ausdruck über alle Werte; welcher Wert getroffen wurde, sagt die Vergleichsform.
+// Werte mit gleicher Vergleichsform kann es nicht geben (Prüfung beim Eintragen und Laden).
+function buildMatcher(items){
   if(!items.length)return null;
   items.sort((a,b)=>b.v.length-a.v.length);
-  const re=new RegExp('(?<![\\p{L}\\p{N}])(?:'+items.map((it,i)=>'(?<g'+i+'>'+valuePattern(it.v,it.t)+')').join('|')+')(?![\\p{L}\\p{N}])','giu');
-  return {re,items};
+  const re=new RegExp('(?<![\\p{L}\\p{N}])(?:'+items.map(it=>valuePattern(it.v,it.t)).join('|')+')(?![\\p{L}\\p{N}])','giu');
+  const map=new Map();for(const it of items)map.set(norm(it.v),it);
+  return {re,items,map};
+}
+function lookup(m,t){
+  const it=m.map.get(norm(t));if(it)return it;
+  // Sonderfälle der Groß-/Kleinschreibung (etwa İ): jeden Wert einzeln prüfen
+  return m.items.find(it=>new RegExp('^(?:'+valuePattern(it.v,it.t)+')$','iu').test(t))||null;
+}
+let maskCache=null;
+function buildMasker(){
+  if(maskCache&&maskCache.v===listVersion)return maskCache.m;
+  const items=[];
+  for(const e of entries){const t=phType(e.ph);for(const v of allValues(e))items.push({v,ph:e.ph,t});}
+  const m=buildMatcher(items);
+  maskCache={v:listVersion,m};
+  return m;
 }
 function mask(text){
   const m=buildMasker();
   const counts=new Map();
   if(!m)return {out:text,counts};
-  const out=text.replace(m.re,(...args)=>{
-    const groups=args[args.length-1];
-    for(let i=0;i<m.items.length;i++){if(groups['g'+i]!==undefined){const ph=m.items[i].ph;counts.set(ph,(counts.get(ph)||0)+1);return ph;}}
-    return args[0];
+  const out=text.replace(m.re,t=>{
+    const it=lookup(m,t);if(!it)return t;
+    counts.set(it.ph,(counts.get(it.ph)||0)+1);return it.ph;
   });
   return {out,counts};
+}
+
+// Namensliste im Text suchen; Treffer kommen mit neuem Platzhalter in die Zuordnung
+let scanCache=null;
+function namesScanner(){
+  if(scanCache&&scanCache.v===namesVersion)return scanCache.m;
+  const items=[];
+  for(const ne of names){if(ne.type==='Vorname')continue;for(const v of allValues(ne))items.push({v,t:ne.type,ne});}
+  const m=buildMatcher(items);
+  scanCache={v:namesVersion,m};
+  return m;
+}
+function inMap(ne){return allValues(ne).some(v=>findValue(v));}
+function syncFromNames(){
+  const src=$('src').value;
+  if(!src.trim()||!names.length)return [];
+  const m=namesScanner();if(!m)return [];
+  const added=[];
+  for(const hit of src.matchAll(m.re)){
+    const it=lookup(m,hit[0]);if(!it)continue;
+    const ne=it.ne;
+    if(ignored.has(ne)||inMap(ne))continue;
+    const e={ph:nextPh(ne.type),value:ne.value,variants:[...ne.variants]};
+    entries.push(e);added.push(e.ph);
+  }
+  return added;
+}
+function nameEntryFor(e){
+  const ns=new Set(allValues(e).map(norm));
+  return names.find(ne=>ne.type!=='Vorname'&&allValues(ne).some(v=>ns.has(norm(v))))||null;
 }
 
 // Leck-Prüfung: Steht ein Wert aus der Liste noch im maskierten Text?
 // Verglichen wird ohne Leerraum und ohne Groß/klein, also auch „DE8937…“ ohne Leerzeichen
 // oder „Mustermanns“. Platzhalter selbst werden vorher entfernt.
 function leaks(maskedText){
+  const stripped=maskedText.replace(/\[[^\]\n]{1,40}\]/g,' ');
   const hay=norm(maskedText.replace(/\[[^\]\n]{1,40}\]/g,'\u0000'));
   const found=[];
-  for(const e of entries){
-    for(const v of allValues(e)){
-      const n=norm(v);
-      if(n.length>=3){if(hay.includes(n))found.push({e,v,at:leakContext(maskedText,n)});}
-      else{const re=new RegExp('(?<![\\p{L}\\p{N}])'+valuePattern(v,phType(e.ph))+'(?![\\p{L}\\p{N}])','iu');if(re.test(maskedText.replace(/\[[^\]\n]{1,40}\]/g,' ')))found.push({e,v,at:v});}
-    }
+  const check=(label,v,type)=>{
+    const n=norm(v);
+    if(n.length>=3){if(hay.includes(n))found.push({label,v,at:leakContext(maskedText,n)});}
+    else{const re=new RegExp('(?<![\\p{L}\\p{N}])'+valuePattern(v,type)+'(?![\\p{L}\\p{N}])','iu');if(re.test(stripped))found.push({label,v,at:v});}
+  };
+  for(const e of entries)for(const v of allValues(e))check(e.ph,v,phType(e.ph));
+  // Namensliste: nur, was nicht schon in der Zuordnung steht und nicht bewusst ausgenommen ist
+  for(const ne of names){
+    if(ne.type==='Vorname'||ignored.has(ne)||inMap(ne))continue;
+    for(const v of allValues(ne))check('Namensliste ('+ne.type+')',v,ne.type);
   }
   return found;
 }
@@ -370,6 +472,39 @@ const REST_RULES=[
   {kind:'Internetadresse',type:'Sonstiges',re:/\b(?:https?:\/\/|www\.)[^\s<>"]+/gi},
   {kind:'Platzhalter-ähnlich',type:null,re:/\[[A-Za-zÄÖÜäöüß-]+ (?:[A-Z]{1,2}|\d{1,3})\]/g}
 ];
+// Vorname aus der eingebauten oder eigenen Liste, dahinter ein großgeschriebenes Wort:
+// „Lena Schmidt“, „Anna Maria Schmidt“, „Ursula von der Leyen“, auch „Mustermann, Max“
+const PARTICLES=new Set(['von','van','vom','zu','zur','de','der','den','di','da','del','dos','le','la','ten','ter','bin','al','el']);
+let firstCache=null;
+function firstNames(){
+  if(firstCache&&firstCache.v===namesVersion)return firstCache.s;
+  const s=new Set(BUILTIN_FIRST);
+  for(const ne of names)if(ne.type==='Vorname')for(const v of allValues(ne))s.add(v.toLowerCase());
+  firstCache={v:namesVersion,s};return s;
+}
+function nameCandidates(text){
+  const fn=firstNames();
+  const words=[...text.matchAll(/[\p{L}\p{N}'’-]+/gu)].map(m=>({s:m.index,e:m.index+m[0].length,w:m[0]}));
+  const cap=w=>/^\p{Lu}/u.test(w.w);
+  const gap=(a,b,re)=>re.test(text.slice(a.e,b.s));
+  const isFirst=w=>cap(w)&&fn.has(w.w.toLowerCase());
+  const out=[];
+  for(let j=0;j<words.length;j++){
+    const w=words[j];
+    if(!isFirst(w))continue;
+    // Vorname, vielleicht ein zweiter Vorname, Namenszusätze, dann Nachname
+    let k=j+1;
+    if(k<words.length&&isFirst(words[k])&&gap(words[k-1],words[k],/^[ \t]+$/)&&k+1<words.length&&cap(words[k+1])&&gap(words[k],words[k+1],/^[ \t]+$/))k++;
+    let p=0;
+    while(k<words.length&&p<2&&PARTICLES.has(words[k].w)&&gap(words[k-1],words[k],/^[ \t]+$/)){k++;p++;}
+    if(k<words.length&&cap(words[k])&&gap(words[k-1],words[k],/^[ \t]+$/)){
+      out.push({s:w.s,e:words[k].e});j=k;continue;
+    }
+    // Nachname, Vorname
+    if(j>0&&cap(words[j-1])&&!fn.has(words[j-1].w.toLowerCase())&&gap(words[j-1],w,/^,[ \t]*$/))out.push({s:words[j-1].s,e:w.e});
+  }
+  return out.map(c=>({s:c.s,e:c.e,t:text.slice(c.s,c.e)}));
+}
 function restList(srcText,maskedText){
   const out=[];const seen=new Set();
   for(const h of patternHits(maskedText)){
@@ -392,6 +527,11 @@ function restList(srcText,maskedText){
       const key=norm(h.t);if(seen.has(key))continue;seen.add(key);
       out.push({kind:r.kind,type:r.type,text:h.t.trim(),s:h.s,e:h.e});
     }
+  }
+  for(const h of nameCandidates(maskedText)){
+    if(out.some(x=>x.s>=0&&h.s<x.e&&x.s<h.e))continue;
+    const key=norm(h.t);if(seen.has(key))continue;seen.add(key);
+    out.push({kind:'Vorname mit Name',type:'Person',text:h.t,s:h.s,e:h.e});
   }
   return out;
 }
@@ -443,7 +583,9 @@ function parse(txt){
   const lines=txt.split(/\r\n|\r|\n/);
   const first=lines.findIndex(l=>l.trim()!=='');
   if(first<0)return {errors:['Die Datei ist leer.']};
-  if(!/^#\s*AI Text Cleaner\b.*\bZuordnung v1\b/.test(lines[first].trim()))
+  const kind=headerKind(lines[first].trim());
+  if(kind==='names')return {errors:['Das ist eine Namensliste, keine Zuordnung. Laden Sie sie unten bei „Namensliste“ mit „Namensliste laden“.']};
+  if(kind!=='map')
     return {errors:['Zeile '+(first+1)+': Kopfzeile „'+HEADER+'“ fehlt. Ist das eine Zuordnung des AI Text Cleaners?']};
   const out=[];const phs=new Map();const vals=new Map();
   for(let i=first+1;i<lines.length;i++){
@@ -470,7 +612,56 @@ function parse(txt){
   if(!errors.length&&!out.length)errors.push('Die Datei enthält keine Einträge.');
   return {errors,entries:out};
 }
-function looksLikeListFile(t){return /#\s*AI Text Cleaner\b[^\n]*Zuordnung v\d/.test(t);}
+function headerKind(line){
+  if(/^#\s*AI Text Cleaner\b.*\bZuordnung v1\b/.test(line))return 'map';
+  if(/^#\s*AI Text Cleaner\b.*\bNamensliste v1\b/.test(line))return 'names';
+  return null;
+}
+function looksLikeListFile(t){return /#\s*AI Text Cleaner\b[^\n]*(?:Zuordnung|Namensliste) v\d/.test(t);}
+
+// Namensliste: eine Zeile je Eintrag, „Art = Wert; Variante; Variante“
+function serializeNames(){
+  const lines=[NAMES_HEADER,
+    '# Diese Datei enthält echte Namen und Daten im Klartext. Nicht an eine KI schicken, nicht in eine Cloud legen.',
+    '# Format: Art = Wert; Variante; Variante',
+    '# Art „Vorname“: nur Hinweis in der Restliste, wird nicht automatisch maskiert.',
+    '# Gespeichert: '+new Date().toLocaleString('de-DE')+' · AI Text Cleaner '+VERSION,''];
+  for(const ne of names)lines.push(ne.type+' = '+allValues(ne).join('; '));
+  return lines.join('\n')+'\n';
+}
+function parseNames(txt){
+  const errors=[];
+  txt=txt.replace(/^\uFEFF/,'');
+  const lines=txt.split(/\r\n|\r|\n/);
+  const first=lines.findIndex(l=>l.trim()!=='');
+  if(first<0)return {errors:['Die Datei ist leer.']};
+  const kind=headerKind(lines[first].trim());
+  if(kind==='map')return {errors:['Das ist eine Zuordnung, keine Namensliste. Laden Sie sie oben bei „Zuordnung“ mit „Liste laden“.']};
+  if(kind!=='names')return {errors:['Zeile '+(first+1)+': Kopfzeile „'+NAMES_HEADER+'“ fehlt. Ist das eine Namensliste des AI Text Cleaners?']};
+  const out=[];const vals=new Map();
+  for(let i=first+1;i<lines.length;i++){
+    const raw=lines[i].trim();const ln='Zeile '+(i+1)+': ';
+    if(!raw||raw.startsWith('#'))continue;
+    const m=/^([^=]*?)\s*=\s*(.*)$/.exec(raw);
+    if(!m){errors.push(ln+'erwartet „Art = Wert“, etwa „Person = Max Mustermann“.');continue;}
+    const type=m[1].trim();
+    if(!TYPE_RE.test(type)){errors.push(ln+'„'+type+'“ ist keine gültige Art. Erlaubt: ein Wort, etwa Person, Firma, Adresse, Vorname.');continue;}
+    const parts=m[2].split(';').map(cleanValue);
+    if(parts.some(p=>!p)){errors.push(ln+(parts.every(p=>!p)?'kein Wert.':'leere Variante (zwei Semikolons hintereinander oder eins am Ende).'));continue;}
+    let bad=false;
+    for(const p of parts){
+      if(/[\[\]]/.test(p)){errors.push(ln+'„'+p+'“ enthält eckige Klammern.');bad=true;continue;}
+      const n=norm(p);
+      if(vals.has(n)){errors.push(ln+'„'+p+'“ steht schon in Zeile '+vals.get(n)+'.');bad=true;}
+      else vals.set(n,i+1);
+    }
+    if(bad)continue;
+    out.push({type,value:parts[0],variants:parts.slice(1)});
+  }
+  if(!errors.length&&!out.length)errors.push('Die Datei enthält keine Einträge.');
+  return {errors,entries:out};
+}
+function findName(v){const n=norm(v);for(const ne of names)for(const x of allValues(ne))if(norm(x)===n)return ne;return null;}
 
 // ============================================================================
 // Oberfläche
@@ -522,8 +713,18 @@ function renderTable(counts){
       i.classList.remove('err');listMsg('');e.variants=parts;changed();
     });
     const n=document.createElement('td');n.className='n';const c=counts.get(e.ph)||0;n.textContent=c?c+'×':'–';n.title=c?'kommt '+c+'-mal im Originaltext vor':'kommt im Originaltext nicht vor';tr.appendChild(n);
-    const x=document.createElement('td');x.className='x';const b=document.createElement('button');b.type='button';b.textContent='×';b.title='Eintrag entfernen';b.setAttribute('aria-label','Eintrag '+e.ph+' entfernen');
-    b.onclick=()=>{entries.splice(idx,1);changed();};x.appendChild(b);tr.appendChild(x);
+    const x=document.createElement('td');x.className='x';
+    const st=document.createElement('button');st.type='button';st.className='star';
+    const known=!!nameEntryFor(e);
+    st.textContent=known?'★':'☆';st.title=known?'Steht in der Namensliste':'In die Namensliste übernehmen';st.setAttribute('aria-label',st.title+': '+e.ph);
+    st.disabled=known;st.onclick=()=>toNames(e);x.appendChild(st);
+    const b=document.createElement('button');b.type='button';b.textContent='×';b.title='Eintrag entfernen';b.setAttribute('aria-label','Eintrag '+e.ph+' entfernen');
+    b.onclick=()=>{
+      const ne=nameEntryFor(e);
+      entries.splice(idx,1);
+      if(ne){ignored.add(ne);listMsg('„'+e.value+'“ steht in der Namensliste und wird in diesem Dokument nicht mehr automatisch maskiert. „Liste leeren“ hebt das auf.','info');}
+      changed();
+    };x.appendChild(b);tr.appendChild(x);
     body.appendChild(tr);
   });
 }
@@ -558,9 +759,9 @@ function renderMask(){
   if(lk.length){
     leakEl.textContent='';
     const b=document.createElement('b');b.textContent='Leck-Prüfung: Kopieren gesperrt. ';leakEl.appendChild(b);
-    leakEl.appendChild(document.createTextNode('Diese Werte aus der Liste stehen noch im maskierten Text, vermutlich in anderer Form (angehängte Endung, anderes Format). Ergänzen Sie die Form als Variante oder ändern Sie den Originaltext:'));
+    leakEl.appendChild(document.createTextNode('Diese Werte aus den Listen stehen noch im maskierten Text, vermutlich in anderer Form (angehängte Endung, anderes Format). Ergänzen Sie die Form als Variante oder ändern Sie den Originaltext:'));
     const ul=document.createElement('ul');
-    for(const {e,v,at} of lk){const li=document.createElement('li');li.textContent='„'+at+'“ im Text enthält '+e.ph+' „'+v+'“';ul.appendChild(li);}
+    for(const {label,v,at} of lk){const li=document.createElement('li');li.textContent='„'+at+'“ im Text enthält '+label+' „'+v+'“';ul.appendChild(li);}
     leakEl.appendChild(ul);show(leakEl,true);
   }else show(leakEl,false);
 
@@ -584,6 +785,7 @@ function renderMask(){
   gate={leak:lk.length>0,rest:rest.length>0&&!$('restOk').checked};
   const ok=!!src.trim()&&!gate.leak&&!gate.rest;
   $('copyMasked').disabled=!ok;$('saveMasked').disabled=!ok;
+  renderNamesState();
   $('maskMsg').textContent=!src.trim()?'':gate.leak?'Gesperrt: Leck-Prüfung':gate.rest?'Erst die Restliste prüfen':(counts.size?[...counts.values()].reduce((a,b)=>a+b,0)+' Stellen ersetzt':'Nichts ersetzt');
 }
 // Markiert im Originaltext die erste Stelle, die zum Fund der Restliste passt
@@ -601,7 +803,7 @@ function renderBack(){
   if(!ans.trim())return;
   if(looksLikeListFile(ans)){
     const n=document.createElement('div');n.className='note bad';n.setAttribute('role','alert');
-    n.textContent='Das ist die Zuordnungsdatei, nicht die Antwort der KI. Sie enthält die echten Namen. Schicken Sie sie nicht an die KI. Laden Sie die Datei unten mit „Liste laden“.';
+    n.textContent=/Namensliste v\d/.test(ans)?'Das ist die Namensliste, nicht die Antwort der KI. Sie enthält echte Namen. Schicken Sie sie nicht an die KI. Laden Sie die Datei unten mit „Namensliste laden“.':'Das ist die Zuordnungsdatei, nicht die Antwort der KI. Sie enthält die echten Namen. Schicken Sie sie nicht an die KI. Laden Sie die Datei unten mit „Liste laden“.';
     rep.appendChild(n);return;
   }
   if(!entries.length)return;
@@ -625,8 +827,89 @@ function renderBack(){
 }
 
 function changed(){
+  listVersion++;
   dirty=entries.length>0;
   fillTypeSelect();renderState();renderMask();renderBack();
+}
+// Text oder Namensliste geändert: erst Treffer aus der Namensliste übernehmen, dann neu maskieren
+function refresh(){
+  const added=syncFromNames();
+  if(added.length){addMsg('Aus der Namensliste erkannt: '+added.join(', ')+'.','info');changed();}
+  else renderMask();
+}
+
+// ---------- Namensliste ----------
+function namesMsg(text,kind){note($('namesMsg'),text,kind);}
+function renderNamesState(){
+  const el=$('namesState');
+  const n=names.length;
+  if(!n){el.textContent='keine eigenen Einträge';el.className='state';}
+  else{
+    const found=names.filter(ne=>ne.type!=='Vorname'&&inMap(ne)).length;
+    el.textContent=n+(n===1?' eigener Eintrag':' eigene Einträge')+(namesDirty?' · nicht gespeichert':(namesSavedAt?' · gespeichert '+namesSavedAt:' · geladen'))+(found?' · '+found+' im Text':'')+(ignored.size?' · '+ignored.size+' ausgenommen':'');
+    el.className='state'+(namesDirty?' dirty':'');
+  }
+  $('saveNames').disabled=!n;$('clearNames').disabled=!n;
+}
+function fillNamesType(sel,cur){
+  sel.textContent='';
+  const opts=[...TYPES,'Vorname'];if(cur&&!opts.includes(cur))opts.push(cur);
+  for(const t of opts){const o=document.createElement('option');o.value=t;o.textContent=t;sel.appendChild(o);}
+  if(cur)sel.value=cur;
+}
+const NAMES_SHOWN=200;
+function renderNames(){
+  const body=$('namesBody');body.textContent='';
+  show($('namesFilterRow'),names.length>10);
+  const q=norm($('namesFilter').value||'');
+  const list=q?names.filter(ne=>allValues(ne).some(v=>norm(v).includes(q))||ne.type.toLowerCase().includes(q)):names;
+  show($('namesTable'),list.length>0);show($('namesEmpty'),names.length===0);
+  const more=$('namesMore');
+  if(list.length>NAMES_SHOWN){more.textContent='Angezeigt: '+NAMES_SHOWN+' von '+list.length.toLocaleString('de-DE')+'. Mit dem Suchfeld finden Sie die übrigen.';show(more,true);}
+  else if(q&&!list.length){more.textContent='Nichts gefunden.';show(more,true);}
+  else show(more,false);
+  for(const ne of list.slice(0,NAMES_SHOWN)){
+    const tr=document.createElement('tr');
+    const tdT=document.createElement('td');const sel=document.createElement('select');sel.setAttribute('aria-label','Art');fillNamesType(sel,ne.type);
+    sel.onchange=()=>{ne.type=sel.value;namesChanged();};tdT.appendChild(sel);tr.appendChild(tdT);
+    const mk=(val,label,on)=>{const td=document.createElement('td');const i=document.createElement('input');i.type='text';i.value=val;i.setAttribute('aria-label',label);i.autocomplete='off';i.spellcheck=false;i.addEventListener('change',()=>on(i));td.appendChild(i);tr.appendChild(td);};
+    mk(ne.value,'Wert',i=>{
+      const v=cleanValue(i.value);const p=valueProblem(v);const ex=findName(v);
+      if(p||(ex&&ex!==ne)){i.classList.add('err');namesMsg(p||'„'+v+'“ steht schon in der Namensliste.','bad');return;}
+      i.classList.remove('err');namesMsg('');ne.value=v;namesChanged();
+    });
+    mk(ne.variants.join('; '),'Varianten',i=>{
+      const parts=i.value.split(';').map(cleanValue).filter(Boolean);
+      for(const p of parts){const pr=valueProblem(p);const ex=findName(p);if(pr||(ex&&ex!==ne)||norm(p)===norm(ne.value)){i.classList.add('err');namesMsg(pr||'„'+p+'“ steht schon in der Namensliste.','bad');return;}}
+      const dup=parts.find((p,k)=>parts.findIndex(x=>norm(x)===norm(p))!==k);
+      if(dup){i.classList.add('err');namesMsg('„'+dup+'“ steht zweimal in den Varianten.','bad');return;}
+      i.classList.remove('err');namesMsg('');ne.variants=parts;namesChanged();
+    });
+    const x=document.createElement('td');x.className='x';const b=document.createElement('button');b.type='button';b.textContent='×';b.title='Aus der Namensliste entfernen';b.setAttribute('aria-label','„'+ne.value+'“ aus der Namensliste entfernen');
+    b.onclick=()=>{names.splice(names.indexOf(ne),1);ignored.delete(ne);namesChanged();};x.appendChild(b);tr.appendChild(x);
+    body.appendChild(tr);
+  }
+}
+function namesChanged(){
+  namesVersion++;namesDirty=names.length>0;
+  renderNames();renderNamesState();
+  // ☆/★ in der Zuordnung aktualisieren
+  listVersion++;refresh();
+}
+function addName(value,type){
+  value=cleanValue(value);
+  const p=valueProblem(value);if(p){namesMsg(p,'bad');return false;}
+  const ex=findName(value);if(ex){namesMsg('„'+value+'“ steht schon in der Namensliste ('+ex.type+').','warn');return false;}
+  names.push({type,value,variants:[]});
+  namesMsg('„'+value+'“ ('+type+') steht jetzt in der Namensliste.'+(type==='Vorname'?' Er erscheint als Hinweis in der Restliste.':' Er wird in jedem Text automatisch maskiert.'),'ok');
+  namesChanged();return true;
+}
+function toNames(e){
+  const vals=allValues(e).filter(v=>!findName(v));
+  if(!vals.length){listMsg('„'+e.value+'“ steht schon in der Namensliste.','warn');return;}
+  names.push({type:phType(e.ph),value:vals[0],variants:vals.slice(1)});
+  listMsg('„'+vals[0]+'“ steht jetzt in der Namensliste. Speichern Sie die Namensliste, damit er beim nächsten Mal bekannt ist.','ok');
+  namesChanged();
 }
 
 // ---------- Kopieren und Speichern ----------
@@ -653,8 +936,8 @@ function maskedForOutput(){
 }
 
 // ---------- Ereignisse ----------
-$('src').addEventListener('input',renderMask);
-$('src').addEventListener('paste',()=>setTimeout(()=>{if(patternHits($('src').value).length)findPatterns();else renderMask();},0));
+$('src').addEventListener('input',refresh);
+$('src').addEventListener('paste',()=>setTimeout(()=>{if(patternHits($('src').value).length)findPatterns();refresh();},0));
 $('prefix').addEventListener('change',renderMask);
 $('restOk').addEventListener('change',renderMask);
 $('clearSrc').onclick=()=>{$('src').value='';renderMask();$('src').focus();};
@@ -706,16 +989,54 @@ $('listFile').addEventListener('change',async()=>{
     el.appendChild(ul);return;
   }
   if(entries.length&&dirty&&!confirm('Die aktuelle Liste ist nicht gespeichert und wird ersetzt. Fortfahren?'))return;
-  entries=r.entries;
-  changed();dirty=false;savedAt=null;renderState();
+  entries=r.entries;ignored.clear();
+  changed();refresh();dirty=false;savedAt=null;renderState();
   listMsg(r.entries.length+(r.entries.length===1?' Eintrag':' Einträge')+' aus „'+f.name+'“ geladen.','ok');
 });
 $('clearList').onclick=()=>{
   if(!entries.length)return;
   if(!confirm(dirty?'Die Liste ist nicht gespeichert. Wirklich leeren?':'Liste leeren?'))return;
-  entries=[];changed();dirty=false;savedAt=null;renderState();listMsg('');
+  entries=[];ignored.clear();changed();refresh();dirty=false;savedAt=null;renderState();listMsg('');
 };
-window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
+window.addEventListener('beforeunload',e=>{if(dirty||namesDirty){e.preventDefault();e.returnValue='';}});
+
+$('namesAdd').onclick=()=>{
+  const v=$('namesValue').value;
+  if(!v.trim()){namesMsg('Bitte erst einen Namen oder Begriff eintragen.','warn');$('namesValue').focus();return;}
+  if(addName(v,$('namesType').value))$('namesValue').value='';
+  $('namesValue').focus();
+};
+$('namesValue').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('namesAdd').click();}});
+$('namesFilter').addEventListener('input',renderNames);
+$('saveNames').onclick=()=>{
+  if(!names.length)return;
+  if(!confirm('Die Namensliste enthält echte Namen und Daten im Klartext, unter Umständen aller Mandanten.\n\nSpeichern Sie sie nur auf diesem Gerät oder einem verschlüsselten Datenträger, nicht in einem Cloud-Ordner, und schicken Sie sie nie an die KI.\n\nJetzt als '+NAMES_FILE+' speichern?'))return;
+  download(NAMES_FILE,serializeNames());
+  namesDirty=false;namesSavedAt=new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  renderNamesState();namesMsg('');
+};
+$('loadNames').onclick=()=>{$('namesFile').value='';$('namesFile').click();};
+$('namesFile').addEventListener('change',async()=>{
+  const f=$('namesFile').files[0];if(!f)return;
+  if(f.size>5e6){namesMsg('Die Datei ist größer als 5 MB; vermutlich die falsche Datei.','bad');return;}
+  const r=parseNames(await f.text());
+  if(r.errors.length){
+    const el=$('namesMsg');el.className='note bad';el.textContent='';
+    const b=document.createElement('b');b.textContent='Namensliste nicht geladen, „'+f.name+'“ hat Fehler. Die bisherige Namensliste bleibt unverändert.';el.appendChild(b);
+    const ul=document.createElement('ul');for(const e of r.errors.slice(0,20)){const li=document.createElement('li');li.textContent=e;ul.appendChild(li);}
+    if(r.errors.length>20){const li=document.createElement('li');li.textContent='… und '+(r.errors.length-20)+' weitere';ul.appendChild(li);}
+    el.appendChild(ul);return;
+  }
+  if(names.length&&namesDirty&&!confirm('Die aktuelle Namensliste ist nicht gespeichert und wird ersetzt. Fortfahren?'))return;
+  names=r.entries;ignored.clear();
+  namesChanged();namesDirty=false;namesSavedAt=null;renderNamesState();
+  namesMsg(r.entries.length.toLocaleString('de-DE')+(r.entries.length===1?' Eintrag':' Einträge')+' aus „'+f.name+'“ geladen.','ok');
+});
+$('clearNames').onclick=()=>{
+  if(!names.length)return;
+  if(!confirm(namesDirty?'Die Namensliste ist nicht gespeichert. Wirklich leeren?':'Namensliste leeren? Die gespeicherte Datei bleibt erhalten.'))return;
+  names=[];ignored.clear();namesChanged();namesDirty=false;namesSavedAt=null;renderNamesState();namesMsg('');
+};
 
 function selectTab(back){
   $('tabMask').setAttribute('aria-selected',String(!back));$('tabBack').setAttribute('aria-selected',String(back));
@@ -735,8 +1056,8 @@ const LEGAL={
     '<p><strong>Haftung für Inhalte</strong><br>Die Inhalte dieses Werkzeugs wurden mit Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität wird keine Gewähr übernommen. Dieses Werkzeug ist ein Hilfsmittel und ersetzt keine eigene Prüfung der maskierten Texte.</p>',
   datenschutz:'<h2>Datenschutzerklärung</h2>'+
     '<p>Dieses Werkzeug ist eine einzelne HTML-Datei, die vollständig lokal in Ihrem Browser läuft.</p>'+
-    '<p><strong>Keine Datenübertragung.</strong> Die Texte, die Sie einfügen, und die Zuordnung werden ausschließlich auf Ihrem Gerät verarbeitet. Das Werkzeug stellt keine Netzwerkverbindungen her und untersagt sie sich zusätzlich selbst über eine Content-Security-Policy, die der Browser durchsetzt. Es enthält kein Tracking, keine Cookies und keine Analyse-Werkzeuge.</p>'+
-    '<p><strong>Keine Speicherung im Browser.</strong> Die Zuordnung liegt nur im Arbeitsspeicher dieses Tabs und in der Datei, die Sie selbst speichern. Wählen Sie oben rechts „Hell“ oder „Dunkel“, speichert Ihr Browser nur diese Einstellung lokal (localStorage); sie wird nicht übertragen und mit „System“ wieder entfernt.</p>'+
+    '<p><strong>Keine Datenübertragung.</strong> Die Texte, die Sie einfügen, die Zuordnung und die Namensliste werden ausschließlich auf Ihrem Gerät verarbeitet. Das Werkzeug stellt keine Netzwerkverbindungen her und untersagt sie sich zusätzlich selbst über eine Content-Security-Policy, die der Browser durchsetzt. Es enthält kein Tracking, keine Cookies und keine Analyse-Werkzeuge.</p>'+
+    '<p><strong>Keine Speicherung im Browser.</strong> Zuordnung und Namensliste liegen nur im Arbeitsspeicher dieses Tabs und in den Dateien, die Sie selbst speichern. Wählen Sie oben rechts „Hell“ oder „Dunkel“, speichert Ihr Browser nur diese Einstellung lokal (localStorage); sie wird nicht übertragen und mit „System“ wieder entfernt.</p>'+
     '<p><strong>Was Sie an eine KI schicken,</strong> unterliegt den Bedingungen dieses Anbieters. Das Werkzeug ersetzt die Namen, die Sie eintragen, und die Muster, die es kennt. Was Sie nicht eintragen, geht im Klartext mit.</p>'+
     '<p><strong>Keine Speicherung durch uns.</strong> Da keine Daten uns erreichen, werden durch den Anbieter keinerlei personenbezogene Daten erhoben, gespeichert oder verarbeitet.</p>'+
     '<p><strong>Verantwortlicher</strong><br>Manfred Just, Am Ritterskamp 21, 40489 Düsseldorf, info@just-support.de</p>'
@@ -755,7 +1076,9 @@ $('legalClose').onclick=()=>$('legal').close();
   apply();b.hidden=false;
 })();
 
-fillTypeSelect();renderState();renderMask();
+$('fnCount').textContent=BUILTIN_FIRST.size.toLocaleString('de-DE');
+fillNamesType($('namesType'),'Person');
+fillTypeSelect();renderState();renderNames();renderMask();
 </script>
 </body>
 </html>

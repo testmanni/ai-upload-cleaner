@@ -38,7 +38,7 @@ Ein Lauf gegen die 6.0 dauert in Chromium rund 16 Sekunden (gemessen am 11.10.20
 
 ## AI Text Cleaner (Prototyp)
 
-`python3 tests/text_cleaner.py` prüft `ai-text-cleaner.html` im Browser, ohne Code aus dem Werkzeug: Den kopierten Text und die gespeicherten Dateien liest der Test selbst und vergleicht sie mit bekannten, erfundenen Geheimnissen. Bericht in `tests/out/text_cleaner.md`, rund 10 Sekunden.
+`python3 tests/text_cleaner.py` prüft `ai-text-cleaner.html` im Browser, ohne Code aus dem Werkzeug: Den kopierten Text und die gespeicherten Dateien liest der Test selbst und vergleicht sie mit bekannten, erfundenen Geheimnissen. Bericht in `tests/out/text_cleaner.md`, rund 12 Sekunden.
 
 | Bereich | Was passiert | Geprüft |
 | --- | --- | --- |
@@ -46,8 +46,13 @@ Ein Lauf gegen die 6.0 dauert in Chromium rund 16 Sekunden (gemessen am 11.10.20
 | Tag 2: zurückübersetzen | Liste von Hand ergänzt (Windows-Zeilenenden), in frischem Browser geladen, Antwort einer „bösen KI“ eingefügt | exakte Platzhalter ersetzt, `[person a]` und `Person B` als verändert gemeldet, `[Person D]` als unbekannt, nichts davon ersetzt, Variante aus der Datei wirkt, Listendatei im Antwortfeld erkannt |
 | Rundreise | maskieren, speichern, neuer Browser, laden, zurückübersetzen | Ergebnis Zeichen für Zeichen gleich dem Original, auch mit Umlauten, ß, Akzenten, Apostroph; Laden und erneut Speichern ergibt dieselbe Datei |
 | Kaputte Listendateien | acht fehlerhafte Dateien laden | jede abgelehnt mit Zeilenangabe, die vorherige Liste bleibt unverändert |
+| Namensliste | Vornamen-Hinweise, eigene Einträge speichern, in frischem Browser laden, Brief einfügen, 5.000 Einträge | „Lena Schmidt“, „Yilmaz, Ahmet“, „Anna Maria Krause“, „Ursula von der Leyen“ als Hinweis; Gegenprobe: Text ohne Namen ergibt keinen Hinweis; eigener Vorname wirkt, wird aber nicht maskiert; Treffer kommen automatisch in die Zuordnung, Nicht-Treffer nicht; Leck-Prüfung bei „Gerda Beispielfraus“; gelöschter Treffer bleibt draußen; ☆ übernimmt; Verwechslung der Dateien abgelehnt; 5.000 Einträge: erste Maskierung 328 ms, jeder weitere Tastendruck 28 ms (lokal, 12.10.2026) |
 
 **Nachweis der Wirksamkeit** (11.10.2026): Fünf absichtlich beschädigte Kopien des Werkzeugs, jede wurde erkannt: Maskierung abgeschaltet (9 Fehler), Leck-Prüfung abgeschaltet (1), Rückübersetzung ohne Unterscheidung von Groß- und Kleinschreibung (1), Prüfung auf doppelte Platzhalter abgeschaltet (7), Restliste abgeschaltet (5).
+
+Für die Namensliste (12.10.2026) fünf weitere: Vornamen-Regel abgeschaltet (5 Fehler), Suche der Namensliste abgeschaltet (6 und mehr), Leck-Prüfung der Namensliste abgeschaltet (1), Ausnahme nach dem Löschen nicht beachtet (1), Vornamen werden maskiert statt nur gemeldet (2). Drei davon fielen erst nach einer Nachbesserung des Tests auf; vorher deckte er diese Fälle nicht ab.
+
+**Grenze der Vornamen-Gegenprobe:** Sie läuft mit einem einzigen Text ohne Namen. Wie viele Fehlalarme echte Schriftsätze erzeugen, zeigt erst der Praxistest.
 
 ## Grenzen
 
