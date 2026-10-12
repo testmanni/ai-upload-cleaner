@@ -14,7 +14,7 @@ Ausgelöst wird nur, wenn sich eine öffentliche Datei, `deploy/` oder der Ablau
 
 ## Was das Skript tut
 
-- **Nur öffentliche Dateien:** `index.html`, `anleitung.html`, `anleitung6.0.html`, die Werkzeugdateien 1.0, 3.0 und 6.0, `og-image.png`, `LICENSE`, `NOTICE`, `THIRD-PARTY-LICENSES.txt`, `licenses/`. Nie `tests/`, `build/`, `.github/`, `README.md`. Die Versionen 2.0, 4.0 und 5.0 bleiben offline; neue Werkzeugdateien müssen in `PUBLIC` in `deploy.py` ergänzt werden.
+- **Nur öffentliche Dateien:** `index.html`, `anleitung.html`, `anleitung6.0.html`, die Werkzeugdateien 1.0, 3.0 und 6.0, `ai-text-cleaner.html` (ungetestete Entwicklungsversion), `og-image.png`, `LICENSE`, `NOTICE`, `THIRD-PARTY-LICENSES.txt`, `licenses/`. Nie `tests/`, `build/`, `.github/`, `README.md`. Die Versionen 2.0, 4.0 und 5.0 bleiben offline; neue Werkzeugdateien müssen in `PUBLIC` in `deploy.py` ergänzt werden.
 - **Nur Geändertes:** Auf dem Server liegt `.deploy-manifest.json` mit den SHA-256-Werten des letzten Uploads und dem Commit. Beim ersten Lauf fehlt es; dann wird nach Dateigröße verglichen.
 - **Nichts löschen:** Dateien auf dem Server, die nicht im Repository stehen, bleiben unangetastet und werden im Protokoll nur genannt.
 - **Keine halben Dateien:** Upload unter `<name>.uploading`, dann Umbenennen.

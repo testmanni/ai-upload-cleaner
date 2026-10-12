@@ -118,6 +118,7 @@ def day1(browser, html, r):
     g = "Tag 1: maskieren"
     t = Tool(browser, html)
     p = t.page
+    r.check(g, "Hinweis „ungetestete Version“ sichtbar", p.is_visible("text=Nur ungetestete Version im Entwicklungsprozess."))
     t.paste_into("#src", ORIGINAL)
     ph = p.eval_on_selector_all("#mapBody td.ph input", "els => els.map(e => e.value)")
     r.check(g, "Einfügen findet IBAN, E-Mail, Telefon von selbst", {"[IBAN 1]", "[E-Mail 1]", "[Telefon 1]"} <= set(ph), ", ".join(ph))
